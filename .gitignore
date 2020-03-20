@@ -1,2 +1,6 @@
 TMSE2_v2/
 data/
+images/
+patches/
+*.pyc
+*.json
