@@ -12,6 +12,8 @@ class Averager(object):
 
     def train(self, train_patches):
         """
+        Inputs:
+        -------
         train_patches (array): Array of shape (num_patch, patch_size) with the training semples (i.e. positive patches)
         """
 
@@ -20,8 +22,13 @@ class Averager(object):
         self.template = (m - np.mean(m)) / np.std(m)
 
 
-    def predict_im(self, image):
-
+    def predict_im(self, image, ax=None):
+        """
+        Inputs:
+        -------
+        image (array): Array in gray tone (2D)
+        ax (plt.axis): ax on whoch disply the result
+        """
 
         image = (image - np.mean(image)) / np.std(image)
         conv = convolve2d(image, self.template, mode='same')
@@ -30,6 +37,12 @@ class Averager(object):
 
         self.pupil_location = (y, x)
 
-        plt.imshow(image, cmap='gray')
-        plt.scatter(x, y, c='r')
-        plt.show()
+        if ax is not None:
+
+            ax.imshow(image, cmap='gray')
+            ax.scatter(x, y, c='r')
+
+        else:
+
+            plt.imshow(image, cmap='gray')
+            plt.scatter(x, y, c='r')
