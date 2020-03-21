@@ -1,9 +1,10 @@
 import re
 import numpy as np
-
+import matplotlib.pyplot as plt
 from pathlib import Path
 
 DATA_DIR = Path(__file__).parent.parent / "images"
+PATCH_DIR = Path(__file__).parent.parent / "patches"
 
 
 def read_pgm(img_no, byteorder=">"):
@@ -43,3 +44,35 @@ def read_eye_annotations(img_no):
     left_eye_position = tuple(eyes_position[:2])
     right_eye_position = tuple(eyes_position[2:4])
     return left_eye_position, right_eye_position
+
+
+def read_patch(img_no, pos_neg='positive', loc='left'):
+    """
+    Inputs:
+    -------
+    img_no (int): The patch id
+    pos_neg(str): Should be negative or postive for choice in patch
+    loc (string): should be 'left' or 'right' for eye location
+
+    Returns a specific positive/negative patch
+    """
+
+    assert(pos_neg == 'positive' or pos_neg == 'negative')
+    assert(loc == 'left' or loc == 'right')
+
+    if pos_neg == 'positive':
+        filename = PATCH_DIR / f'{pos_neg}' / f"{loc}" / f"{loc}_patch_{img_no:04}.jpg"
+        patch = plt.imread(filename)
+
+        # Put in gray scale
+        patch = np.mean(patch, axis=2)
+
+        return patch
+
+    filename = PATCH_DIR / 'negative' / f"neg_patch_{img_no:04}.jpg"
+    patch = plt.imread(filename)
+
+    # Put in gray scale
+    patch = np.mean(patch, axis=2)
+
+    return patch
