@@ -1,4 +1,5 @@
 import numpy as np
+from scipy.signal import convolve
 
 
 
@@ -54,3 +55,113 @@ def make_2d_spline_patch(n, k, l):
     spline_y = s_y(y)
     
     return np.outer(spline_y, spline_x)
+
+
+def make_2d_spline(n, k, l, Nx, Ny, Nk, Nl):
+    """
+    Inputs:
+    -------
+    n (int): Spline degree
+
+    Return the 2D spline B^n_{sk, sl} = B^n(x / sk) * B^n(y / sl)
+    """
+    x = np.arange(Nx)
+    y = np.arange(Ny)
+
+    s_x = make_k_th_order_spline(k, n)
+    s_y = make_k_th_order_spline(l, n)
+
+    s_k = Nx / Nk
+    s_l = Ny / Nl
+
+    spline_x = s_x(x / s_k)
+    spline_y = s_y(y / s_l)
+
+    return np.outer(spline_y, spline_x)
+
+############################################   Fonctions coming from the paper    ########################################################
+
+def spline_1(x, start=-51, stop=51, granularity=10000):
+    """
+    Return first order spline
+    """
+
+    s = np.linspace(start, stop, granularity)
+
+    # Get the index
+    index = np.round(granularity * (x - start) / (stop - start) -1).astype(int)
+
+    # Create indicator fonction
+    ind = np.logical_and(-0.5 <= s, s <= 0.5).astype(int)
+    # Convolve
+
+    conv = np.convolve(ind, ind, mode='same') / sum(ind)
+
+    return conv[index]
+
+
+
+def make_spline_n_deg(n, start=-51, stop=51, granularity=1000):
+    """
+    Return a n-order spline as define in the paper B^n(x) = I_[-0.5, 0.5] (*)^ n I_[-0.5, 0.5]
+
+    Inputs:
+    -------
+    n (int): The spline's order
+    """
+
+
+    if n == 1:
+        return spline_1
+
+    def spline_n(x):
+
+        s = np.linspace(start, stop, granularity)
+
+        # Get the index
+        index = np.round(granularity * (x - start) / (stop - start) -1).astype(int)
+
+        # Build previous spline
+        spline_prev = make_spline_n_deg(n - 1)
+
+        # Create function
+        s_prev = spline_prev(s)
+
+        # Create indicator fonction
+        ind = np.logical_and(-0.5 <= s, s <= 0.5).astype(int)
+
+        # Convolve
+        conv = np.convolve(ind, s_prev, mode='same') / sum(ind)
+
+        return conv[index]
+
+    return spline_n
+    
+
+def make_2D_spline_deg_n(n, sk=1, sl=1, start=-51, stop=51, granularity=1000):
+    """
+    Inputs:
+    -------
+    n (int): Spline degree
+    sk (float): scale factor x-axis
+    sl (float): scale factor y-axis
+
+    Return the 2D spline B^n_{sk, sl} = B^n(x / sk) * B^n(y / sl)
+    """
+    Bx = make_spline_n_deg(n, start=start, stop=stop, granularity=granularity)
+    By = make_spline_n_deg(n, start=start, stop=stop, granularity=granularity)
+
+
+    def spline_2D(x, y):
+
+        # Get the index x-axis
+        index_x = np.round(granularity * (x - start) / (stop - start) -1).astype(int)
+
+        # Get the index y-axis
+        index_y = np.round(granularity * (y - start) / (stop - start) -1).astype(int)
+
+        return np.outer(Bx(x / sk),  By(y / sl))
+
+    return spline_2D
+
+
