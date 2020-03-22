@@ -34,6 +34,7 @@ class Averager(object):
         """
 
         image = (image - np.mean(image)) / np.std(image)
+        
         conv = convolve2d(image, self.template, mode='same')
 
         (y, x) = np.where(conv==np.amax(conv))
