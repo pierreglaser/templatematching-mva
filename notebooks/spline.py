@@ -81,24 +81,11 @@ def make_2d_spline(n, k, l, Nx, Ny, Nk, Nl):
 
 ############################################   Fonctions coming from the paper    ########################################################
 
-def spline_1(x, start=-51, stop=51, granularity=10000):
+def spline_0(x, start=-51, stop=51, granularity=10000):
     """
     Return first order spline
     """
-
-    s = np.linspace(start, stop, granularity)
-
-    # Get the index
-    index = np.round(granularity * (x - start) / (stop - start) -1).astype(int)
-
-    # Create indicator fonction
-    ind = np.logical_and(-0.5 <= s, s <= 0.5).astype(int)
-    # Convolve
-
-    conv = np.convolve(ind, ind, mode='same') / sum(ind)
-
-    return conv[index]
-
+    return np.logical_and(-0.5 <= x, x <= 0.5).astype(int)
 
 
 def make_spline_n_deg(n, start=-51, stop=51, granularity=1000):
@@ -111,8 +98,8 @@ def make_spline_n_deg(n, start=-51, stop=51, granularity=1000):
     """
 
 
-    if n == 1:
-        return spline_1
+    if n == 0:
+        return spline_0
 
     def spline_n(x):
 
