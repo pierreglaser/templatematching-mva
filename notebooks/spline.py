@@ -81,7 +81,7 @@ def make_2d_spline(n, k, l, Nx, Ny, Nk, Nl):
 
 ############################################   Fonctions coming from the paper    ########################################################
 
-def spline_0(x, start=-51, stop=51, granularity=10000):
+def spline_0(x, start=-51, stop=51, granularity=1000):
     """
     Return first order spline
     """
@@ -140,12 +140,6 @@ def make_2D_spline_deg_n(n, sk=1, sl=1, start=-51, stop=51, granularity=1000):
 
 
     def spline_2D(x, y):
-
-        # Get the index x-axis
-        index_x = np.round(granularity * (x - start) / (stop - start) -1).astype(int)
-
-        # Get the index y-axis
-        index_y = np.round(granularity * (y - start) / (stop - start) -1).astype(int)
 
         return np.outer(Bx(x / sk),  By(y / sl))
 
