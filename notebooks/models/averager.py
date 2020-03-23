@@ -1,6 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.signal import convolve2d
+from scipy.signal import correlate2d
+from preprocessing import *
+
 
 class Averager(object):
 
@@ -33,9 +35,7 @@ class Averager(object):
         --------
         """
 
-        image = (image - np.mean(image)) / np.std(image)
-        
-        conv = convolve2d(image, self.template, mode='same')
+        conv = correlate2d(image, self.template, mode='same')
 
         (y, x) = np.where(conv==np.amax(conv))
 
