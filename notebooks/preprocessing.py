@@ -4,14 +4,23 @@ from scipy.signal import convolve2d
 
 def m_function(x, y, r, n_order=1):
     """
-    The windowing function a defined in the article
+    The windowing function a defined in the article.
+
+    Carreful: The output is not normalized such that \
+    \int_{\mathbb{R}^2} m(x, y) dx dy = 1
+    ---------
+    To find the constante call 'dblquad' from scipy.integrate 
 
     Inputs:
     -------
-    x (int): x-coordinate with (0, 0) in center of image
-    y (int): y-coordinate with (0, 0) in center of image
-    r (float): the disk radius
-    n_order (int): the order of the sum (c.f. paper)
+    x (int):
+        x-coordinate with (0, 0) in center of image
+    y (int):
+        y-coordinate with (0, 0) in center of image
+    r (float):
+        the disk radius
+    n_order (int):
+        the order of the sum (c.f. paper)
     """
 
     res = 0
@@ -29,13 +38,18 @@ def m_function(x, y, r, n_order=1):
 
 def mask_img(image, c=(0, 0), r=10):
     """
-    Create disk-like mask for selecytong region of interest
+    Create disk-like mask for selecytong region of interest.
+    The disk is centered on the image's center
 
     Inputs:
     -------
-    image (array): The input image
-    c (tuple): The center
-    r (int): the radius of the disk 
+    image (array):
+        The input image
+    c (tuple):
+        The center
+    r (int): 
+        the radius of the disk
+
     """
     (dim_y, dim_x) = image.shape
     X = np.linspace(- dim_x / 2 + 1, dim_x / 2, dim_x)
@@ -54,14 +68,17 @@ def normalize_img(image, window, mask=None):
 
     Inputs:
     -------
-
-    image (array): The input image to normalize
-    window (array): The window/filter function (i.e. m_function)
-    mask (array): The mask to select the region of interest
+    image (array):
+        The input image to normalize
+    window (array):
+        The window/filter function (i.e. m_function)
+    mask (array):
+        The mask to select the region of interest
 
     Outputs:
     --------
-    normalized_img (array): The normalized image
+    normalized_img (array):
+        The normalized image
 
     """
 
@@ -73,16 +90,16 @@ def normalize_img(image, window, mask=None):
     mask = mask.astype(int)
 
     
-    imMean = convolve2d(image * mask, window, mode='same') / (convolve2d(mask, window, mode='same') + eps)
-    imMeanSq = convolve2d((image ** 2) * mask, window, mode='same') / (convolve2d(mask, window, mode='same') + eps)
-    std = np.sqrt(np.abs(imMeanSq - imMean ** 2))
+    im_mean = convolve2d(image * mask, window, mode='same') / (convolve2d(mask, window, mode='same') + eps)
+    im_mean_sq = convolve2d((image ** 2) * mask, window, mode='same') / (convolve2d(mask, window, mode='same') + eps)
+    std = np.sqrt(np.abs(im_mean_sq - im_mean ** 2))
 
-    background = (1 - np.abs(image - imMean) / (std + eps)) >= 0
+    background = (1 - np.abs(image - im_mean) / (std + eps)) >= 0
     background = background.astype(int)
 
-    imMean = convolve2d(image * mask * background, window, mode='same') / (convolve2d(mask * background, window, mode='same') + eps)
-    imMeanSq = convolve2d((image ** 2) * mask * background, window, mode='same') / (convolve2d(mask * background, window, mode='same') + eps)
-    std = np.sqrt(np.abs(imMeanSq - imMean ** 2))
+    im_mean = convolve2d(image * mask * background, window, mode='same') / (convolve2d(mask * background, window, mode='same') + eps)
+    im_mean_sq = convolve2d((image ** 2) * mask * background, window, mode='same') / (convolve2d(mask * background, window, mode='same') + eps)
+    std = np.sqrt(np.abs(im_mean_sq - im_mean ** 2))
 
   
-    return np.tanh(8 * (image - imMean) / (std + eps))
+    return np.tanh(8 * (image - im_mean) / (std + eps))
