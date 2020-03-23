@@ -61,7 +61,8 @@ def make_2d_spline(n, k, l, Nx, Ny, Nk, Nl):
     """
     Inputs:
     -------
-    n (int): Spline degree
+    n (int):
+        Spline degree
 
     Return the 2D spline B^n_{sk, sl} = B^n(x / sk) * B^n(y / sl)
     """
@@ -94,7 +95,8 @@ def make_spline_n_deg(n, start=-51, stop=51, granularity=1000):
 
     Inputs:
     -------
-    n (int): The spline's order
+    n (int):
+        The spline's order
     """
 
 
@@ -129,9 +131,12 @@ def make_2D_spline_deg_n(n, sk=1, sl=1, start=-51, stop=51, granularity=1000):
     """
     Inputs:
     -------
-    n (int): Spline degree
-    sk (float): scale factor x-axis
-    sl (float): scale factor y-axis
+    n (int):
+        Spline degree
+    sk (float):
+        scale factor x-axis
+    sl (float):
+        scale factor y-axis
 
     Return the 2D spline B^n_{sk, sl} = B^n(x / sk) * B^n(y / sl)
     """
