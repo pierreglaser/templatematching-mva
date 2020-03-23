@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.signal import correlate2d
-from preprocessing import *
+from models.utils import make_template_mass
 
 
 class Averager(object):
@@ -12,16 +12,25 @@ class Averager(object):
         self.pupil_location = None
 
 
-    def train(self, train_patches):
+    def train(self, train_patches, n_order=1):
         """
         Inputs:
         -------
-        train_patches (array): Array of shape (num_patch, patch_size) with the training semples (i.e. positive patches)
+        train_patches (array):
+            Array of shape (num_patch, patch_size) with the training semples (i.e. positive patches)
+        n_order (int):
+            The order to perform smoothing (c.f. preprocessing.m_function)
         """
 
         m = np.mean(train_patches, axis=0)
 
         self.template = (m - np.mean(m)) / np.std(m)
+
+        r = (self.template.shape[0] - 1) / 2
+
+        temp = make_template_mass(r=r, n_order=n_order)
+
+        self.template *= temp
 
 
     def predict_im(self, image, ax=None):
