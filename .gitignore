@@ -4,3 +4,4 @@ images/
 patches/
 *.pyc
 *.json
+img_normalized/
