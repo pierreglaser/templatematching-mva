@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 from pathlib import Path
 
 DATA_DIR = Path(__file__).parent.parent / "images"
+PROCESS_DATA_DIR = Path(__file__).parent.parent / "img_normalized"
 PATCH_DIR = Path(__file__).parent.parent / "patches"
 
 
@@ -50,9 +51,12 @@ def read_patch(img_no, pos_neg='positive', loc='left'):
     """
     Inputs:
     -------
-    img_no (int): The patch id
-    pos_neg(str): Should be negative or postive for choice in patch
-    loc (string): should be 'left' or 'right' for eye location
+    img_no (int):
+        The patch id
+    pos_neg(str):
+        Should be negative or postive for choice in patch
+    loc (string):
+        Should be 'left' or 'right' for eye location
 
     Returns a specific positive/negative patch
     """
@@ -76,3 +80,14 @@ def read_patch(img_no, pos_neg='positive', loc='left'):
     patch = np.mean(patch, axis=2)
 
     return patch
+
+
+def read_norm_img(img_no):
+
+    filename = PROCESS_DATA_DIR / f'img_norm_{img_no:04}.jpg'
+
+    image = plt.imread(filename)
+
+    image = np.mean(image, axis=2)
+
+    return image
