@@ -26,7 +26,7 @@ class Averager(object):
 
         self.template = (m - np.mean(m)) / np.std(m)
 
-        r = (self.template.shape[0] - 1) / 2
+        r = int((self.template.shape[0] - 1) / 2)
 
         temp = make_template_mass(r=r, n_order=n_order)
 
