@@ -1,5 +1,6 @@
 import numpy as np
 from scipy.signal import convolve
+from scipy.special import binom
 
 
 
@@ -151,3 +152,53 @@ def make_2D_spline_deg_n(n, sk=1, sl=1, start=-51, stop=51, granularity=1000):
     return spline_2D
 
 
+def discrete_spline(x, n):
+    """
+    Discrete splines as defined in wikipedia
+
+    Inputs:
+    -------
+    x (int, float, array):
+        The point(s) to compute function
+    n (int):
+        The spline degree
+    """
+    
+    s = np.zeros(x.shape)
+
+    for k in range(n + 1):
+        s += (- 1) ** k * 1 / np.math.factorial(n) \
+            * binom(n + 1, k) * ((x - k + (n + 1) / 2)  * \
+                np.array(x - k + (n + 1) / 2 >= 0)) ** n
+
+    return s
+
+
+def discrete_spline_2D(x, y, n):
+
+    Bx = discrete_spline(x, n)
+    By = discrete_spline(y, n)
+
+    return np.outer(Bx, By)
+
+def spline_kl_to_xy(k, l, sk, sl):
+    """
+    Convert from (k, l) coordinate to (x, y) coordinates
+
+    Inputs:
+    -------
+    k (int):
+        The k-coordinate
+    l (int):
+        The l-coordinate
+    sk (float):
+        The scale factor (Nx / Nk)
+    sl (float):
+        The scale factor (Ny / Nl)
+    """
+    return np.round((k - 1) * sk + (sk + 1) / 2).astype(int), \
+        np.round((l - 1) * sl + (sl + 1) / 2).astype(int)
+
+def xy_to_kl(x, y, sk, sl):
+    return np.round((x + sk / 2 - 0.5) / sk).astype(int), \
+        np.round((y + sl /2 - 0.5) / sl).astype(int)
