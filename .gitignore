@@ -4,4 +4,7 @@ images/
 patches/
 *.pyc
 *.json
+*.pdf
 img_normalized/
+images_transformed_se2/
+.ipynb_checkpoints/
