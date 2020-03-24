@@ -1,7 +1,10 @@
 import numpy as np
+import math  # noqa
 from scipy.signal import convolve
 from scipy.special import binom
 
+
+factorial = np.math.factorial
 
 
 def make_first_order_spline(i):
@@ -31,14 +34,14 @@ def make_k_th_order_spline(i, k):
 def make_spline_first_derivative(i, k):
     def b_i_1_derivative(x):
         return 0 * x
-    
+
     if k == 1:
         return b_i_1_derivative
-    
+
     def d_b_ik(x):
         bik1 = make_k_th_order_spline(i, k-1)
         bik2 = make_k_th_order_spline(i+1, k-1)
-        
+
         ret1 = bik1(x) / (i+k - i)
         ret2 = bik2(x) / (i+k+1 - (i+1))
         return k * (ret1 - ret2)
@@ -48,13 +51,13 @@ def make_spline_first_derivative(i, k):
 def make_2d_spline_patch(n, k, l):
     x = np.linspace(0, 10, 100)
     y = np.linspace(0, 10, 100)
-    
+
     s_x = make_k_th_order_spline(k, n)
     s_y = make_k_th_order_spline(l, n)
-    
+
     spline_x = s_x(x)
     spline_y = s_y(y)
-    
+
     return np.outer(spline_y, spline_x)
 
 
@@ -126,7 +129,7 @@ def make_spline_n_deg(n, start=-51, stop=51, granularity=1000):
         return conv[index]
 
     return spline_n
-    
+
 
 def make_2D_spline_deg_n(n, sk=1, sl=1, start=-51, stop=51, granularity=1000):
     """
@@ -163,13 +166,12 @@ def discrete_spline(x, n):
     n (int):
         The spline degree
     """
-    
     s = np.zeros(x.shape)
 
-    for k in range(n + 1):
-        s += (- 1) ** k * 1 / np.math.factorial(n) \
-            * binom(n + 1, k) * ((x - k + (n + 1) / 2)  * \
-                np.array(x - k + (n + 1) / 2 >= 0)) ** n
+    for k in range(n + 2):
+        tmp = np.maximum(np.power(x - k + (n+1)/2, n), 0)
+        tmp *= (-1) ** k * (n+1)/(factorial(n+1-k)*factorial(k))
+        s += tmp
 
     return s
 
@@ -201,4 +203,4 @@ def spline_kl_to_xy(k, l, sk, sl):
 
 def xy_to_kl(x, y, sk, sl):
     return np.round((x + sk / 2 - 0.5) / sk).astype(int), \
-        np.round((y + sl /2 - 0.5) / sl).astype(int)
+        np.round((y + sl / 2 - 0.5) / sl).astype(int)
