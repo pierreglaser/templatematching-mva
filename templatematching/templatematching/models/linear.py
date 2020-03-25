@@ -79,6 +79,9 @@ class R2Ridge(object):
 
             # Get the corresponding points in(x, y) grid and flatten
             S[i] = convolved_sample_i[_x_idxs, :][:, _y_idxs].flatten()
+
+        S /= np.linalg.norm(S, axis=0)[np.newaxis, :] 
+
         return S
 
     def _make_subsampled_grid(self, Nx, Ny, Nk, Nl, centered=True):
@@ -112,4 +115,3 @@ class R2Ridge(object):
 
         B = discrete_spline_2D(x_grid, y_grid, self.spline_order)
         return B
-
