@@ -28,10 +28,12 @@ class R2LogReg(R2Ridge):
         # Optimization step
         for _ in range(self.optimizer_steps):
             p = expit(S @ c)
-            W = np.diag(p.flatten())
+            w = p * (1 - p)
+
+            W = np.diag(w.flatten())
         
             # Close form hessian
-            H = - (S.T @ W @ S + self.mu * np.eye(S.shape[1]) )  
+            H = - (S.T @ W @ S + self.mu * np.eye(S.shape[1]))  
             H_inv = np.linalg.inv(H +  TOL * np.eye(H.shape[0]))
             
             # Close form gradient
