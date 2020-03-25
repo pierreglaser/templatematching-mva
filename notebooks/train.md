@@ -141,7 +141,3 @@ ax2.matshow(conv, cmap='gray');
 ax3.matshow(img, cmap='gray');
 ax3.scatter(y, x, c='r')
 ```
-
-```python
-
-```
