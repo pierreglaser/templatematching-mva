@@ -6,7 +6,7 @@ from numpy import pi
 from numpy.fft import ifft2
 from scipy.signal import convolve2d
 
-from spline import make_k_th_order_spline
+from .spline import make_k_th_order_spline
 
 
 def _make_gaussian_patch(N, sigma):
