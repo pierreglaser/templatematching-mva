@@ -5,9 +5,10 @@ from templatematching.models.linear import R2Ridge
 
 class R2LogReg(R2Ridge):
     
-    def __init__(self, template_shape, spline_order=2, mu=0, optimizer_steps=10, verbose=0):
+    def __init__(self, template_shape, spline_order=2, mu=0, optimizer_steps=10, random_state=None, verbose=0):
         super().__init__(template_shape, spline_order, mu, verbose)
         self.optimizer_steps = optimizer_steps
+        self.rs = np.random.RandomState(random_state)
         
     
     def fit(self, X, y):
@@ -19,7 +20,7 @@ class R2LogReg(R2Ridge):
         S = self._make_s_matrix(X)
         
         # Randomly intialize c
-        c = np.random.rand(Nk * Nl, 1)
+        c = self.rs.rand(Nk * Nl, 1)
         
         # Normalize c
         c /= np.linalg.norm(c)
