@@ -1,7 +1,9 @@
-import numpy as np
 import functools
-from preprocessing import m_function
+import numpy as np
+
 from scipy.integrate import dblquad
+
+from ..preprocessing import m_function
 
 
 def make_template_mass(r=50, n_order=5):

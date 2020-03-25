@@ -1,7 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.signal import correlate2d
-from models.utils import make_template_mass
+
+from .utils import make_template_mass
 
 
 class Averager(object):
