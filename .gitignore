@@ -9,3 +9,4 @@ img_normalized/
 images_transformed_se2/
 .ipynb_checkpoints/
 images_s2/
+*.egg-info/
