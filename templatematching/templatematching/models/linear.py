@@ -2,7 +2,7 @@ import numpy as np
 
 from itertools import product
 
-from scipy.signal import convolve2d
+from scipy.signal import convolve2d, correlate2d
 
 from ..spline import spline_kl_to_xy, discrete_spline_2D
 
@@ -25,8 +25,15 @@ class R2Ridge(object):
             rcond=None
         )
         # record fitting information (input shape, S matrix, coefficients etc.)
-        self.S, self._Nx, self._Ny = S, X.shape[1], X.shape[2]
+        self._S, self._Nx, self._Ny = S, X.shape[1], X.shape[2]
         self.spline_coef = c[0]
+
+    def predict(self, X):
+
+        conv = correlate2d(X, self._template, mode='same')
+        (y, x) = np.where(conv==np.amax(conv))
+
+        return conv, (y, x)
 
     def reconstruct_template(self):
         final_template = np.zeros((self._Nx, self._Ny))
@@ -45,6 +52,8 @@ class R2Ridge(object):
                 continue
 
             final_template[_sx, _sy] += self.spline_coef[i] * self._B
+
+        self._template = final_template
 
         return final_template
 
