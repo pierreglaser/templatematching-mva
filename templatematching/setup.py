@@ -17,7 +17,7 @@ dist = setup(
     author='Pierre Glaser',
     author_email='pierreglaser@msn.com',
     license='BSD 3-Clause License',
-    packages=['templatematching'],
+    packages=['templatematching', 'templatematching.models'],
     classifiers=[
         'Development Status :: 4 - Beta',
         'License :: OSI Approved :: BSD License',
