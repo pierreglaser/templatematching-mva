@@ -8,4 +8,4 @@ patches/
 img_normalized/
 images_transformed_se2/
 .ipynb_checkpoints/
-*.egg-info/
+images_s2/
