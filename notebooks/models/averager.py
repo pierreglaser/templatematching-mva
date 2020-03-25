@@ -37,8 +37,10 @@ class Averager(object):
         """
         Inputs:
         -------
-        image (array): Array in gray tone (2D)
-        ax (plt.axis): ax on whoch disply the result
+        image (array):
+            Array in gray tone (2D)
+        ax (plt.axis):
+            Axis on which disply the result
 
         Outputs:
         --------
