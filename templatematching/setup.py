@@ -17,9 +17,7 @@ dist = setup(
     author='Pierre Glaser',
     author_email='pierreglaser@msn.com',
     license='BSD 3-Clause License',
-    packages=['cloudpickle'],
-    long_description=open('README.md').read(),
-    long_description_content_type="text/markdown",
+    packages=['templatematching'],
     classifiers=[
         'Development Status :: 4 - Beta',
         'License :: OSI Approved :: BSD License',
