@@ -84,7 +84,7 @@ ax3.scatter(y, x, c='r')
 
 ```python
 from templatematching.models import R2Ridge
-clf = R2Ridge(template_shape=(51, 51), mu=1e7, spline_order=3)
+clf = R2Ridge(template_shape=(51, 51), mu=0, spline_order=3)
 clf.fit(X=patches, y=labels)
 ```
 
@@ -115,7 +115,7 @@ ax3.scatter(y, x, c='r')
 
 ```python
 from templatematching.models.logistic import R2LogReg
-clf = R2LogReg(template_shape=(51, 51), mu=1e4, spline_order=3, optimizer_steps=10, random_state=1)
+clf = R2LogReg(template_shape=(51, 51), mu=1e-6, spline_order=3, optimizer_steps=10, random_state=10)
 clf.fit(X=patches, y=labels)
 ```
 
