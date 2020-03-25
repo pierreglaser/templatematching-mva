@@ -1,9 +1,6 @@
-This module was extracted from the `cloud` package, developed by
-PiCloud, Inc.
+This module was created by Pierre Glaser and Clement Chadebec
 
-Copyright (c) 2015, Cloudpickle contributors.
-Copyright (c) 2012, Regents of the University of California.
-Copyright (c) 2009 PiCloud, Inc. http://www.picloud.com.
+Copyright (c) 2020, Pierre Glaser and Clement Chadebec
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
