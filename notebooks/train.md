@@ -23,7 +23,7 @@ import os
 import numpy as np
 from scipy.signal import convolve2d
 
-from templatematching.utils import load_patches, read_norm_img
+from templatematching.utils import load_patches, read_norm_img, read_pgm
 from templatematching.models.utils import make_template_mass
 ```
 
@@ -36,12 +36,23 @@ import matplotlib.pyplot as plt
 patches, labels = load_patches(1000)
 ```
 
+```python
+fig, (ax1, ax2) = plt.subplots(nrows=1, ncols=2, figsize=(16, 8))
+
+ax1.matshow(patches[0], cmap='gray')
+ax1.set_title('positive patch')
+
+ax2.matshow(patches[1000], cmap='gray')
+ax3.set_title('negative patch')
+
+```
+
 # Average model (A) TEST
 
 ```python
 from templatematching.models.averager import Averager
 avg = Averager()
-avg.train(patches, n_order=16)
+avg.train(patches, n_order=1)
 
 # Display template
 plt.imshow(avg.template, cmap='gray')
@@ -51,22 +62,25 @@ np.mean(avg.template), np.std(avg.template)
 ```python
 fig, (ax1, ax2, ax3) = plt.subplots(nrows=1, ncols=3, figsize=(16, 8))
 image = read_norm_img(17)
+img = read_pgm(17)
 
-conv, (x, y) = avg.predict_im(image, ax3)
+conv, (x, y) = avg.predict_im(image)
 
-ax1.imshow(image, cmap='gray')
-ax2.imshow(conv, cmap='gray')
+ax1.matshow(image, cmap='gray')
+ax2.matshow(conv, cmap='gray')
+ax3.matshow(img, cmap='gray')
+ax3.scatter(y, x, c='r')
 ```
 
 ```python
-plt.imshow(patches[0], cmap='gray')
-plt.show()
 
-plt.imshow(patches[-1], cmap='gray')
-plt.show()
 ```
 
-# Ridge Model
+# Ridge Model (B, C)
+
+```python
+
+```
 
 ```python
 from templatematching.models import R2Ridge
@@ -79,43 +93,55 @@ final_template = clf.reconstruct_template()
 mask = make_template_mass(int(patches.shape[1]/2))
 
 f, (ax1, ax2, ax3) = plt.subplots(ncols=3, figsize=(12, 4))
-ax1.matshow(clf.spline_coef.reshape(51, 51))
-ax2.matshow(final_template);
-ax3.matshow(mask * final_template);
-```
-
-## Function interopolation
-@clement: what is this?
-
-```python
-from scipy.interpolate import bisplrep
-from scipy.interpolate import bisplev
+ax1.matshow(clf.spline_coef.reshape(51, 51), cmap='gray')
+ax2.matshow(final_template, cmap='gray');
+ax3.matshow(mask * final_template, cmap='gray');
 ```
 
 ```python
-x, y = np.mgrid[-1:1:101j, -1:1:101j]
+image = read_norm_img(17)
+img = read_pgm(17)
+conv, (x, y) = clf.predict(image)
 
-#x, y = np.meshgrid(x, y)
-tck = bisplrep(x, y, temp, s=0)
 
-x, y = np.mgrid[-1:1:202j, -1:1:202j]
+f, (ax1, ax2, ax3) = plt.subplots(ncols=3, figsize=(12, 4))
+ax1.matshow(image, cmap='gray')
+ax2.matshow(conv, cmap='gray');
+ax3.matshow(img, cmap='gray');
+ax3.scatter(y, x, c='r')
+```
 
-#x_new, y_new = np.meshgrid(x_new, y_new)
+# Logistic model (B, C)
 
-inter = bisplev(x_new[:,0], y_new[0,:], tck)
+```python
+from templatematching.models.logistic import R2LogReg
+clf = R2LogReg(template_shape=(51, 51), mu=1e4, spline_order=3, optimizer_steps=10, random_state=1)
+clf.fit(X=patches, y=labels)
 ```
 
 ```python
-x, y = np.mgrid[-1:1:20j, -1:1:20j]
-z = (x+y) * np.exp(-6.0*(x*x+y*y))
+final_template = clf.reconstruct_template()
+mask = make_template_mass(int(patches.shape[1]/2))
 
-xnew, ynew = np.mgrid[-1:1:70j, -1:1:70j]
-tck = bisplrep(x, y, z, s=0)
-znew = bisplev(xnew[:,0], ynew[0,:], tck)
+f, (ax1, ax2, ax3) = plt.subplots(ncols=3, figsize=(12, 4))
+ax1.matshow(clf.spline_coef.reshape(51, 51), cmap='gray')
+ax2.matshow(final_template, cmap='gray');
+ax3.matshow(mask * final_template, cmap='gray');
+```
 
-plt.figure()
-plt.pcolor(xnew, ynew, znew)
-plt.colorbar()
-plt.title("Interpolated function.")
-plt.show()
+```python
+image = read_norm_img(17)
+img = read_pgm(17)
+conv, (x, y) = clf.predict(image)
+
+
+f, (ax1, ax2, ax3) = plt.subplots(ncols=3, figsize=(12, 4))
+ax1.matshow(image, cmap='gray')
+ax2.matshow(conv, cmap='gray');
+ax3.matshow(img, cmap='gray');
+ax3.scatter(y, x, c='r')
+```
+
+```python
+
 ```
