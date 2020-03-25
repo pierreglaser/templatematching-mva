@@ -13,20 +13,27 @@ class R2LogReg(R2Ridge):
     
     def fit(self, X, y):
         
-        TOL = 1E-8
+        TOL = 1E-4
         
         Nk, Nl = self.template_shape
         
         S = self._make_s_matrix(X)
-        
+
         # Randomly intialize c
         c = self.rs.rand(Nk * Nl, 1)
         
         # Normalize c
         c /= np.linalg.norm(c)
     
+        loss = 1
+
         # Optimization step
         for _ in range(self.optimizer_steps):
+
+            if loss < TOL:
+                break
+
+            c_old = c.copy()
             p = expit(S @ c)
             w = p * (1 - p)
 
@@ -38,8 +45,14 @@ class R2LogReg(R2Ridge):
             
             # Close form gradient
             grad  = S.T @ (y - p) - self.mu * np.eye(S.shape[1]) @ c
+            #grad = S.T @ W @ (S @ c + W_inv @ (y - p))
             c -= H_inv @ grad
             c /= np.linalg.norm(c)
+
+            loss = np.linalg.norm(c - c_old)
+
+            if self.verbose:
+                print(f"Loss: {loss}")
         
         
         self._S, self._Nx, self._Ny = S, X.shape[1], X.shape[2]
