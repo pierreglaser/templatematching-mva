@@ -39,12 +39,13 @@ def make_spline_first_derivative(i, k):
         return b_i_1_derivative
 
     def d_b_ik(x):
-        bik1 = make_k_th_order_spline(i, k-1)
-        bik2 = make_k_th_order_spline(i+1, k-1)
+        bik1 = make_k_th_order_spline(i, k - 1)
+        bik2 = make_k_th_order_spline(i + 1, k - 1)
 
-        ret1 = bik1(x) / (i+k - i)
-        ret2 = bik2(x) / (i+k+1 - (i+1))
+        ret1 = bik1(x) / (i + k - i)
+        ret2 = bik2(x) / (i + k + 1 - (i + 1))
         return k * (ret1 - ret2)
+
     return d_b_ik
 
 
@@ -84,7 +85,9 @@ def make_2d_spline(n, k, l, Nx, Ny, Nk, Nl):
 
     return np.outer(spline_y, spline_x)
 
+
 ############################################   Fonctions coming from the paper    ########################################################
+
 
 def spline_0(x, start=-51, stop=51, granularity=1000):
     """
@@ -103,7 +106,6 @@ def make_spline_n_deg(n, start=-51, stop=51, granularity=1000):
         The spline's order
     """
 
-
     if n == 0:
         return spline_0
 
@@ -112,7 +114,9 @@ def make_spline_n_deg(n, start=-51, stop=51, granularity=1000):
         s = np.linspace(start, stop, granularity)
 
         # Get the index
-        index = np.round(granularity * (x - start) / (stop - start) -1).astype(int)
+        index = np.round(
+            granularity * (x - start) / (stop - start) - 1
+        ).astype(int)
 
         # Build previous spline
         spline_prev = make_spline_n_deg(n - 1)
@@ -124,7 +128,7 @@ def make_spline_n_deg(n, start=-51, stop=51, granularity=1000):
         ind = np.logical_and(-0.5 <= s, s <= 0.5).astype(int)
 
         # Convolve
-        conv = np.convolve(ind, s_prev, mode='same') / sum(ind)
+        conv = np.convolve(ind, s_prev, mode="same") / sum(ind)
 
         return conv[index]
 
@@ -147,10 +151,9 @@ def make_2D_spline_deg_n(n, sk=1, sl=1, start=-51, stop=51, granularity=1000):
     Bx = make_spline_n_deg(n, start=start, stop=stop, granularity=granularity)
     By = make_spline_n_deg(n, start=start, stop=stop, granularity=granularity)
 
-
     def spline_2D(x, y):
 
-        return np.outer(Bx(x / sk),  By(y / sl))
+        return np.outer(Bx(x / sk), By(y / sl))
 
     return spline_2D
 
@@ -169,8 +172,8 @@ def discrete_spline(x, n):
     s = np.zeros(x.shape)
 
     for k in range(n + 2):
-        tmp = np.maximum(np.power(x - k + (n+1)/2, n), 0)
-        tmp *= (-1) ** k * (n+1)/(factorial(n+1-k)*factorial(k))
+        tmp = np.maximum(np.power(x - k + (n + 1) / 2, n), 0)
+        tmp *= (-1) ** k * (n + 1) / (factorial(n + 1 - k) * factorial(k))
         s += tmp
 
     return s
@@ -182,6 +185,7 @@ def discrete_spline_2D(x, y, n):
     By = discrete_spline(y, n)
 
     return np.outer(Bx, By)
+
 
 def spline_kl_to_xy(k, l, sk, sl):
     """
@@ -198,9 +202,14 @@ def spline_kl_to_xy(k, l, sk, sl):
     sl (float):
         The scale factor (Ny / Nl)
     """
-    return np.round((k - 1) * sk + (sk + 1) / 2).astype(int), \
-        np.round((l - 1) * sl + (sl + 1) / 2).astype(int)
+    return (
+        np.round((k - 1) * sk + (sk + 1) / 2).astype(int),
+        np.round((l - 1) * sl + (sl + 1) / 2).astype(int),
+    )
+
 
 def xy_to_kl(x, y, sk, sl):
-    return np.round((x + sk / 2 - 0.5) / sk).astype(int), \
-        np.round((y + sl / 2 - 0.5) / sl).astype(int)
+    return (
+        np.round((x + sk / 2 - 0.5) / sk).astype(int),
+        np.round((y + sl / 2 - 0.5) / sl).astype(int),
+    )

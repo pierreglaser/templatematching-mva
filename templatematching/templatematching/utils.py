@@ -36,9 +36,9 @@ def read_pgm(img_no, byteorder=">"):
 
 def read_eye_annotations(img_no):
     filename = DATA_DIR / f"BioID_{img_no:04}.eye"
-    with open(filename, 'r') as f:
+    with open(filename, "r") as f:
         lines = list(f.readlines())
-    eyes_position = lines[1].strip('\n').split('\t')
+    eyes_position = lines[1].strip("\n").split("\t")
     eyes_position = list(map(int, eyes_position))
 
     assert len(eyes_position) == 4
@@ -47,7 +47,7 @@ def read_eye_annotations(img_no):
     return left_eye_position, right_eye_position
 
 
-def read_patch(img_no, pos_neg='positive', loc='left'):
+def read_patch(img_no, pos_neg="positive", loc="left"):
     """
     Inputs:
     -------
@@ -61,11 +61,16 @@ def read_patch(img_no, pos_neg='positive', loc='left'):
     Returns a specific positive/negative patch
     """
 
-    assert(pos_neg == 'positive' or pos_neg == 'negative')
-    assert(loc == 'left' or loc == 'right')
+    assert pos_neg == "positive" or pos_neg == "negative"
+    assert loc == "left" or loc == "right"
 
-    if pos_neg == 'positive':
-        filename = PATCH_DIR / f'{pos_neg}' / f"{loc}" / f"{loc}_patch_{img_no:04}.jpg"
+    if pos_neg == "positive":
+        filename = (
+            PATCH_DIR
+            / f"{pos_neg}"
+            / f"{loc}"
+            / f"{loc}_patch_{img_no:04}.jpg"
+        )
         patch = plt.imread(filename)
 
         # Put in gray scale
@@ -73,7 +78,7 @@ def read_patch(img_no, pos_neg='positive', loc='left'):
 
         return patch
 
-    filename = PATCH_DIR / 'negative' / f"neg_patch_{img_no:04}.jpg"
+    filename = PATCH_DIR / "negative" / f"neg_patch_{img_no:04}.jpg"
     patch = plt.imread(filename)
 
     # Put in gray scale
@@ -90,8 +95,8 @@ def load_patches(num_patches, with_labels=True):
     neg_labels = np.zeros((num_patches, 1))
 
     for i in range(num_patches):
-        pos_patch = read_patch(i, loc='left', pos_neg="positive")
-        neg_patch = read_patch(i, loc='left', pos_neg="negative")
+        pos_patch = read_patch(i, loc="left", pos_neg="positive")
+        neg_patch = read_patch(i, loc="left", pos_neg="negative")
 
         pos_patches[i] = pos_patch
         neg_patches[i] = neg_patch
@@ -103,7 +108,7 @@ def load_patches(num_patches, with_labels=True):
 
 def read_norm_img(img_no):
 
-    filename = PROCESS_DATA_DIR / f'img_norm_{img_no:04}.jpg'
+    filename = PROCESS_DATA_DIR / f"img_norm_{img_no:04}.jpg"
 
     image = plt.imread(filename)
 

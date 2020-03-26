@@ -33,8 +33,8 @@ def make_m_function_cake(N):
     def M_n(rho, t=0.5):
         rho = rho ** 2 / t
         ret = np.exp(-rho) * sum(
-                (rho ** k) / factorial(k) for k in range(N + 1)
-                )
+            (rho ** k) / factorial(k) for k in range(N + 1)
+        )
         return ret
 
     return M_n

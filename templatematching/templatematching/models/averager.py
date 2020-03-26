@@ -6,19 +6,18 @@ from .utils import make_template_mass
 
 
 class Averager(object):
-
     def __init__(self):
 
         self.template = None
         self.pupil_location = None
-
 
     def train(self, train_patches, n_order=1):
         """
         Inputs:
         -------
         train_patches (array):
-            Array of shape (num_patch, patch_size) with the training semples (i.e. positive patches)
+            Array of shape (num_patch, patch_size) with the training semples
+            (i.e. positive patches)
         n_order (int):
             The order to perform smoothing (c.f. preprocessing.m_function)
         """
@@ -33,7 +32,6 @@ class Averager(object):
 
         self.template *= temp
 
-
     def predict_im(self, image, ax=None):
         """
         Inputs:
@@ -47,15 +45,15 @@ class Averager(object):
         --------
         """
 
-        conv = correlate2d(image, self.template, mode='same')
+        conv = correlate2d(image, self.template, mode="same")
 
-        (y, x) = np.where(conv==np.amax(conv))
+        (y, x) = np.where(conv == np.amax(conv))
 
         self.pupil_location = (y, x)
 
         if ax is not None:
 
-            ax.imshow(image, cmap='gray')
-            ax.scatter(x, y, c='r')
+            ax.imshow(image, cmap="gray")
+            ax.scatter(x, y, c="r")
 
         return conv, (y, x)

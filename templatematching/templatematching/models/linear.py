@@ -20,9 +20,7 @@ class R2Ridge(object):
     def fit(self, X, y):
         S = self._make_s_matrix(X)
         c = np.linalg.lstsq(
-            S.T @ S + self.mu * np.eye(S.shape[1]),
-            S.T @ y,
-            rcond=None
+            S.T @ S + self.mu * np.eye(S.shape[1]), S.T @ y, rcond=None
         )
         # record fitting information (input shape, S matrix, coefficients etc.)
         self._S, self._Nx, self._Ny = S, X.shape[1], X.shape[2]
@@ -30,8 +28,8 @@ class R2Ridge(object):
 
     def predict(self, X):
 
-        conv = correlate2d(X, self._template, mode='same')
-        (y, x) = np.where(conv==np.amax(conv))
+        conv = correlate2d(X, self._template, mode="same")
+        (y, x) = np.where(conv == np.amax(conv))
 
         return conv, (y, x)
 
@@ -59,7 +57,7 @@ class R2Ridge(object):
 
     def _make_s_matrix(self, X):
         num_samples, Nx, Ny = X.shape  # Nx, Ny: training images shape
-        Nk, Nl = self.template_shape   # Nk, Nl: number of splines in each axis
+        Nk, Nl = self.template_shape  # Nk, Nl: number of splines in each axis
         sk, sl = Nx / Nk, Ny / Nl
 
         S = np.zeros((num_samples, Nk * Nl))
@@ -73,14 +71,14 @@ class R2Ridge(object):
 
         for i in range(num_samples):
             if self.verbose and i % 100 == 0:
-                print('Creating S matrix - Patch {}'.format(i))
+                print("Creating S matrix - Patch {}".format(i))
 
-            convolved_sample_i = convolve2d(X[i], self._B, mode='same')
+            convolved_sample_i = convolve2d(X[i], self._B, mode="same")
 
             # Get the corresponding points in(x, y) grid and flatten
             S[i] = convolved_sample_i[_x_idxs, :][:, _y_idxs].flatten()
 
-        S /= np.linalg.norm(S, axis=0)[np.newaxis, :] 
+        S /= np.linalg.norm(S, axis=0)[np.newaxis, :]
 
         return S
 
@@ -89,11 +87,11 @@ class R2Ridge(object):
         # - [-Nx/2, Nx/2] x [Ny/2,Ny/2] if centered
         # - [0, Nx] x [0, Ny] if not centered
         # containing Nk points in the x-axis, and Nl points in the y-axis
-        sk, sl = Nx/Nk, Ny/Nl
+        sk, sl = Nx / Nk, Ny / Nl
 
         k_grid, l_grid = np.arange(Nk), np.arange(Nl)
         subsampled_x_grid, subsampled_y_grid = spline_kl_to_xy(
-                k_grid, l_grid, sk, sl
+            k_grid, l_grid, sk, sl
         )
 
         if centered:

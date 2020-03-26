@@ -24,7 +24,7 @@ def make_template_mass(r=50, n_order=5):
 
     m_function_part = functools.partial(m_function, r=r, n_order=n_order)
     # Compute normilizing constante
-    eta = dblquad(m_function_part, - np.inf, np.inf, -np.inf, np.inf)[0]
+    eta = dblquad(m_function_part, -np.inf, np.inf, -np.inf, np.inf)[0]
     window = m_function(y, x, r=r, n_order=n_order) / eta
 
     return window
