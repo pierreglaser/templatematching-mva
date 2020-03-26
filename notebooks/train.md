@@ -68,12 +68,12 @@ fig, (ax1, ax2, ax3) = plt.subplots(nrows=1, ncols=3, figsize=(16, 8))
 image = read_norm_img(17)
 img = read_pgm(17)
 
-conv, (x, y) = clf.predict(image)
+conv, (y, x) = clf.predict(image)
 
 ax1.matshow(image, cmap='gray')
 ax2.matshow(conv, cmap='gray')
 ax3.matshow(img, cmap='gray')
-ax3.scatter(y, x, c='r')
+ax3.scatter(x, y, c='r')
 ```
 
 # Ridge Model (B, C)
