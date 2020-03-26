@@ -6,13 +6,12 @@ from .utils import make_template_mass
 
 
 class Averager(object):
-    def __init__(self, spline_order=2):
-        self.spline_order = spline_order
+    def __init__(self):
         self._template = None
         self._template_full = None
         self._mask = None
 
-    def train(self, X):
+    def fit(self, X):
         """
         Inputs:
         -------
