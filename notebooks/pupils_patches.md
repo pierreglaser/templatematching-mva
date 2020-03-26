@@ -145,7 +145,7 @@ if not os.path.exists(path_to_positive_patches + 'right'):
     os.makedirs(path_to_positive_patches + 'right')
     
     
-num_images = 1251 #1251
+num_images = 1521 #1521
 
 patch_size = (101, 101)
 
