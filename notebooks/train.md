@@ -43,7 +43,7 @@ ax1.matshow(patches[0], cmap='gray')
 ax1.set_title('positive patch')
 
 ax2.matshow(patches[1000], cmap='gray')
-ax3.set_title('negative patch')
+ax2.set_title('negative patch')
 
 ```
 
@@ -51,12 +51,16 @@ ax3.set_title('negative patch')
 
 ```python
 from templatematching.models.averager import Averager
-avg = Averager()
-avg.train(patches, n_order=1)
+clf = Averager(spline_order=3)
+clf.fit(patches)
+```
 
-# Display template
-plt.imshow(avg.template, cmap='gray')
-np.mean(avg.template), np.std(avg.template)
+```python
+full_template, final_template = clf._template_full, clf._template
+
+f, (ax1, ax2) = plt.subplots(ncols=2, figsize=(12, 4))
+ax1.matshow(full_template, cmap='gray');
+ax2.matshow(final_template, cmap='gray');
 ```
 
 ```python
@@ -64,7 +68,7 @@ fig, (ax1, ax2, ax3) = plt.subplots(nrows=1, ncols=3, figsize=(16, 8))
 image = read_norm_img(17)
 img = read_pgm(17)
 
-conv, (x, y) = avg.predict_im(image)
+conv, (x, y) = clf.predict(image)
 
 ax1.matshow(image, cmap='gray')
 ax2.matshow(conv, cmap='gray')
@@ -72,15 +76,7 @@ ax3.matshow(img, cmap='gray')
 ax3.scatter(y, x, c='r')
 ```
 
-```python
-
-```
-
 # Ridge Model (B, C)
-
-```python
-
-```
 
 ```python
 from templatematching.models import R2Ridge
@@ -90,12 +86,12 @@ clf.fit(X=patches, y=labels)
 
 ```python
 final_template = clf.reconstruct_template()
-mask = make_template_mass(int(patches.shape[1]/2))
+full_template = clf._template_full
 
 f, (ax1, ax2, ax3) = plt.subplots(ncols=3, figsize=(12, 4))
 ax1.matshow(clf.spline_coef.reshape(51, 51), cmap='gray')
-ax2.matshow(final_template, cmap='gray');
-ax3.matshow(mask * final_template, cmap='gray');
+ax2.matshow(full_template, cmap='gray');
+ax3.matshow(final_template, cmap='gray');
 ```
 
 ```python
@@ -115,18 +111,18 @@ ax3.scatter(y, x, c='r')
 
 ```python
 from templatematching.models.logistic import R2LogReg
-clf = R2LogReg(template_shape=(51, 51), mu=1e-6, spline_order=3, optimizer_steps=10, random_state=10)
+clf = R2LogReg(template_shape=(51, 51), mu=1e-4, spline_order=3, optimizer_steps=10, random_state=10)
 clf.fit(X=patches, y=labels)
 ```
 
 ```python
 final_template = clf.reconstruct_template()
-mask = make_template_mass(int(patches.shape[1]/2))
+full_template = clf._template_full
 
 f, (ax1, ax2, ax3) = plt.subplots(ncols=3, figsize=(12, 4))
 ax1.matshow(clf.spline_coef.reshape(51, 51), cmap='gray')
-ax2.matshow(final_template, cmap='gray');
-ax3.matshow(mask * final_template, cmap='gray');
+ax2.matshow(full_template, cmap='gray');
+ax3.matshow(final_template, cmap='gray');
 ```
 
 ```python
@@ -140,4 +136,8 @@ ax1.matshow(image, cmap='gray')
 ax2.matshow(conv, cmap='gray');
 ax3.matshow(img, cmap='gray');
 ax3.scatter(y, x, c='r')
+```
+
+```python
+
 ```
