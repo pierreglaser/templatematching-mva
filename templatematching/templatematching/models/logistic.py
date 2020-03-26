@@ -15,6 +15,7 @@ class R2LogReg(R2Ridge):
         verbose=0,
     ):
         super().__init__(template_shape, spline_order, mu, verbose)
+        self.model_name = 'Logistic Ridge'
         self.optimizer_steps = optimizer_steps
         self.rs = np.random.RandomState(random_state)
 
