@@ -49,12 +49,7 @@ class R2LogReg(R2Ridge):
             H_inv = np.linalg.inv(H + TOL * np.eye(H.shape[0]))
 
             # Close form gradient
-<<<<<<< HEAD
             grad  = S.T @ (y - p) - self.mu * np.eye(S.shape[1]) @ c
-=======
-            grad = S.T @ (y - p) - self.mu * np.eye(S.shape[1]) @ c
-            # grad = S.T @ W @ (S @ c + W_inv @ (y - p))
->>>>>>> 8f0fe055abab531742c9629802e0cef720ae39e2
             c -= H_inv @ grad
             c /= np.linalg.norm(c)
 
