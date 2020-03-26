@@ -7,55 +7,36 @@ from .utils import make_template_mass
 
 class Averager(object):
 
-    def __init__(self):
+    def __init__(self, spline_order=2, verbose=0):
+        self.spline_order = spline_order
+        self.verbose = verbose
+        self._template = None
+        self._template_full = None
+        self._mask = None
 
-        self.template = None
-        self.pupil_location = None
-
-
-    def train(self, train_patches, n_order=1):
+    def fit(self, X):
         """
         Inputs:
         -------
-        train_patches (array):
+        X (array):
             Array of shape (num_patch, patch_size) with the training semples (i.e. positive patches)
-        n_order (int):
-            The order to perform smoothing (c.f. preprocessing.m_function)
         """
 
-        m = np.mean(train_patches, axis=0)
+        m = np.mean(X, axis=0)
 
-        self.template = (m - np.mean(m)) / np.std(m)
+        self._template_full = (m - np.mean(m)) / np.std(m)
+        self._mask = make_template_mass(int(X.shape[1]/2))
+        self._template = self._mask * self._template_full
 
-        r = int((self.template.shape[0] - 1) / 2)
-
-        temp = make_template_mass(r=r, n_order=n_order)
-
-        self.template *= temp
-
-
-    def predict_im(self, image, ax=None):
+    def predict(self, X):
         """
         Inputs:
         -------
-        image (array):
+        X (array):
             Array in gray tone (2D)
-        ax (plt.axis):
-            Axis on which disply the result
-
-        Outputs:
-        --------
         """
 
-        conv = correlate2d(image, self.template, mode='same')
-
+        conv = correlate2d(X, self._template, mode='same')
         (y, x) = np.where(conv==np.amax(conv))
-
-        self.pupil_location = (y, x)
-
-        if ax is not None:
-
-            ax.imshow(image, cmap='gray')
-            ax.scatter(x, y, c='r')
 
         return conv, (y, x)
