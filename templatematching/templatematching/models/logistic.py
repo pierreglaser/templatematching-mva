@@ -1,6 +1,7 @@
 import numpy as np
 from scipy.special import expit
 from templatematching.models.linear import R2Ridge
+from .utils import make_template_mass
 
 
 class R2LogReg(R2Ridge):
@@ -48,8 +49,7 @@ class R2LogReg(R2Ridge):
             H_inv = np.linalg.inv(H + TOL * np.eye(H.shape[0]))
 
             # Close form gradient
-            grad = S.T @ (y - p) - self.mu * np.eye(S.shape[1]) @ c
-            # grad = S.T @ W @ (S @ c + W_inv @ (y - p))
+            grad  = S.T @ (y - p) - self.mu * np.eye(S.shape[1]) @ c
             c -= H_inv @ grad
             c /= np.linalg.norm(c)
 
@@ -59,4 +59,5 @@ class R2LogReg(R2Ridge):
                 print(f"Loss: {loss}")
         self._S, self._Nx, self._Ny = S, X.shape[1], X.shape[2]
         self.spline_coef = c
+        self._mask = make_template_mass(int(X.shape[1]/2))
         self._template = self.reconstruct_template()

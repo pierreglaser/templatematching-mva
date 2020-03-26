@@ -6,6 +6,8 @@ from scipy.signal import convolve2d, correlate2d
 
 from ..spline import spline_kl_to_xy, discrete_spline_2D
 
+from .utils import make_template_mass
+
 
 class R2Ridge(object):
     def __init__(self, template_shape, spline_order=2, mu=0, verbose=0):
@@ -15,7 +17,8 @@ class R2Ridge(object):
         self.verbose = verbose
         self._S = None
         self._template = None
-        self._pupil_location = None
+        self._template_full = None
+        self._mask = None
 
     def fit(self, X, y):
         S = self._make_s_matrix(X)
@@ -25,6 +28,7 @@ class R2Ridge(object):
         # record fitting information (input shape, S matrix, coefficients etc.)
         self._S, self._Nx, self._Ny = S, X.shape[1], X.shape[2]
         self.spline_coef = c[0]
+        self._mask = make_template_mass(int(X.shape[1]/2))
 
     def predict(self, X):
 
@@ -51,9 +55,10 @@ class R2Ridge(object):
 
             final_template[_sx, _sy] += self.spline_coef[i] * self._B
 
-        self._template = final_template
+        self._template_full = final_template
+        self._template = self._mask * self._template_full
 
-        return final_template
+        return final_template * self._mask
 
     def _make_s_matrix(self, X):
         num_samples, Nx, Ny = X.shape  # Nx, Ny: training images shape
