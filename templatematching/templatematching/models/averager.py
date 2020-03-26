@@ -6,20 +6,21 @@ from .utils import make_template_mass
 
 
 class Averager(object):
-
-    def __init__(self, spline_order=2, verbose=0):
+    def __init__(self, spline_order=2):
         self.spline_order = spline_order
-        self.verbose = verbose
         self._template = None
         self._template_full = None
         self._mask = None
 
-    def fit(self, X):
+    def train(self, X):
         """
         Inputs:
         -------
-        X (array):
-            Array of shape (num_patch, patch_size) with the training semples (i.e. positive patches)
+        train_patches (array):
+            Array of shape (num_patch, patch_size) with the training semples
+            (i.e. positive patches)
+        n_order (int):
+            The order to perform smoothing (c.f. preprocessing.m_function)
         """
 
         m = np.mean(X, axis=0)
@@ -28,7 +29,7 @@ class Averager(object):
         self._mask = make_template_mass(int(X.shape[1]/2))
         self._template = self._mask * self._template_full
 
-    def predict(self, X):
+    def predict(self, X, ax=None):
         """
         Inputs:
         -------

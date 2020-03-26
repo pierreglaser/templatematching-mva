@@ -5,14 +5,22 @@ from .utils import make_template_mass
 
 
 class R2LogReg(R2Ridge):
-    def __init__(self, template_shape, spline_order=2, mu=0, optimizer_steps=10, random_state=None, verbose=0):
+    def __init__(
+        self,
+        template_shape,
+        spline_order=2,
+        mu=0,
+        optimizer_steps=10,
+        random_state=None,
+        verbose=0,
+    ):
         super().__init__(template_shape, spline_order, mu, verbose)
         self.optimizer_steps = optimizer_steps
         self.rs = np.random.RandomState(random_state)
 
     def fit(self, X, y):
 
-        TOL = 1E-4
+        TOL = 1e-4
         Nk, Nl = self.template_shape
         S = self._make_s_matrix(X)
 
@@ -37,11 +45,16 @@ class R2LogReg(R2Ridge):
             W = np.diag(w.flatten())
 
             # Close form hessian
-            H = - (S.T @ W @ S + self.mu * np.eye(S.shape[1]))
-            H_inv = np.linalg.inv(H +  TOL * np.eye(H.shape[0]))
+            H = -(S.T @ W @ S + self.mu * np.eye(S.shape[1]))
+            H_inv = np.linalg.inv(H + TOL * np.eye(H.shape[0]))
 
             # Close form gradient
+<<<<<<< HEAD
             grad  = S.T @ (y - p) - self.mu * np.eye(S.shape[1]) @ c
+=======
+            grad = S.T @ (y - p) - self.mu * np.eye(S.shape[1]) @ c
+            # grad = S.T @ W @ (S @ c + W_inv @ (y - p))
+>>>>>>> 8f0fe055abab531742c9629802e0cef720ae39e2
             c -= H_inv @ grad
             c /= np.linalg.norm(c)
 

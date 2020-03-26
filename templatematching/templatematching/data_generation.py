@@ -15,8 +15,8 @@ def make_circle(N):
     XX, YY = np.meshgrid(np.arange(N), np.arange(N))
     XY = np.stack([XX, YY], axis=-1)
     center = np.array([(N - 1) / 2, (N - 1) / 2])
-    radius = N/3
+    radius = N / 3
     val = np.linalg.norm(XY - center[np.newaxis, np.newaxis, :], axis=2)
-    ret_one = 1 * np.logical_and(val < 1.1*radius, val > 0.9 * radius)
-    ret_two = 0 * np.logical_or(val > 1.1*radius, val < 0.9 * radius)
-    return (ret_one + ret_two)
+    ret_one = 1 * np.logical_and(val < 1.1 * radius, val > 0.9 * radius)
+    ret_two = 0 * np.logical_or(val > 1.1 * radius, val < 0.9 * radius)
+    return ret_one + ret_two

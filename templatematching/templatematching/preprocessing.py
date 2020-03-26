@@ -30,8 +30,7 @@ def m_function(x, y, r, n_order=1):
 
     for i in range(n_order):
 
-        res += np.exp(- norm_sq / s) * (norm_sq / s) ** i / np.math.factorial(i)
-
+        res += np.exp(-norm_sq / s) * (norm_sq / s) ** i / np.math.factorial(i)
 
     return res
 
@@ -52,8 +51,8 @@ def mask_img(image, c=(0, 0), r=10):
 
     """
     (dim_y, dim_x) = image.shape
-    X = np.linspace(- dim_x / 2 + 1, dim_x / 2, dim_x)
-    Y = np.linspace(- dim_y / 2 + 1, dim_y / 2, dim_y)
+    X = np.linspace(-dim_x / 2 + 1, dim_x / 2, dim_x)
+    Y = np.linspace(-dim_y / 2 + 1, dim_y / 2, dim_y)
     x, y = np.meshgrid(X, Y)
 
     mask = np.sqrt((x - c[0]) ** 2 + (y - c[1]) ** 2) <= r
@@ -82,24 +81,30 @@ def normalize_img(image, window, mask=None):
 
     """
 
-    eps = 1E-7
+    eps = 1e-7
 
     if mask is None:
         mask = np.ones((image.shape[0], image.shape[1]))
 
     mask = mask.astype(int)
 
-    
-    im_mean = convolve2d(image * mask, window, mode='same') / (convolve2d(mask, window, mode='same') + eps)
-    im_mean_sq = convolve2d((image ** 2) * mask, window, mode='same') / (convolve2d(mask, window, mode='same') + eps)
+    im_mean = convolve2d(image * mask, window, mode="same") / (
+        convolve2d(mask, window, mode="same") + eps
+    )
+    im_mean_sq = convolve2d((image ** 2) * mask, window, mode="same") / (
+        convolve2d(mask, window, mode="same") + eps
+    )
     std = np.sqrt(np.abs(im_mean_sq - im_mean ** 2))
 
     background = (1 - np.abs(image - im_mean) / (std + eps)) >= 0
     background = background.astype(int)
 
-    im_mean = convolve2d(image * mask * background, window, mode='same') / (convolve2d(mask * background, window, mode='same') + eps)
-    im_mean_sq = convolve2d((image ** 2) * mask * background, window, mode='same') / (convolve2d(mask * background, window, mode='same') + eps)
+    im_mean = convolve2d(image * mask * background, window, mode="same") / (
+        convolve2d(mask * background, window, mode="same") + eps
+    )
+    im_mean_sq = convolve2d(
+        (image ** 2) * mask * background, window, mode="same"
+    ) / (convolve2d(mask * background, window, mode="same") + eps)
     std = np.sqrt(np.abs(im_mean_sq - im_mean ** 2))
 
-  
     return np.tanh(8 * (image - im_mean) / (std + eps))
