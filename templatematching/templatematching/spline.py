@@ -172,11 +172,17 @@ def discrete_spline(x, n):
     s = np.zeros(x.shape)
 
     for k in range(n + 2):
-        tmp = np.maximum(np.power(x - k + (n + 1) / 2, n), 0)
-        tmp *= (-1) ** k * (n + 1) / (factorial(n + 1 - k) * factorial(k))
-        s += tmp
-
+        tmp = _positive_part(0.5*(n+1) + x - k, n)
+        coef = ((-1) ** k) * (n + 1) / (factorial(n + 1 - k) * factorial(k))
+        s += coef * tmp
     return s
+
+
+def _positive_part(x, n):
+    if n == 0:
+        return 1 / 2 * (x == 0) + 1 * (x > 0)
+    else:
+        return np.maximum(0, x) ** n
 
 
 def discrete_spline_2D(x, y, n):
