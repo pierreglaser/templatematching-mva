@@ -94,6 +94,8 @@ def load_patches(num_patches, with_labels=True):
     neg_patches = np.zeros((num_patches, 101, 101))
     neg_labels = np.zeros((num_patches, 1))
 
+    eye_loc = np.zeros((2 * num_patches, 2))
+
     for i in range(num_patches):
         pos_patch = read_patch(i, loc="left", pos_neg="positive")
         neg_patch = read_patch(i, loc="left", pos_neg="negative")
@@ -101,9 +103,13 @@ def load_patches(num_patches, with_labels=True):
         pos_patches[i] = pos_patch
         neg_patches[i] = neg_patch
 
+        (left_x, left_y), (right_x, right_y) = read_eye_annotations(i)
+
+        eye_loc[i] = np.array([left_x, left_y])
+
     all_patches = np.vstack((pos_patches, neg_patches))
     all_labels = np.vstack((pos_labels, neg_labels))
-    return all_patches, all_labels
+    return all_patches, all_labels, eye_loc
 
 
 def read_norm_img(img_no):
