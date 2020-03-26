@@ -51,7 +51,7 @@ ax2.set_title('negative patch')
 
 ```python
 from templatematching.models.averager import Averager
-clf = Averager(spline_order=3)
+clf = Averager()
 clf.fit(patches)
 ```
 
