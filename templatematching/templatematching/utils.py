@@ -109,7 +109,8 @@ def load_patches(num_patches, with_labels=True):
 
     all_patches = np.vstack((pos_patches, neg_patches))
     all_labels = np.vstack((pos_labels, neg_labels))
-    return all_patches, all_labels, eye_loc
+    all_labels = np.hstack((eye_loc, all_labels, ))
+    return all_patches, all_labels
 
 
 def read_norm_img(img_no):
