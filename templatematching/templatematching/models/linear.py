@@ -30,6 +30,7 @@ class R2Ridge(object):
         self._S, self._Nx, self._Ny = S, X.shape[1], X.shape[2]
         self.spline_coef = c[0]
         self._mask = make_template_mass(int(X.shape[1]/2))
+        self._template = self.reconstruct_template()
 
     def predict(self, X):
 
