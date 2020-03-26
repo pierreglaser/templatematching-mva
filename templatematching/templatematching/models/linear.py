@@ -11,6 +11,7 @@ from .utils import make_template_mass
 
 class R2Ridge(object):
     def __init__(self, template_shape, spline_order=2, mu=0, verbose=0):
+        self.model_name = 'Linear Ridge'
         self.template_shape = template_shape
         self.spline_order = spline_order
         self.mu = mu
@@ -36,6 +37,24 @@ class R2Ridge(object):
         (y, x) = np.where(conv == np.amax(conv))
 
         return conv, (y, x)
+
+    def score(self, X, y, radius_criteria=50):
+
+        num_sample = X.shape[0]
+        score = 0
+
+        for i in range(num_sample):
+            image = X[i]
+            _, (pred_y, pred_x) = self.predict(image)
+            true_x, true_y = y[i][0], y[i][1]
+
+            if np.sqrt((pred_x - true_x) ** 2 + (pred_y - true_y) ** 2) < np.sqrt(radius_criteria):
+                score += 1
+
+        total_score = np.round(score / num_sample * 100, 2)
+        print(f'Score was computed on {num_sample} samples: \n')
+        print(f'Model {self.model_name} accuracy: {total_score} %')
+
 
     def reconstruct_template(self):
         final_template = np.zeros((self._Nx, self._Ny))
