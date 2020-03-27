@@ -217,11 +217,3 @@ ax2.matshow(right[3], cmap='gray')
 ax3.matshow(neg[6], cmap='gray')
 ax4.matshow(neg[7], cmap='gray')
 ```
-
-```python
-int(y[0])
-```
-
-```python
-
-```
