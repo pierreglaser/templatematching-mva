@@ -93,6 +93,56 @@ mask = np.ones((image.shape[0], image.shape[1]))
 plt.imshow(normalize_img(image, window, mask), cmap='gray')
 ```
 
+```python
+from templatematching.preprocessing import normalize_img_batched
+image = plt.imread('../images/BioID_{0:04}.pgm'.format(1))
+images = np.zeros((12, 286, 384))
+
+for i in range(12):
+    images[i] = plt.imread('../images/BioID_{0:04}.pgm'.format(i))
+#images = images.astype(np.uint8)
+
+
+plt.imshow(normalize_img_batched(images.astype(np.uint8), window)[0], cmap='gray')
+plt.show()
+plt.imshow(normalize_img_batched(images, window)[0], cmap='gray')
+plt.show()
+
+```
+
+```python
+images.shape[-2]
+```
+
+```python
+mask=None
+eps = 1e-10
+if mask is None:
+    mask = np.ones((images.shape[-2], images.shape[-1]))
+
+window = window.reshape(1, *window.shape)
+mask = mask.reshape(1, *mask.shape)
+
+mask = mask.astype(int)
+mask_c_window = fftconvolve(mask, window, mode="same")
+im_squared = image ** 2
+
+im_mean = fftconvolve(images * mask, window, mode="same") / (
+         mask_c_window + eps)
+```
+
+```python
+im_mean.shape
+```
+
+```python
+mask_c_window = fftconvolve(mask, window, mode="same")
+```
+
+```python
+fftconvolve(image * mask, window, mode="same") / (mask_c_window)
+```
+
 # Loop over all images
 
 ```python
@@ -109,6 +159,26 @@ for image_no in range(1251, num_images):
     img_normalized = normalize_img(image, window, mask)
     
     plt.imsave(PATH_TO_SAVE + 'img_norm_{0:04}.jpg'.format(image_no), img_normalized, cmap='gray')
+```
+
+# Test Transformer
+
+```python
+from templatematching.image_transformer import ImageTransformer
+```
+
+```python
+trans = ImageTransformer()
+
+images = np.zeros((12, 286, 384))
+
+for i in range(12):
+    images[i] = plt.imread('../images/BioID_{0:04}.pgm'.format(i))
+
+```
+
+```python
+plt.imshow(trans.fit_transform(images)[1], cmap='gray')
 ```
 
 ```python
