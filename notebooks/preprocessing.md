@@ -164,11 +164,12 @@ for image_no in range(1251, num_images):
 # Test Transformer
 
 ```python
-from templatematching.image_transformer import ImageTransformer
+from templatematching.image_transformer import Normalizer
+from templatematching.patch_transformer import PatchTranformer
 ```
 
 ```python
-trans = ImageTransformer()
+normalizer = Normalizer()
 
 images = np.zeros((12, 286, 384))
 
@@ -178,7 +179,7 @@ for i in range(12):
 ```
 
 ```python
-plt.imshow(trans.fit_transform(images)[1], cmap='gray')
+plt.imshow(trans.fit_transform(images)[0], cmap='gray')
 ```
 
 ```python

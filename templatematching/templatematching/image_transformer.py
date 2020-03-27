@@ -37,7 +37,7 @@ def m_function(x, y, r, n_order=1):
     return res
 
 
-class ImageTransformer:
+class Normalizer:
     """
     Normalize images based on Foracchia's Luminosity-Contrast
     normalization scheme

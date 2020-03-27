@@ -1,7 +1,7 @@
 import numpy as np
 
 
-class PatchTranformer:
+class PatchCreator:
     """
     Creation of positive and negative patch
     from images

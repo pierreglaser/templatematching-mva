@@ -193,32 +193,31 @@ ax[1].set_title('Right eye')
 
 ```python
 from templatematching.patch_transformer import PatchTranformer
+from templatematching.image_transformer import Normalizer
 from templatematching.utils import read_images, read_eye_annotations
 ```
 
 ```python
-images, eye_annotations = read_images(10), read_eye_annotations(10)
+num_images = 100
+images, eye_annotations = read_images(100), read_eye_annotations(100)
 ```
 
 ```python
 trans = PatchTranformer(patch_size = (101, 101), neg_pos_proportion=2, random_state=1)
+image_transformer = Normlalizer(neg_pos_proportion=2, random_state=1)
 left_eye_patches, right_eye_patches, negative_patches = trans.fit_transform(
     images, eye_annotations
 )
 ```
 
 ```python
-f, (ax1, ax2, ax3) = plt.subplots(ncols=3)
+f, (ax1, ax2, ax3, ax4) = plt.subplots(ncols=4)
 ax1.imshow(left_eye_patches[0])
-ax2.imshow(left_eye_patches[0])
-ax.imshow(left_eye_patches[0])
+ax2.imshow(right_eye_patches[0])
+ax3.imshow(negative_patches[0])
+ax4.imshow(negative_patches[1])
 ```
 
 ```python
-fig, (ax1, ax2, ax3, ax4) = plt.subplots(ncols=4, nrows=1, figsize=(16,8))
-
-ax1.matshow(left[3], cmap='gray')
-ax2.matshow(right[3], cmap='gray')
-ax3.matshow(neg[6], cmap='gray')
-ax4.matshow(neg[7], cmap='gray')
+from templatematching.
 ```
