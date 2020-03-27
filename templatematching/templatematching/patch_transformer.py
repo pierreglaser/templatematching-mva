@@ -12,7 +12,6 @@ def _pos_patch(image, image_no, patch_size):
     # Define mask
     mask = np.ones(image.shape)
 
-
     # Perform padding
     pad_1, pad_2 = - min(left_eye[1] - Ny, 0), - image.shape[0] + max(left_eye[1] + Ny + 1, image.shape[0])
     pad_3, pad_4 = - min(left_eye[0] - Nx, 0), - image.shape[1] + max(left_eye[0] + Ny + 1, image.shape[1])
@@ -28,18 +27,15 @@ def _pos_patch(image, image_no, patch_size):
 
     assert(patch_left.shape == patch_size)    
 
-
     # Perform padding
     pad_1, pad_2 = - min(right_eye[1] - Ny, 0), - image.shape[0] + max(right_eye[1] + Ny + 1, image.shape[0])
     pad_3, pad_4 = - min(right_eye[0] - Nx, 0), - image.shape[1] + max(right_eye[0] + Ny + 1, image.shape[1])
-
 
     # Create right patch
     patch_right =  image[max(right_eye[1] - Ny, 0):min(right_eye[1] + Ny + 1, image.shape[0]), max(right_eye[0] - Nx, 0): min(right_eye[0] + Nx + 1, image.shape[1])]
 
     # Remove location of right patch
     mask[max(right_eye[1] - Ny, 0):min(right_eye[1] + Ny + 1, image.shape[0]), max(right_eye[0] - Nx, 0): min(right_eye[0] + Nx + 1, image.shape[1])] = 0
-
 
     # Pad the patch
     patch_right = np.pad(patch_right, ((pad_1, pad_2), (pad_3, pad_4)))
@@ -55,20 +51,15 @@ def _neg_patch(image, image_no, mask, patch_size, rs):
     assert(mask.shape == image.shape)
 
     Nx, Ny = int((patch_size[0] - 1) / 2), int((patch_size[1] - 1) / 2)
-
     v = np.argwhere(mask==1)
-
     center_id = rs.randint(0, len(v))
-
     center = v[center_id]
 
     # Perform padding
     pad_1, pad_2 = - min(center[0] - Ny, 0), - image.shape[0] + max(center[0] + Ny + 1, image.shape[0])
     pad_3, pad_4 = - min(center[1] - Nx, 0), - image.shape[1] + max(center[1] + Ny + 1, image.shape[1])
-
     patch =  image[max(center[0] - Ny, 0):min(center[0] + Ny + 1, image.shape[0]), max(center[1] - Nx, 0): min(center[1] + Nx + 1, image.shape[1])]
     
-
     # Pad the patch
     patch = np.pad(patch, ((pad_1, pad_2), (pad_3, pad_4)))
 
