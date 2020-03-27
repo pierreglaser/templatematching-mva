@@ -1,5 +1,5 @@
 import numpy as np
-from scipy.signal import convolve2d
+from scipy.signal import fftconvolve
 
 
 def m_function(x, y, r, n_order=1):
@@ -60,6 +60,38 @@ def mask_img(image, c=(0, 0), r=10):
     return mask
 
 
+def normalize_img_batched(image, window, mask=None, eps=1e-7):
+    if mask is None:
+        mask = np.ones((image.shape[0], image.shape[1]))
+
+    window = window.reshape(1, *window.shape)
+    mask = mask.reshape(1, *mask.shape)
+
+    mask = mask.astype(int)
+    mask_c_window = fftconvolve(mask, window, mode="same")
+    im_squared = image ** 2
+
+    im_mean = fftconvolve(image * mask, window, mode="same") / (
+         mask_c_window + eps)
+    im_mean_sq = fftconvolve(im_squared * mask, window, mode="same") / (
+         mask_c_window + eps)
+
+    std = np.sqrt(np.abs(im_mean_sq - im_mean ** 2))
+
+    background = (1 - np.abs(image - im_mean) / (std + eps)) >= 0
+    background = background.astype(int)
+    mask_c_background = fftconvolve(mask * background, window, mode="same")
+
+    im_mean = fftconvolve(image * mask * background, window, mode="same") / (
+         mask_c_background + eps)
+    im_mean_sq = fftconvolve(
+        im_squared * mask * background, window, mode="same"
+    ) / (mask_c_background + eps)
+
+    std = np.sqrt(np.abs(im_mean_sq - im_mean ** 2))
+    return np.tanh(8 * (image - im_mean) / (std + eps))
+
+
 def normalize_img(image, window, mask=None):
     """
     Normalizing fonction based on Foracchia's Luminosity-Contrast 
@@ -88,23 +120,22 @@ def normalize_img(image, window, mask=None):
 
     mask = mask.astype(int)
 
-    im_mean = convolve2d(image * mask, window, mode="same") / (
-        convolve2d(mask, window, mode="same") + eps
+    im_mean = fftconvolve(image * mask, window, mode="same") / (
+        fftconvolve(mask, window, mode="same") + eps
     )
-    im_mean_sq = convolve2d((image ** 2) * mask, window, mode="same") / (
-        convolve2d(mask, window, mode="same") + eps
+    im_mean_sq = fftconvolve((image ** 2) * mask, window, mode="same") / (
+        fftconvolve(mask, window, mode="same") + eps
     )
     std = np.sqrt(np.abs(im_mean_sq - im_mean ** 2))
 
     background = (1 - np.abs(image - im_mean) / (std + eps)) >= 0
     background = background.astype(int)
 
-    im_mean = convolve2d(image * mask * background, window, mode="same") / (
-        convolve2d(mask * background, window, mode="same") + eps
+    im_mean = fftconvolve(image * mask * background, window, mode="same") / (
+        fftconvolve(mask * background, window, mode="same") + eps
     )
-    im_mean_sq = convolve2d(
+    im_mean_sq = fftconvolve(
         (image ** 2) * mask * background, window, mode="same"
-    ) / (convolve2d(mask * background, window, mode="same") + eps)
+    ) / (fftconvolve(mask * background, window, mode="same") + eps)
     std = np.sqrt(np.abs(im_mean_sq - im_mean ** 2))
-
     return np.tanh(8 * (image - im_mean) / (std + eps))
