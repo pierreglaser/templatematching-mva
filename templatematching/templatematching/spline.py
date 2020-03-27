@@ -193,6 +193,16 @@ def discrete_spline_2D(x, y, n):
     return np.outer(Bx, By)
 
 
+def discrete_spline_3D(x, y, t, n):
+
+    Bx = discrete_spline(x, n)
+    By = discrete_spline(y, n)
+    Bt = discrete_spline(t, n)
+    _na = np.newaxis
+
+    return Bx[:, _na, _na] * By[_na, :, _na] * Bt[_na, _na, :]
+
+
 def spline_kl_to_xy(k, l, sk, sl):
     """
     Convert from (k, l) coordinate to (x, y) coordinates
@@ -211,6 +221,32 @@ def spline_kl_to_xy(k, l, sk, sl):
     return (
         np.round((k - 1) * sk + (sk + 1) / 2).astype(int),
         np.round((l - 1) * sl + (sl + 1) / 2).astype(int),
+    )
+
+
+def spline_klm_to_xytheta(k, l, m, sk, sl, sm):
+    """
+    Convert from (k, l, m) coordinate to (x, y, theta) coordinates
+
+    Inputs:
+    -------
+    k (int):
+        The k-coordinate
+    l (int):
+        The l-coordinate
+    m (int)
+        The m-coordinate
+    sk (float):
+        The scale factor (Nx / Nk)
+    sl (float):
+        The scale factor (Ny / Nl)
+    sm (float):
+        The scale factor (Nt / Nm)
+    """
+    return (
+        np.round((k - 1) * sk + (sk + 1) / 2).astype(int),
+        np.round((l - 1) * sl + (sl + 1) / 2).astype(int),
+        np.round((m - 1) * sm + (sm + 1) / 2).astype(int),
     )
 
 
