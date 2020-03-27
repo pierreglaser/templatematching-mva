@@ -2,10 +2,14 @@ import numpy as np
 
 from itertools import product
 
-from scipy.signal import convolve2d, correlate2d
+from scipy.signal import convolve2d, correlate2d, convolve
 
-from ..spline import spline_kl_to_xy, discrete_spline_2D
-
+from ..spline import (
+    spline_kl_to_xy,
+    spline_klm_to_xytheta,
+    discrete_spline_2D,
+    discrete_spline_3D,
+)
 from .utils import make_template_mass
 
 
@@ -157,4 +161,73 @@ class R2Ridge(SplineRegressorBase):
         y_grid = np.array(range(-int(5 * sl / 2), int(5 * sl / 2) + 1)) / sl
 
         B = discrete_spline_2D(x_grid, y_grid, self.spline_order)
+        return B
+
+
+class SE2Ridge(SplineRegressorBase):
+    def __init__(self, splines_per_axis, spline_order=2, mu=0, verbose=0):
+        super().__init__(splines_per_axis, spline_order)
+        self.mu = mu
+        self.verbose = verbose
+        self._mask = None
+
+    def _make_s_matrix(self, X):
+        num_samples, Nx, Ny, Nt = X.shape
+        Nk, Nl, Nm = self.splines_per_axis  # fmt: off
+        sk, sl, sm = Nx / Nk, Ny / Nl, Nt / Nm
+
+        S = np.zeros((num_samples, Nk * Nl * Nm))
+        self._B = self._make_unit_spline(sk, sl, sm)
+
+        # centers of each 2D spline used to create the template, compressed
+        # as a carthesian product
+        _x_idxs, _y_idxs, _t_idxs = self._make_subsampled_grid(
+            Nx, Ny, Nt, Nk, Nl, Nm, centered=False
+        )
+
+        for i in range(num_samples):
+            if self.verbose and i % 100 == 0:
+                print("Creating S matrix - Patch {}".format(i))
+
+            convolved_sample_i = convolve(X[i], self._B, mode="same")
+
+            # Get the corresponding points in(x, y) grid and flatten
+            S[i] = convolved_sample_i[_x_idxs, :, :][:, _y_idxs, :][
+                :, :, _t_idxs
+            ].flatten()
+
+        S /= np.linalg.norm(S, axis=0)[np.newaxis, :]
+
+        return S
+
+    def _make_subsampled_grid(self, Nx, Ny, Nt, Nk, Nl, Nm, centered=True):
+        # generate a subsampled grid between:
+        # - [-Nx/2, Nx/2] x [Ny/2,Ny/2] x [-Nt/2, Nt/2] if centered
+        # - [0, Nx] x [0, Ny] if not centered
+        # containing Nk points in the x-axis, and Nl points in the y-axis
+        sk, sl, sm = Nx / Nk, Ny / Nl, Nt / Nm
+
+        k_grid, l_grid, m_grid = np.arange(Nk), np.arange(Nl), np.arange(Nm)
+        xyt_grids = spline_klm_to_xytheta(k_grid, l_grid, m_grid, sk, sl, sm)
+        subsampled_x_grid, subsampled_y_grid, subsampled_t_grid = xyt_grids
+
+        if centered:
+            subsampled_x_grid -= (Nx - 1) // 2
+            subsampled_y_grid -= (Ny - 1) // 2
+        else:
+            assert subsampled_x_grid[0] == 0
+            assert subsampled_y_grid[0] == 0
+
+        return subsampled_x_grid, subsampled_y_grid, subsampled_t_grid
+
+    def _make_unit_spline(self, sk, sl, st):
+        # Our spline is always defined on [-2.5, 2.5] (may be a problem if we
+        # change the order of the spline, as B_k is defined on [-k/2, k/2]) the
+        # granularity of the grid impacts the percieved width of the spline.
+
+        x_grid = np.array(range(-int(5 * sk / 2), int(5 * sk / 2) + 1)) / sk
+        y_grid = np.array(range(-int(5 * sl / 2), int(5 * sl / 2) + 1)) / sl
+        t_grid = np.array(range(-int(5 * st / 2), int(5 * st / 2) + 1)) / st
+
+        B = discrete_spline_3D(x_grid, y_grid, t_grid, self.spline_order)
         return B
