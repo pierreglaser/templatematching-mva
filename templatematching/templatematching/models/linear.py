@@ -9,27 +9,47 @@ from ..spline import spline_kl_to_xy, discrete_spline_2D
 from .utils import make_template_mass
 
 
-class R2Ridge(object):
-    def __init__(self, template_shape, spline_order=2, mu=0, verbose=0):
-        self.model_name = 'Linear Ridge'
-        self.template_shape = template_shape
+class SplineRegressorBase:
+    def __init__(self, splines_per_axis, spline_order=2):
+        self.splines_per_axis = splines_per_axis
         self.spline_order = spline_order
-        self.mu = mu
-        self.verbose = verbose
         self._S = None
         self._template = None
         self._template_full = None
+
+
+class R2Ridge(SplineRegressorBase):
+    def __init__(
+        self, splines_per_axis, spline_order=2, mu=0, verbose=0, solver="dual"
+    ):
+        super().__init__(splines_per_axis, spline_order=spline_order)
+        self.model_name = 'Linear Ridge'
+        self.mu = mu
+        self.verbose = verbose
         self._mask = None
+        assert solver in [
+            "primal",
+            "dual",
+        ], "`solver` must be 'primal' or 'dual'"
+        self.solver = solver
 
     def fit(self, X, y):
         S = self._make_s_matrix(X)
-        c = np.linalg.lstsq(
-            S.T @ S + self.mu * np.eye(S.shape[1]), S.T @ y, rcond=None
-        )
+        if self.solver == "primal":
+            c = np.linalg.lstsq(
+                S.T @ S + self.mu * np.eye(S.shape[1]), S.T @ y, rcond=None
+            )[0]
+        elif self.solver == "dual":
+            c = S.T @ np.linalg.inv(S @ S.T + self.mu * np.eye(S.shape[0])) @ y
+        else:
+            raise ValueError(
+                f"solver must be 'primal' or 'dual', got '{self.solver}'"
+            )
+
         # record fitting information (input shape, S matrix, coefficients etc.)
         self._S, self._Nx, self._Ny = S, X.shape[1], X.shape[2]
-        self.spline_coef = c[0]
-        self._mask = make_template_mass(int(X.shape[1]/2))
+        self.spline_coef = c
+        self._mask = make_template_mass(int(X.shape[1] / 2))
         self._template = self.reconstruct_template()
 
     def predict(self, X):
@@ -60,7 +80,7 @@ class R2Ridge(object):
     def reconstruct_template(self):
         final_template = np.zeros((self._Nx, self._Ny))
         _x_idxs, _y_idxs = self._make_subsampled_grid(
-            self._Nx, self._Ny, *self.template_shape, centered=False
+            self._Nx, self._Ny, *self.splines_per_axis, centered=False
         )
         spline_width = (self._B.shape[0] - 1) // 2
 
@@ -82,7 +102,7 @@ class R2Ridge(object):
 
     def _make_s_matrix(self, X):
         num_samples, Nx, Ny = X.shape  # Nx, Ny: training images shape
-        Nk, Nl = self.template_shape  # Nk, Nl: number of splines in each axis
+        Nk, Nl = self.splines_per_axis  # fmt: off
         sk, sl = Nx / Nk, Ny / Nl
 
         S = np.zeros((num_samples, Nk * Nl))
