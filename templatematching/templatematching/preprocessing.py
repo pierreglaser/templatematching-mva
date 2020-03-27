@@ -62,7 +62,7 @@ def mask_img(image, c=(0, 0), r=10):
 
 def normalize_img_batched(image, window, mask=None, eps=1e-7):
     if mask is None:
-        mask = np.ones((image.shape[0], image.shape[1]))
+        mask = np.ones((image.shape[-2], image.shape[-1]))
 
     window = window.reshape(1, *window.shape)
     mask = mask.reshape(1, *mask.shape)
