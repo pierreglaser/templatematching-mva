@@ -188,3 +188,40 @@ right = read_patch(0, loc='right')
 ax[1].imshow(right, cmap='gray')
 ax[1].set_title('Right eye')
 ```
+
+# Test Patch_transformer 
+
+```python
+from templatematching.patch_transformer import PatchTranformer
+```
+
+```python
+images = np.zeros((12, 286, 384))
+for i in range(12):
+    images[i] = np.mean(plt.imread('../img_normalized/img_norm_{0:04}.jpg'.format(i)), axis=2)
+    
+y = np.arange(12).reshape(12, 1)
+y
+```
+
+```python
+trans = PatchTranformer(patch_size = (101, 101), neg_pos_proportion=2, random_state=1)
+left, right, neg = trans.fit_transform(images, y)
+```
+
+```python
+fig, (ax1, ax2, ax3, ax4) = plt.subplots(ncols=4, nrows=1, figsize=(16,8))
+
+ax1.matshow(left[3], cmap='gray')
+ax2.matshow(right[3], cmap='gray')
+ax3.matshow(neg[6], cmap='gray')
+ax4.matshow(neg[7], cmap='gray')
+```
+
+```python
+int(y[0])
+```
+
+```python
+
+```
