@@ -23,7 +23,7 @@ import os
 import numpy as np
 from scipy.signal import convolve2d
 
-from templatematching.utils import load_patches, read_norm_img, read_pgm
+from templatematching.utils import read_images, read_eye_annotations, load_patches
 from templatematching.models.utils import make_template_mass
 ```
 
@@ -33,26 +33,20 @@ import matplotlib.pyplot as plt
 ```
 
 ```python
-patches, labels = load_patches(1000)
-```
-
-```python
-fig, (ax1, ax2) = plt.subplots(nrows=1, ncols=2, figsize=(16, 8))
-
-ax1.matshow(patches[0], cmap='gray')
-ax1.set_title('positive patch')
-
-ax2.matshow(patches[1000], cmap='gray')
-ax2.set_title('negative patch')
-
+num_images = 10
+images, eye_annotations = read_images(num_images), read_eye_annotations(num_images)
 ```
 
 # Average model (A) TEST
 
 ```python
+images.shape
+```
+
+```python
 from templatematching.models.averager import Averager
-clf = Averager()
-clf.fit(patches)
+clf = Averager(patch_size=(51, 51))
+a = clf.fit(images, eye_annotations)
 ```
 
 ```python
@@ -80,8 +74,10 @@ ax3.scatter(x, y, c='r')
 
 ```python
 from templatematching.models import R2Ridge
-clf = R2Ridge(template_shape=(51, 51), mu=0, spline_order=3)
+clf = R2Ridge(splines_per_axis=(51, 51), mu=0, spline_order=3, solver='dual')
 clf.fit(X=patches, y=labels)
+clf2 = R2Ridge(splines_per_axis=(51, 51), mu=0, spline_order=3, solver='primal')
+clf2.fit(X=patches, y=labels)
 ```
 
 ```python

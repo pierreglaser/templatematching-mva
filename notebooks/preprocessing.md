@@ -179,9 +179,5 @@ for i in range(12):
 ```
 
 ```python
-plt.imshow(trans.fit_transform(images)[0], cmap='gray')
-```
-
-```python
-
+plt.imshow(normalizer.fit_transform(images)[0], cmap='gray')
 ```

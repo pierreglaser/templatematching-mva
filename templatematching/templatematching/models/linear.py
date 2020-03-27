@@ -10,6 +10,7 @@ from ..spline import (
     discrete_spline_2D,
     discrete_spline_3D,
 )
+from .base import PatchRegressorBase
 from .utils import make_template_mass
 
 
@@ -22,12 +23,12 @@ class SplineRegressorBase:
         self._template_full = None
 
 
-class R2Ridge(SplineRegressorBase):
+class R2Ridge(SplineRegressorBase, PatchRegressorBase):
     def __init__(
         self, splines_per_axis, spline_order=2, mu=0, verbose=0, solver="dual"
     ):
         super().__init__(splines_per_axis, spline_order=spline_order)
-        self.model_name = 'Linear Ridge'
+        self.model_name = "Linear Ridge"
         self.mu = mu
         self.verbose = verbose
         self._mask = None
@@ -37,23 +38,34 @@ class R2Ridge(SplineRegressorBase):
         ], "`solver` must be 'primal' or 'dual'"
         self.solver = solver
 
-    def fit(self, X, y):
-        S = self._make_s_matrix(X)
+    def _fit_patches(self, X, y):
+        X_patches_, y_patches = self._create_patches(X, y)
+        S = self._make_s_matrix(X_patches_)
         if self.solver == "primal":
             c = np.linalg.lstsq(
-                S.T @ S + self.mu * np.eye(S.shape[1]), S.T @ y, rcond=None
+                S.T @ S + self.mu * np.eye(S.shape[1]),
+                S.T @ y_patches,
+                rcond=None,
             )[0]
         elif self.solver == "dual":
-            c = S.T @ np.linalg.inv(S @ S.T + self.mu * np.eye(S.shape[0])) @ y
+            c = (
+                S.T
+                @ np.linalg.inv(S @ S.T + self.mu * np.eye(S.shape[0]))
+                @ y_patches
+            )
         else:
             raise ValueError(
                 f"solver must be 'primal' or 'dual', got '{self.solver}'"
             )
 
         # record fitting information (input shape, S matrix, coefficients etc.)
-        self._S, self._Nx, self._Ny = S, X.shape[1], X.shape[2]
+        self._S, self._Nx, self._Ny = (
+            S,
+            X_patches_.shape[1],
+            X_patches_.shape[2],
+        )
         self.spline_coef = c
-        self._mask = make_template_mass(int(X.shape[1] / 2))
+        self._mask = make_template_mass(int(X_patches_.shape[1] / 2))
         self._template = self.reconstruct_template()
 
     def predict(self, X):
@@ -73,13 +85,15 @@ class R2Ridge(SplineRegressorBase):
             _, (pred_y, pred_x) = self.predict(image)
             true_x, true_y = y[i][0], y[i][1]
 
-            if np.sqrt((pred_x - true_x) ** 2 + (pred_y - true_y) ** 2) < np.sqrt(radius_criteria):
+            dist_to_location = np.sqrt(
+                (pred_x - true_x) ** 2 + (pred_y - true_y) ** 2
+            )
+            if dist_to_location < np.sqrt(radius_criteria):
                 score += 1
 
         total_score = np.round(score / num_sample * 100, 2)
-        print(f'Score was computed on {num_sample} samples: \n')
-        print(f'Model {self.model_name} accuracy: {total_score} %')
-
+        print(f"Score was computed on {num_sample} samples: \n")
+        print(f"Model {self.model_name} accuracy: {total_score} %")
 
     def reconstruct_template(self):
         final_template = np.zeros((self._Nx, self._Ny))
@@ -164,7 +178,7 @@ class R2Ridge(SplineRegressorBase):
         return B
 
 
-class SE2Ridge(SplineRegressorBase):
+class SE2Ridge(SplineRegressorBase, PatchRegressorBase):
     def __init__(self, splines_per_axis, spline_order=2, mu=0, verbose=0):
         super().__init__(splines_per_axis, spline_order)
         self.mu = mu

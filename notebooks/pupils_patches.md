@@ -192,7 +192,7 @@ ax[1].set_title('Right eye')
 # Test Patch_transformer 
 
 ```python
-from templatematching.patch_transformer import PatchTranformer
+from templatematching.patch_transformer import PatchCreator
 from templatematching.image_transformer import Normalizer
 from templatematching.utils import read_images, read_eye_annotations
 ```
@@ -203,8 +203,8 @@ images, eye_annotations = read_images(100), read_eye_annotations(100)
 ```
 
 ```python
-trans = PatchTranformer(patch_size = (101, 101), neg_pos_proportion=2, random_state=1)
-image_transformer = Normlalizer(neg_pos_proportion=2, random_state=1)
+trans = PatchCreator(patch_size = (101, 101), neg_pos_proportion=2, random_state=1)
+image_transformer = Normalizer()
 left_eye_patches, right_eye_patches, negative_patches = trans.fit_transform(
     images, eye_annotations
 )
@@ -216,8 +216,4 @@ ax1.imshow(left_eye_patches[0])
 ax2.imshow(right_eye_patches[0])
 ax3.imshow(negative_patches[0])
 ax4.imshow(negative_patches[1])
-```
-
-```python
-from templatematching.
 ```

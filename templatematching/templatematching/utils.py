@@ -54,8 +54,15 @@ def read_images(image_nos):
         return np.stack([read_pgm(i) for i in image_nos])
 
 
-def read_eye_annotations(img_nos):
-    return [_read_single_image_eye_annotations(i) for i in range(img_nos)]
+def read_eye_annotations(image_nos):
+    if isinstance(image_nos, int):
+        return np.stack(
+            [_read_single_image_eye_annotations(i) for i in range(image_nos)]
+        )
+    else:
+        return np.stack(
+            [_read_single_image_eye_annotations(i) for i in image_nos]
+        )
 
 
 def read_patch(img_no, pos_neg="positive", loc="left"):
@@ -114,7 +121,7 @@ def load_patches(num_patches, with_labels=True):
         pos_patches[i] = pos_patch
         neg_patches[i] = neg_patch
 
-        (left_x, left_y), (right_x, right_y) = read_eye_annotations(i)
+        (left_x, left_y), (right_x, right_y) = read_eye_annotations([i])[0]
 
         eye_loc[i] = np.array([left_x, left_y])
 
