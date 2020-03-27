@@ -1,5 +1,4 @@
 import numpy as np
-from templatematching.utils import read_eye_annotations
 
 
 class PatchTranformer:
@@ -24,6 +23,7 @@ class PatchTranformer:
         self.patch_size = patch_size
         self.neg_pos_prop = neg_pos_proportion
         self._eye_locations = None
+
     def fit(self, X, y=None):
         """
         Inputs:
