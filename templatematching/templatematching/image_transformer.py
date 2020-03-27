@@ -5,13 +5,13 @@ from scipy.integrate import dblquad
 
 
 def m_function(x, y, r, n_order=1):
-    """
+    r"""
     The windowing function a defined in the article.
 
-    Carreful: The output is not normalized such that \
-    \int_{\mathbb{R}^2} m(x, y) dx dy = 1
+    Carreful: The output is not normalized such that
+    \\int_{\mathbb{R}^2} m(x, y) dx dy = 1
     ---------
-    To find the constante call 'dblquad' from scipy.integrate 
+    To find the constante call 'dblquad' from scipy.integrate
 
     Inputs:
     -------
@@ -39,30 +39,34 @@ def m_function(x, y, r, n_order=1):
 
 class ImageTransformer:
     """
-    Normalize images based on Foracchia's Luminosity-Contrast 
+    Normalize images based on Foracchia's Luminosity-Contrast
     normalization scheme
     """
 
-    def __init__(
-        self, 
-        wind_order=3, 
-        wind_radius=10
-    ):
+    def __init__(self, wind_order=3, wind_radius=10):
         self.wind_order = wind_order
         self.wind_radius = wind_radius
 
     def fit(self, X, y=None):
-        
-        X = np.linspace(-self.wind_radius, self.wind_radius, 2 * self.wind_radius + 1)
-        Y = np.linspace(-self.wind_radius, self.wind_radius, 2 * self.wind_radius + 1)
+
+        X = np.linspace(
+            -self.wind_radius, self.wind_radius, 2 * self.wind_radius + 1
+        )
+        Y = np.linspace(
+            -self.wind_radius, self.wind_radius, 2 * self.wind_radius + 1
+        )
         x, y = np.meshgrid(X, Y)
 
-        m_function_part = functools.partial(m_function, r=self.wind_radius, n_order=self.wind_order)
-        
+        m_function_part = functools.partial(
+            m_function, r=self.wind_radius, n_order=self.wind_order
+        )
+
         # Compute normalizing constante
-        eta = dblquad(m_function_part, - np.inf, np.inf, -np.inf, np.inf)[0]
-        
-        self.window = m_function(y, x, r=self.wind_radius, n_order=self.wind_order) / eta
+        eta = dblquad(m_function_part, -np.inf, np.inf, -np.inf, np.inf)[0]
+
+        self.window = (
+            m_function(y, x, r=self.wind_radius, n_order=self.wind_order) / eta
+        )
 
     def transform(self, X):
         X = X.astype(np.uint8)
@@ -72,7 +76,6 @@ class ImageTransformer:
     def fit_transform(self, X, y=None):
         self.fit(X, y=y)
         return self.transform(X)
-
 
     def _normalize_img_batched(self, image, window, mask=None, eps=1e-7):
         if mask is None:
@@ -86,9 +89,11 @@ class ImageTransformer:
         im_squared = image ** 2
 
         im_mean = fftconvolve(image * mask, window, mode="same") / (
-             mask_c_window + eps)
+            mask_c_window + eps
+        )
         im_mean_sq = fftconvolve(im_squared * mask, window, mode="same") / (
-             mask_c_window + eps)
+            mask_c_window + eps
+        )
 
         std = np.sqrt(np.abs(im_mean_sq - im_mean ** 2))
 
@@ -96,8 +101,9 @@ class ImageTransformer:
         background = background.astype(int)
         mask_c_background = fftconvolve(mask * background, window, mode="same")
 
-        im_mean = fftconvolve(image * mask * background, window, mode="same") / (
-             mask_c_background + eps)
+        im_mean = fftconvolve(
+            image * mask * background, window, mode="same"
+        ) / (mask_c_background + eps)
         im_mean_sq = fftconvolve(
             im_squared * mask * background, window, mode="same"
         ) / (mask_c_background + eps)
