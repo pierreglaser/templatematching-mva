@@ -4,7 +4,7 @@ from math import factorial
 
 from numpy import pi
 from numpy.fft import ifft2
-from scipy.signal import convolve2d
+from scipy.signal import fftconvolve
 
 from .spline import make_k_th_order_spline
 
@@ -47,14 +47,14 @@ class OrientationScoreTransformer:
 
     def __init__(
         self,
-        patch_size,
+        wavelet_dim,
         num_slices,
         spline_order=3,
         mn_order=8,
         bandwidth=5,
         convolution_mode="full",
     ):
-        self.patch_size = patch_size
+        self.wavelet_dim = wavelet_dim
         self.num_slices = num_slices
         self.spline_order = spline_order
         self.mn_order = mn_order
@@ -79,7 +79,7 @@ class OrientationScoreTransformer:
     def transform(self, X):
         transformed_X = []
         for w in self._wavelets:
-            convolved_img = convolve2d(X, w.imag, mode=self.convolution_mode)
+            convolved_img = fftconvolve(X, w, mode=self.convolution_mode)
             transformed_X.append(convolved_img)
         return np.stack(transformed_X, axis=-1)
 
@@ -89,7 +89,7 @@ class OrientationScoreTransformer:
 
     def _make_cake_wavelet(self, orientation):
         gaussian_window = _make_gaussian_patch(
-            N=self.patch_size, sigma=self.patch_size / 4
+            N=self.wavelet_dim, sigma=self.wavelet_dim / 4
         )
         cake_slice = self._make_cake_slice(orientation=orientation)
         w = ifft2(np.fft.ifftshift(cake_slice)) * gaussian_window
@@ -99,7 +99,7 @@ class OrientationScoreTransformer:
         return w, cake_slice
 
     def _make_cake_slice(self, orientation):
-        rhos, phis = make_polar_coordinates(self.patch_size, self.bandwidth)
+        rhos, phis = make_polar_coordinates(self.wavelet_dim, self.bandwidth)
         # the + (spline_order/2) is necessary to recenter my spline orientation
         return self._B_k(
             (np.mod(phis - orientation, 2 * pi) - pi / 2) / self.s_theta
