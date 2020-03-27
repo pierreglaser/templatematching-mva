@@ -34,7 +34,7 @@ def read_pgm(img_no, byteorder=">"):
     ).reshape((int(height), int(width)))
 
 
-def read_eye_annotations(img_no):
+def _read_single_image_eye_annotations(img_no):
     filename = DATA_DIR / f"BioID_{img_no:04}.eye"
     with open(filename, "r") as f:
         lines = list(f.readlines())
@@ -45,6 +45,17 @@ def read_eye_annotations(img_no):
     left_eye_position = tuple(eyes_position[:2])
     right_eye_position = tuple(eyes_position[2:4])
     return left_eye_position, right_eye_position
+
+
+def read_images(image_nos):
+    if isinstance(image_nos, int):
+        return np.stack([read_pgm(i) for i in range(image_nos)])
+    else:
+        return np.stack([read_pgm(i) for i in image_nos])
+
+
+def read_eye_annotations(img_nos):
+    return [_read_single_image_eye_annotations(i) for i in range(img_nos)]
 
 
 def read_patch(img_no, pos_neg="positive", loc="left"):
@@ -109,7 +120,7 @@ def load_patches(num_patches, with_labels=True):
 
     all_patches = np.vstack((pos_patches, neg_patches))
     all_labels = np.vstack((pos_labels, neg_labels))
-    all_labels = np.hstack((eye_loc, all_labels, ))
+    all_labels = np.hstack((eye_loc, all_labels,))
     return all_patches, all_labels
 
 

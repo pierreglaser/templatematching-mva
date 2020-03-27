@@ -193,20 +193,25 @@ ax[1].set_title('Right eye')
 
 ```python
 from templatematching.patch_transformer import PatchTranformer
+from templatematching.utils import read_images, read_eye_annotations
 ```
 
 ```python
-images = np.zeros((12, 286, 384))
-for i in range(12):
-    images[i] = np.mean(plt.imread('../img_normalized/img_norm_{0:04}.jpg'.format(i)), axis=2)
-    
-y = np.arange(12).reshape(12, 1)
-y
+images, eye_annotations = read_images(10), read_eye_annotations(10)
 ```
 
 ```python
 trans = PatchTranformer(patch_size = (101, 101), neg_pos_proportion=2, random_state=1)
-left, right, neg = trans.fit_transform(images, y)
+left_eye_patches, right_eye_patches, negative_patches = trans.fit_transform(
+    images, eye_annotations
+)
+```
+
+```python
+f, (ax1, ax2, ax3) = plt.subplots(ncols=3)
+ax1.imshow(left_eye_patches[0])
+ax2.imshow(left_eye_patches[0])
+ax.imshow(left_eye_patches[0])
 ```
 
 ```python
