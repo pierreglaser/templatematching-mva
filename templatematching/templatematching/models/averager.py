@@ -9,8 +9,6 @@ class Averager(TemplateCrossCorellatorBase, PatchRegressorBase):
         PatchRegressorBase.__init__(self, patch_shape, eye=eye)
         TemplateCrossCorellatorBase.__init__(self, template_shape=patch_shape)
         self.model_name = "Averager"
-        self._mask = None
-        self._is_fitted = None
 
     def _fit_patches(self, X, y):
         """
@@ -23,10 +21,7 @@ class Averager(TemplateCrossCorellatorBase, PatchRegressorBase):
         """
         X = X[y == 1]  # select only positive patches
         m = np.mean(X, axis=0)
-
-        self._mask = make_template_mass(int(X.shape[1] / 2))
         self._template = (m - np.mean(m)) / np.std(m)
-        self._masked_template = self._mask * self._template
 
     @TemplateCrossCorellatorBase.template.getter
     def template(self):

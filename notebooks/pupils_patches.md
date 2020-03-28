@@ -189,10 +189,10 @@ ax[1].imshow(right, cmap='gray')
 ax[1].set_title('Right eye')
 ```
 
-# Test Patch_transformer 
+# Test PatchCreator
 
 ```python
-from templatematching.patch_transformer import PatchCreator
+from templatematching.patch_creator import PatchCreator
 from templatematching.image_transformer import Normalizer
 from templatematching.utils import read_images, read_eye_annotations
 ```

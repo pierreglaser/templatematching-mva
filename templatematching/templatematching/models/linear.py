@@ -1,6 +1,6 @@
 import numpy as np
 
-from scipy.signal import fftconvolve
+from scipy.signal import fftconvolve, correlate
 
 from ..spline import (
     discrete_spline_2D,
@@ -14,7 +14,7 @@ from .base import (
     SplineRegressorBase,
     TemplateCrossCorellatorBase,
 )
-from .utils import make_template_mass
+from ..orientation_transformer import OrientationScoreTransformer
 
 
 class R2Ridge(SplineRegressorBase, PatchRegressorBase):
@@ -43,7 +43,6 @@ class R2Ridge(SplineRegressorBase, PatchRegressorBase):
         self.mu = mu
         self.lbd = lbd
         self.verbose = verbose
-        self._mask = make_template_mass(int(template_shape[0] / 2))
 
         self.solver = solver
         self._is_fitted = False
@@ -83,7 +82,6 @@ class R2Ridge(SplineRegressorBase, PatchRegressorBase):
         impulses[::sk, ::sl] = self._spline_coef.reshape(Nk, Nl)
 
         self._template = fftconvolve(impulses, B, mode="same")
-        self._masked_template = self._mask * self._template
         return self._template
 
     def _create_s_matrix(self, X):
@@ -145,6 +143,8 @@ class SE2Ridge(SplineRegressorBase, PatchRegressorBase):
         self,
         template_shape,
         splines_per_axis,
+        wavelet_dim,
+        num_orientation_slices=12,
         spline_order=2,
         mu=0,
         verbose=0,
@@ -158,7 +158,6 @@ class SE2Ridge(SplineRegressorBase, PatchRegressorBase):
         )
         PatchRegressorBase.__init__(self, patch_shape=template_shape)
 
-        super().__init__(splines_per_axis, spline_order)
         self.name = "SE2 Ridge"
         self.mu = mu
         self.verbose = verbose
@@ -166,9 +165,35 @@ class SE2Ridge(SplineRegressorBase, PatchRegressorBase):
         self.solver = solver
         self._is_fitted = False
         self._template = None
+        self._ost = OrientationScoreTransformer(
+            wavelet_dim=wavelet_dim, num_slices=num_orientation_slices
+        )
+
+    @TemplateCrossCorellatorBase.template.getter
+    def template(self):
+        if self._is_fitted:
+            if self._template is not None:
+                return self._template
+            else:
+                return self._reconstruct_template()
+        else:
+            raise AttributeError("No template yet: Classifier not fitted")
+
+    def predict(self, X):
+        # TODO: put this method in a Mixin Class.
+        X = self._ost.transform(X).imag
+        template = self.template.reshape(1, *self.template.shape)
+        convs = correlate(X, template, mode="same", method="fft")
+        positions = []
+        for i in range(len(X)):
+            (y, x, _) = np.unravel_index(np.argmax(convs[i]), convs[i].shape)
+            positions.append([x, y])
+        return convs, np.array(positions)
+        return TemplateCrossCorellatorBase.predict(self, X)
 
     def _fit_patches(self, X, y):
-        self._check_params(self, X)
+        X = self._ost.fit_transform(X).imag  # can also take the modulus
+        self._check_params(X)
         S = self._create_s_matrix(X)
         if self.solver == "primal":
             c = np.linalg.lstsq(
@@ -196,10 +221,9 @@ class SE2Ridge(SplineRegressorBase, PatchRegressorBase):
         B = self._make_unit_spline(sk, sl, sm)
 
         impulses = np.zeros((Nx, Ny, Nt))
-        impulses[::sk, ::sl, ::Nt] = self._spline_coef.reshape(Nk, Nl, Nt)
+        impulses[::sk, ::sl, ::sm] = self._spline_coef.reshape(Nk, Nl, Nm)
 
-        self._template = fftconvolve(impulses, B)
-        self._masked_template = self._mask * self._template_full
+        self._template = fftconvolve(impulses, B, mode="same")
         return self._template
 
     def _make_unit_spline(self, sk, sl, st):
@@ -217,13 +241,14 @@ class SE2Ridge(SplineRegressorBase, PatchRegressorBase):
     def _check_params(self, X):
         _, Nx, Ny, Nt = X.shape  # Nx, Ny, Nt: training images shape
         Nk, Nl, Nm = self.splines_per_axis  # fmt: off
-        assert (Nx % Nk) == 0
-        assert (Ny % Nl) == 0
-        assert (Nt % Nm) == 0
+        assert (Nx - 1) % (Nk - 1) == 0
+        assert (Ny - 1) % (Nl - 1) == 0
+        assert Nt % Nm == 0  # theta is not centered
         self._X_shape = X.shape
 
     def _get_dims(self):
         num_samples, Nx, Ny, Nt = self._X_shape
         Nk, Nl, Nm = self.splines_per_axis  # fmt: off
-        sk, sl, sm = Nx // Nk, Ny // Nl, Nt // Nm  # fmt: off
+        sk, sl = (Nx - 1) // (Nk - 1), (Ny - 1) // (Nl - 1)
+        sm = Nt // Nm
         return num_samples, Nx, Ny, Nt, Nk, Nl, Nm, sk, sl, sm

@@ -165,7 +165,7 @@ for image_no in range(1251, num_images):
 
 ```python
 from templatematching.image_transformer import Normalizer
-from templatematching.patch_transformer import PatchTranformer
+from templatematching.patch_creator import PatchCreator
 ```
 
 ```python

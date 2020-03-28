@@ -52,7 +52,7 @@ class OrientationScoreTransformer:
         spline_order=3,
         mn_order=8,
         bandwidth=5,
-        convolution_mode="full",
+        convolution_mode="same",
     ):
         self.wavelet_dim = wavelet_dim
         self.num_slices = num_slices
@@ -68,7 +68,7 @@ class OrientationScoreTransformer:
         self._B_k = make_k_th_order_spline(0, self.spline_order)
         self._M_n = make_m_function_cake(self.mn_order)
 
-        self._wavelets = []
+        self._wavelets = []  # dim: (dimx, dimy)
         self._cake_slices = []
 
         for orientation in np.linspace(0, pi, self.num_slices):
@@ -79,6 +79,7 @@ class OrientationScoreTransformer:
     def transform(self, X):
         transformed_X = []
         for w in self._wavelets:
+            w = w.reshape(1, *w.shape)  # convolve over a full batch of images
             convolved_img = fftconvolve(X, w, mode=self.convolution_mode)
             transformed_X.append(convolved_img)
         return np.stack(transformed_X, axis=-1)
