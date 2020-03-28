@@ -23,17 +23,17 @@ import numpy as np
 ```
 
 ```python
-from templatematching.data_generation import make_circle
+from templatematching.data_generation import make_circle, make_cross
 from templatematching.orientation_transformer import OrientationScoreTransformer
 ```
 
 ```python
 # these parameters take ~1 minute to fit to have a nice visualisation, 
 # scale down the size of the image/the patch to increase speed.
-img = make_circle(501)
-transformer = OrientationScoreTransformer(patch_size=51, num_slices=50)
-transformer.fit(img)
-val = transformer.transform(img)
+images = np.stack([make_circle(101), make_cross(101)])
+transformer = OrientationScoreTransformer(wavelet_dim=21, num_slices=50)
+transformer.fit(images)
+oriented_circle, oriented_cross  = transformer.transform(images)
 ```
 
 ```python
@@ -46,11 +46,11 @@ axs[0].matshow(transformer._cake_slices[0])
 axs[1].matshow(transformer._wavelets[0].imag)
 
 # zoom a little bit on the wavelet
-zoomed_slice = slice(int(3*transformer.patch_size/8),int(5*transformer.patch_size/8))
+zoomed_slice = slice(int(3*transformer.wavelet_dim/8),int(5*transformer.wavelet_dim/8))
 
 axs[2].matshow(transformer._wavelets[0].imag[zoomed_slice, zoomed_slice])
 axs[3].matshow(img)
-axs[4].matshow(val[:, :, 0]>100)
+axs[4].matshow(oriented_circle.imag[:, :, 0])
 ```
 
 ```python
