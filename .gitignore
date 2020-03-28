@@ -12,3 +12,9 @@ images_s2/
 *.egg-info/
 __pycache__/
 *.ipynb
+*.aux
+*.fdb_latexmk
+*.fls
+*.log
+*.pdf
+*.synctex.gz
