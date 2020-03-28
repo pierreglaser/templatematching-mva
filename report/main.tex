@@ -1,0 +1,98 @@
+\author{Pierre Glaser, Clément Chadebec}
+\documentclass{article}
+\usepackage{color}
+\usepackage{xcolor}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{empheq}
+\usepackage[most]{tcolorbox}
+\usepackage[a4paper, total={6in, 8in}]{geometry}
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+
+\makeatletter
+\def\BState{\State\hskip-\ALG@thistlm}
+\makeatother
+
+\definecolor{materialdarkbg}{RGB}{15,17,26}
+\definecolor{materialdarkfg}{RGB}{143, 147, 162}
+\definecolor{myblue}{rgb}{.8, .8, 1}
+\definecolor{materialblue}{HTML}{82aaff}
+\definecolor{materialgray}{HTML}{80869e}
+
+
+\tcbset{colback=materialgray, colframe=materialblue}
+
+\usepackage{import}
+\usepackage{xifthen}
+\usepackage{pdfpages}
+\usepackage{transparent}
+
+\newcommand{\incfig}[1]{%
+    \colorbox{white}{
+        \def\svgwidth{\columnwidth}
+        \import{./figures/}{#1.pdf_tex}
+    }
+}
+
+\newtheorem{definition}{Definition}
+\newtheorem{proposition}{Proposition}
+\newtheorem{theorem}{Theorem}
+
+\title{Rapport de projet - Geodesic Methods and Deformable Models}
+\begin{document}
+\maketitle
+$ \quad $
+% \pagebreak
+% \part{Questions}
+
+
+\paragraph{Quel est le problème traité} 
+Nous étudierons dans ce rapport l'article \emph{Template Matching via densitives on the
+Roto Translation Group}, par Erik J. Bekkers et. Al.
+
+Le problème traité est la \textbf{localisation} d'un objet d'intérêt dans une image par
+\textbf{apprentissage supervisé}. Dans les jeux de
+données utilisés, l'objet est par exemple le disque optique d'un œil, ou bien la
+rétine. Le présupposé est que les problèmes en question bénéficierait d'une prise en
+compte des structures d'orientation locale en tout point de l'image.
+
+\paragraph{Quelles sont les équations et les méthodes numériques utilisées} 
+\begin{itemize}
+    \item La localisation de l'objet d'intérêt se fait par \emph{cross-correlation}: un
+        \emph{template} est convolué avec l'image d'intérêt. La valeur maximale du
+        résultat est alors la localisation prédite de l'objet. Formellement, si $ f $
+        est l'image, et $ x $
+    le template:
+    \[
+        {x}^{\star} = \arg \max_{  } \left ( f \star t \right )(x)
+    \] 
+    \item Dans le cas standard, $ f $ est définie sur $ \mathbb{R}^2 $. Cependant, $ f $
+        peut être transformée (relevée/soulevée?) dans $ \mathbb{R}^3 $, la dimension
+        additionnelle décrivant l'état local l'orientation en tout point d'une image.
+    \item Le template final est la solution d'un probleme d'optimisation de type
+        moindres carrés régularisé, ou régression logistique régularisée.
+        Typiquement,
+        \[
+        t = \arg \min_{  } \sum\limits_{ i=1 }^{ N } \left ( \langle t, p_i \rangle
+        - y_i \right )^2 + R(t)
+        \] 
+        les $ p_i $ sont des templates individuels: 'idéaux': ce sont des images de la
+        même taille que $ t $ centrée en le point d'intérêt de l'image $ i $. Si l'on
+        suppose que 
+        \begin{itemize}
+            \item $ \|p_i\| = 1 $
+            \item n'importe quelle coupe de $ f_i $ de la taille de $ p_i $ a une norme
+                de $ 1 $
+        \end{itemize}
+        on a $ (p_i \star f_i)(x) = \mathcal  \langle T_x(p_i) f_i[p_i] \rangle  \leq
+        \|p_i\| \|f_i[p_i]\| \leq  1$, le maximum étant atteint quand $ f_i $ et $ p_i $ 
+        sont alignés, ceci arrivant par construction en $ {x}^{\star}_i $
+        ou $ R $ est une pénalité imposant de la régularité à t.
+        L'intuition derrière ce problème d'optimisation est.
+    \item 
+        le template $ t $ doit ensuite être paramétrisé, pour limiter la dimension de
+        l'espace
+\end{itemize}
+\end{document}
