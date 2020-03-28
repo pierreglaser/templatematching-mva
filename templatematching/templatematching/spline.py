@@ -178,6 +178,29 @@ def discrete_spline(x, n):
     return s
 
 
+def discrete_spline_first_derivative(x, n):
+    
+    s = np.zeros(x.shape)
+    
+    for k in range(n + 2):
+        tmp = _positive_part(0.5*(n+1) + x - k, n-1)
+        coef = n * ((-1) ** k) * (n + 1) / (factorial(n + 1 - k) * factorial(k))
+        s += coef * tmp
+    return s
+
+
+
+def discrete_spline_second_derivative(x, n):
+    
+    s = np.zeros(x.shape)
+    
+    for k in range(n + 2):
+        tmp = _positive_part(0.5*(n+1) + x - k, n-2)
+        coef = n * (n-1) * ((-1) ** k) * (n + 1) / (factorial(n + 1 - k) * factorial(k))
+        s += coef * tmp
+    return s
+
+
 def _positive_part(x, n):
     if n == 0:
         return 1 / 2 * (x == 0) + 1 * (x > 0)
