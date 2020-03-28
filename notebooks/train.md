@@ -37,8 +37,10 @@ def show_template_and_prediction(clf, test_images, image_no):
     convs, positions = clf.predict(images)
     conv, (x, y) = convs[image_no], positions[image_no]
 
-    estimator = clf.steps[-1][1]
+    est_name, estimator = clf.steps[-1]
     template, mask = estimator.template, estimator._mask
+    if est_name == 'se2ridge':
+        template = template[:, :, 0]
     masked_template = mask * template
 
     f, (ax1, ax2, ax3, ax4) = plt.subplots(ncols=4, nrows=1, figsize=(20, 5))
@@ -75,8 +77,8 @@ print(f'score (from {num_test_samples} samples): {score:.3f}')
 
 ```python
 clf = R2Ridge(
-    template_shape=(101, 101), splines_per_axis=(51, 51), mu=1e7,
-    spline_order=3, solver="dual"
+    template_shape=(101, 101), splines_per_axis=(51, 51),
+    mu=1e7, spline_order=3, solver="dual"
 )
 ridge_pipeline = make_pipeline(Normalizer(), clf)
 ridge_pipeline.fit(X=images, y=eye_annotations)
@@ -126,5 +128,25 @@ print(f'score (from {num_test_samples} samples): {score:.3f}')
 ```
 
 ```python
+from templatematching.models.linear import SE2Ridge
+```
 
+```python
+%pdb
+```
+
+```python
+num_images = 10
+images, eye_annotations = read_images(num_images), read_eye_annotations(num_images)
+se2_pipeline = make_pipeline(
+    Normalizer(),
+    SE2Ridge(template_shape=(101, 101), splines_per_axis=(51, 51, 4),
+             wavelet_dim=21, num_orientation_slices=4,
+             mu=1e7, spline_order=3, solver="dual")
+)
+se2_pipeline.fit(images, eye_annotations)
+```
+
+```python
+show_template_and_prediction(se2_pipeline, images, 0)
 ```
