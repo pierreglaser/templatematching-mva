@@ -19,7 +19,6 @@ class TemplateCrossCorellatorBase(ABC):
         pass
 
     def predict(self, X):
-        assert len(X.shape) == 3
         template = self.template.reshape(1, *self.template.shape)
         convs = correlate(X, template, mode="same", method="fft")
         positions = []
