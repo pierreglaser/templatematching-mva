@@ -23,7 +23,7 @@ class TemplateCrossCorellatorBase(ABC):
         convs = correlate(X, template, mode="same", method="fft")
         positions = []
         for i in range(len(X)):
-            (y, x) = np.unravel_index(np.argmax(convs[0]), convs[0].shape)
+            (y, x) = np.unravel_index(np.argmax(convs[i]), convs[i].shape)
             positions.append([x, y])
         return convs, np.array(positions)
 
