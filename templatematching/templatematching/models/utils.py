@@ -3,7 +3,7 @@ import numpy as np
 
 from scipy.integrate import dblquad
 
-from ..preprocessing import m_function
+from ..preprocessing.utils import m_function
 
 
 def make_template_mass(r=50, n_order=5):
