@@ -63,6 +63,14 @@ averager_pipeline.fit(images, eye_annotations)
 show_template_and_prediction(averager_pipeline, images[:5], 0)
 ```
 
+```python
+num_test_samples = 5
+score = averager_pipeline.score(
+    images[:num_test_samples], eye_annotations[:num_test_samples]
+)
+print(f'score (from {num_test_samples} samples): {score:.3f}')
+```
+
 # Ridge Model (B, C)
 
 ```python
@@ -78,6 +86,14 @@ ridge_pipeline.fit(X=images, y=eye_annotations)
 show_template_and_prediction(ridge_pipeline, images, 0)
 ```
 
+```python
+num_test_samples = 5
+score = ridge_pipeline.score(
+    images[:num_test_samples], eye_annotations[:num_test_samples]
+)
+print(f'score (from {num_test_samples} samples): {score:.3f}')
+```
+
 # Logistic model (B, C)
 
 ```python
@@ -90,6 +106,7 @@ logistic_regressor = R2LogReg(
     spline_order=3,
     max_iter=50,
     random_state=10,
+    tol=1e-6,
     verbose=1
 )
 logistic_pipeline = make_pipeline(Normalizer(), logistic_regressor)
@@ -98,6 +115,14 @@ logistic_pipeline.fit(X=images[:10], y=eye_annotations)
 
 ```python
 show_template_and_prediction(logistic_pipeline, images, 0)
+```
+
+```python
+num_test_samples = 5
+score = logistic_pipeline.score(
+    images[:num_test_samples], eye_annotations[:num_test_samples]
+)
+print(f'score (from {num_test_samples} samples): {score:.3f}')
 ```
 
 ```python
