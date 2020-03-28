@@ -69,6 +69,9 @@ class Normalizer:
         )
 
     def transform(self, X):
+        # XXX: we should not cast as int8 as _normalize_img_batched
+        # cause int8 overflow. But somehow the preprocessing looks
+        # better in this case...
         X = X.astype(np.uint8)
         transformed_X = self._normalize_img_batched(X, self.window)
         return transformed_X
