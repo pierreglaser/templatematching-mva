@@ -1,5 +1,4 @@
-numpy
 matplotlib
+scikit-learn
 jupyter
-joblib
 jupytext
