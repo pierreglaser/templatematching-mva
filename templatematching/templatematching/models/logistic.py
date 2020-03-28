@@ -13,6 +13,7 @@ class R2LogReg(R2Ridge):
         splines_per_axis,
         spline_order=2,
         mu=0,
+        lbd=0,
         max_iter=10,
         tol=1e-8,
         random_state=None,
@@ -24,6 +25,7 @@ class R2LogReg(R2Ridge):
             splines_per_axis,
             spline_order,
             mu,
+            lbd,
             verbose,
             random_state=random_state,
             eye=eye
@@ -39,6 +41,7 @@ class R2LogReg(R2Ridge):
 
         Nk, Nl = self.splines_per_axis
         S = self._create_s_matrix(X)
+        R = self._create_R_matrix()
 
         # Randomly intialize c
         c = self.rs.rand(Nk * Nl, 1)
@@ -61,11 +64,11 @@ class R2LogReg(R2Ridge):
             W = np.diag(w.flatten())
 
             # Close form hessian
-            H = -(S.T @ W @ S + self.mu * np.eye(S.shape[1]))
+            H = -(S.T @ W @ S + self.lbd * R + self.mu * np.eye(S.shape[1]))
             H_inv = np.linalg.inv(H + self.tol * np.eye(H.shape[0]))
 
             # Close form gradient
-            grad = S.T @ (y - p) - self.mu * np.eye(S.shape[1]) @ c
+            grad = S.T @ (y - p) - self.lbd * R @ c - self.mu * np.eye(S.shape[1]) @ c
             c -= H_inv @ grad
             c /= np.linalg.norm(c)
 
