@@ -1,7 +1,6 @@
 import numpy as np
 from scipy.special import expit
 from templatematching.models.linear import R2Ridge
-from .utils import make_template_mass
 
 
 # XXX: R2LogReg inheriting from R2Ridge is a hack: the commom
@@ -17,6 +16,7 @@ class R2LogReg(R2Ridge):
         max_iter=10,
         tol=1e-8,
         random_state=None,
+        eye="left",
         verbose=0,
     ):
         super().__init__(
@@ -26,6 +26,7 @@ class R2LogReg(R2Ridge):
             mu,
             verbose,
             random_state=random_state,
+            eye=eye
         )
         self.model_name = "Logistic Ridge"
         self.max_iter = max_iter

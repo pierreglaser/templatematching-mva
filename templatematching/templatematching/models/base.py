@@ -28,24 +28,16 @@ class TemplateCrossCorellatorBase(ABC):
         return convs, np.array(positions)
 
     def score(self, X, y, radius_criteria=50):
-        num_sample = X.shape[0]
-        score = 0
+        if self.eye == "left":
+            true_positions = y[:, 0, :]
+        else:
+            true_positions = y[:, 1, :]
 
-        for i in range(num_sample):
-            image = X[i]
-            _, (pred_y, pred_x) = self.predict(image)
-            true_x, true_y = y[i][0], y[i][1]
+        _, pred_positions = self.predict(X)
 
-            dist_to_location = np.sqrt(
-                (pred_x - true_x) ** 2 + (pred_y - true_y) ** 2
-            )
-            if dist_to_location < np.sqrt(radius_criteria):
-                score += 1
-
-        total_score = np.round(score / num_sample * 100, 2)
-        print(f"Score was computed on {num_sample} samples: \n")
-        print(f"Model {self.model_name} accuracy: {total_score} %")
-        return total_score
+        dists = np.linalg.norm(true_positions - pred_positions, axis=1)
+        score = np.sum(dists < radius_criteria) / len(X)
+        return score
 
 
 class SplineRegressorBase(TemplateCrossCorellatorBase):

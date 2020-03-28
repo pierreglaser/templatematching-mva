@@ -21,6 +21,7 @@ class R2Ridge(SplineRegressorBase, PatchRegressorBase):
         verbose=0,
         solver="dual",
         random_state=None,
+        eye="left",
     ):
         assert template_shape[0] == template_shape[1]
         assert solver in ["primal", "dual"], "solver must be primal or dual"
@@ -28,7 +29,10 @@ class R2Ridge(SplineRegressorBase, PatchRegressorBase):
             self, template_shape, splines_per_axis, spline_order=spline_order
         )
         PatchRegressorBase.__init__(
-            self, patch_shape=template_shape, random_state=random_state
+            self,
+            patch_shape=template_shape,
+            eye=eye,
+            random_state=random_state,
         )
 
         self.model_name = "Linear Ridge"

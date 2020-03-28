@@ -1,13 +1,12 @@
 import numpy as np
-from scipy.signal import correlate2d
 
 from .utils import make_template_mass
 from .base import PatchRegressorBase, TemplateCrossCorellatorBase
 
 
 class Averager(TemplateCrossCorellatorBase, PatchRegressorBase):
-    def __init__(self, patch_shape):
-        PatchRegressorBase.__init__(self, patch_shape)
+    def __init__(self, patch_shape, eye="left"):
+        PatchRegressorBase.__init__(self, patch_shape, eye=eye)
         TemplateCrossCorellatorBase.__init__(self, template_shape=patch_shape)
         self.model_name = "Averager"
         self._mask = None
