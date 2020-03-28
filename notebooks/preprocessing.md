@@ -19,9 +19,10 @@ jupyter:
 import matplotlib.pyplot as plt
 %matplotlib inline
 
-from templatematching.utils import read_images
-from templatematching.image_transformer import Normalizer
+from templatematching.datasets import read_images
+from templatematching.preprocessing import Normalizer
 ```
+
 
 # Example Using Normalizer
 

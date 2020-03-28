@@ -3,38 +3,7 @@ from scipy.signal import fftconvolve
 import functools
 from scipy.integrate import dblquad
 
-
-def m_function(x, y, r, n_order=1):
-    r"""
-    The windowing function a defined in the article.
-
-    Carreful: The output is not normalized such that
-    \\int_{\mathbb{R}^2} m(x, y) dx dy = 1
-    ---------
-    To find the constante call 'dblquad' from scipy.integrate
-
-    Inputs:
-    -------
-    x (int):
-        x-coordinate with (0, 0) in center of image
-    y (int):
-        y-coordinate with (0, 0) in center of image
-    r (float):
-        the disk radius
-    n_order (int):
-        the order of the sum (c.f. paper)
-    """
-
-    res = 0
-
-    norm_sq = x * x + y * y
-    s = 2 * r * r / (1 + 2 * n_order)
-
-    for i in range(n_order):
-
-        res += np.exp(-norm_sq / s) * (norm_sq / s) ** i / np.math.factorial(i)
-
-    return res
+from .utils import m_function
 
 
 def _normalize_img_batched(image, window, mask=None, eps=1e-7):

@@ -14,7 +14,7 @@ from .base import (
     SplineRegressorBase,
     TemplateCrossCorellatorBase,
 )
-from ..orientation_transformer import OrientationScoreTransformer
+from ..preprocessing import OrientationScoreTransformer
 
 
 class R2Ridge(SplineRegressorBase, PatchRegressorBase):

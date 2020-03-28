@@ -49,7 +49,7 @@ axs[1].matshow(transformer._wavelets[0].imag)
 zoomed_slice = slice(int(3*transformer.wavelet_dim/8),int(5*transformer.wavelet_dim/8))
 
 axs[2].matshow(transformer._wavelets[0].imag[zoomed_slice, zoomed_slice])
-axs[3].matshow(img)
+axs[3].matshow(images[0])
 axs[4].matshow(oriented_circle.imag[:, :, 0])
 ```
 

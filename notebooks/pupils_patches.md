@@ -18,9 +18,8 @@ jupyter:
 %autoreload 2
 import numpy as np
 import matplotlib.pyplot as plt
-from templatematching.patch_creator import PatchCreator
-from templatematching.image_transformer import Normalizer
-from templatematching.utils import read_images, read_eye_annotations
+from templatematching.preprocessing import PatchCreator, Normalizer
+from templatematching.datasets import read_images, read_eye_annotations
 ```
 # Test PatchCreator
 

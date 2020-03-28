@@ -25,11 +25,12 @@ import matplotlib.pyplot as plt
 
 from scipy.signal import convolve2d
 
-from templatematching.utils import read_images, read_eye_annotations
+from sklearn.pipeline import make_pipeline
+
+from templatematching.datasets import read_images, read_eye_annotations
 from templatematching.models.utils import make_template_mass
 from templatematching.models import Averager, R2Ridge
-from templatematching.image_transformer import Normalizer
-from sklearn.pipeline import make_pipeline
+from templatematching.preprocessing import Normalizer
 ```
 
 ```python

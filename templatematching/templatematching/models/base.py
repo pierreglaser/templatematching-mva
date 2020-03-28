@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 
 from scipy.signal import correlate
 
-from ..patch_creator import PatchCreator
+from ..preprocessing import PatchCreator
 from .utils import make_template_mass
 
 
