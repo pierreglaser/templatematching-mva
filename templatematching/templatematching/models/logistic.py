@@ -4,26 +4,40 @@ from templatematching.models.linear import R2Ridge
 from .utils import make_template_mass
 
 
+# XXX: R2LogReg inheriting from R2Ridge is a hack: the commom
+# logic between the two classes should be factored out into the
+# Spline Base class or a Spline Mixin Class
 class R2LogReg(R2Ridge):
     def __init__(
         self,
         template_shape,
+        splines_per_axis,
         spline_order=2,
         mu=0,
-        optimizer_steps=10,
+        max_iter=10,
+        tol=1e-8,
         random_state=None,
         verbose=0,
     ):
-        super().__init__(template_shape, spline_order, mu, verbose)
-        self.model_name = 'Logistic Ridge'
-        self.optimizer_steps = optimizer_steps
+        super().__init__(
+            template_shape,
+            splines_per_axis,
+            spline_order,
+            mu,
+            verbose,
+            random_state=random_state,
+        )
+        self.model_name = "Logistic Ridge"
+        self.max_iter = max_iter
+        self.tol = tol
         self.rs = np.random.RandomState(random_state)
 
-    def fit(self, X, y):
+    def _fit_patches(self, X, y):
+        self._check_params(X)
+        y = y.reshape(-1, 1)
 
-        TOL = 1e-4
-        Nk, Nl = self.template_shape
-        S = self._make_s_matrix(X)
+        Nk, Nl = self.splines_per_axis
+        S = self._create_s_matrix(X)
 
         # Randomly intialize c
         c = self.rs.rand(Nk * Nl, 1)
@@ -34,9 +48,9 @@ class R2LogReg(R2Ridge):
         loss = 1
 
         # Optimization step
-        for _ in range(self.optimizer_steps):
+        for iter_no in range(self.max_iter):
 
-            if loss < TOL:
+            if loss < self.tol:
                 break
 
             c_old = c.copy()
@@ -47,18 +61,15 @@ class R2LogReg(R2Ridge):
 
             # Close form hessian
             H = -(S.T @ W @ S + self.mu * np.eye(S.shape[1]))
-            H_inv = np.linalg.inv(H + TOL * np.eye(H.shape[0]))
+            H_inv = np.linalg.inv(H + self.tol * np.eye(H.shape[0]))
 
             # Close form gradient
-            grad  = S.T @ (y - p) - self.mu * np.eye(S.shape[1]) @ c
+            grad = S.T @ (y - p) - self.mu * np.eye(S.shape[1]) @ c
             c -= H_inv @ grad
             c /= np.linalg.norm(c)
 
             loss = np.linalg.norm(c - c_old)
 
             if self.verbose:
-                print(f"Loss: {loss}")
-        self._S, self._Nx, self._Ny = S, X.shape[1], X.shape[2]
-        self.spline_coef = c
-        self._mask = make_template_mass(int(X.shape[1]/2))
-        self._template = self.reconstruct_template()
+                print(f"iteration no: {iter_no}, change in coefs: {loss}")
+        self._S, self._spline_coef = S, c
