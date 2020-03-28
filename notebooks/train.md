@@ -19,117 +19,87 @@ jupyter:
 
 ```python
 import os
-
 import numpy as np
-from scipy.signal import convolve2d
-
-from templatematching.utils import read_images, read_eye_annotations, load_patches
-from templatematching.models.utils import make_template_mass
-```
-
-```python
 import matplotlib.pyplot as plt
 %matplotlib inline
+
+from scipy.signal import convolve2d
+
+from templatematching.utils import read_images, read_eye_annotations
+from templatematching.models.utils import make_template_mass
+from templatematching.models import Averager, R2Ridge
+from templatematching.image_transformer import Normalizer
+from sklearn.pipeline import make_pipeline
 ```
 
 ```python
-num_images = 10
-images, eye_annotations = read_images(num_images), read_eye_annotations(num_images)
+def show_template_and_prediction(clf, test_images, image_no):
+    convs, positions = clf.predict(images)
+    conv, (x, y) = convs[image_no], positions[image_no]
+
+    estimator = clf.steps[-1][1]
+    template, mask = estimator.template, estimator._mask
+    masked_template = mask * template
+
+    f, (ax1, ax2, ax3, ax4) = plt.subplots(ncols=4, nrows=1, figsize=(20, 5))
+    ax1.matshow(test_images[image_no], cmap="gray")
+    ax1.scatter(x, y, c="r")
+    ax2.matshow(conv, cmap="gray")
+
+    ax3.matshow(template, cmap="gray")
+    ax4.matshow(masked_template, cmap="gray")
 ```
 
 # Average model (A) TEST
 
 ```python
-images.shape
+num_images = 200
+images, eye_annotations = read_images(num_images), read_eye_annotations(num_images)
+averager_pipeline = make_pipeline(Normalizer(), Averager(patch_shape=(101, 101)))
+averager_pipeline.fit(images, eye_annotations)
 ```
 
 ```python
-from templatematching.models.averager import Averager
-clf = Averager(patch_size=(51, 51))
-a = clf.fit(images, eye_annotations)
-```
-
-```python
-full_template, final_template = clf._template_full, clf._template
-
-f, (ax1, ax2) = plt.subplots(ncols=2, figsize=(12, 4))
-ax1.matshow(full_template, cmap='gray');
-ax2.matshow(final_template, cmap='gray');
-```
-
-```python
-fig, (ax1, ax2, ax3) = plt.subplots(nrows=1, ncols=3, figsize=(16, 8))
-image = read_norm_img(17)
-img = read_pgm(17)
-
-conv, (y, x) = clf.predict(image)
-
-ax1.matshow(image, cmap='gray')
-ax2.matshow(conv, cmap='gray')
-ax3.matshow(img, cmap='gray')
-ax3.scatter(x, y, c='r')
+show_template_and_prediction(averager_pipeline, images[:5], 0)
 ```
 
 # Ridge Model (B, C)
 
 ```python
-from templatematching.models import R2Ridge
-clf = R2Ridge(splines_per_axis=(51, 51), mu=0, spline_order=3, solver='dual')
-clf.fit(X=patches, y=labels)
-clf2 = R2Ridge(splines_per_axis=(51, 51), mu=0, spline_order=3, solver='primal')
-clf2.fit(X=patches, y=labels)
+clf = R2Ridge(
+    template_shape=(101, 101), splines_per_axis=(51, 51), mu=1e7,
+    spline_order=3, solver="dual"
+)
+ridge_pipeline = make_pipeline(Normalizer(), clf)
+ridge_pipeline.fit(X=images, y=eye_annotations)
 ```
 
 ```python
-final_template = clf.reconstruct_template()
-full_template = clf._template_full
-
-f, (ax1, ax2, ax3) = plt.subplots(ncols=3, figsize=(12, 4))
-ax1.matshow(clf.spline_coef.reshape(51, 51), cmap='gray')
-ax2.matshow(full_template, cmap='gray');
-ax3.matshow(final_template, cmap='gray');
-```
-
-```python
-fig, (ax1, ax2, ax3) = plt.subplots(nrows=1, ncols=3, figsize=(16, 8))
-image = read_norm_img(17)
-img = read_pgm(17)
-
-conv, (y, x) = clf.predict(image)
-
-ax1.matshow(image, cmap='gray')
-ax2.matshow(conv, cmap='gray')
-ax3.matshow(img, cmap='gray')
-ax3.scatter(x, y, c='r')
+show_template_and_prediction(ridge_pipeline, images, 0)
 ```
 
 # Logistic model (B, C)
 
 ```python
 from templatematching.models.logistic import R2LogReg
-clf = R2LogReg(template_shape=(51, 51), mu=1e-4, spline_order=3, optimizer_steps=10, random_state=10)
-clf.fit(X=patches, y=labels)
+
+logistic_regressor = R2LogReg(
+    template_shape=(101, 101),
+    splines_per_axis=(51, 51),
+    mu=1e-4,
+    spline_order=3,
+    max_iter=50,
+    random_state=10,
+    verbose=1
+)
+logistic_pipeline = make_pipeline(Normalizer(), logistic_regressor)
+logistic_pipeline.fit(X=images[:10], y=eye_annotations)
 ```
 
 ```python
-final_template = clf.reconstruct_template()
-full_template = clf._template_full
-
-f, (ax1, ax2, ax3) = plt.subplots(ncols=3, figsize=(12, 4))
-ax1.matshow(clf.spline_coef.reshape(51, 51), cmap='gray')
-ax2.matshow(full_template, cmap='gray');
-ax3.matshow(final_template, cmap='gray');
+show_template_and_prediction(logistic_pipeline, images, 0)
 ```
 
 ```python
-fig, (ax1, ax2, ax3) = plt.subplots(nrows=1, ncols=3, figsize=(16, 8))
-image = read_norm_img(17)
-img = read_pgm(17)
 
-conv, (y, x) = clf.predict(image)
-
-ax1.matshow(image, cmap='gray')
-ax2.matshow(conv, cmap='gray')
-ax3.matshow(img, cmap='gray')
-ax3.scatter(x, y, c='r')
 ```
