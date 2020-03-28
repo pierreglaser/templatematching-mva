@@ -38,7 +38,6 @@ class R2Ridge(SplineRegressorBase, PatchRegressorBase):
         self.model_name = "Linear Ridge"
         self.mu = mu
         self.verbose = verbose
-        self._mask = make_template_mass(int(template_shape[0] / 2))
 
         self.solver = solver
         self._is_fitted = False
@@ -77,7 +76,6 @@ class R2Ridge(SplineRegressorBase, PatchRegressorBase):
         impulses[::sk, ::sl] = self._spline_coef.reshape(Nk, Nl)
 
         self._template = fftconvolve(impulses, B, mode="same")
-        self._masked_template = self._mask * self._template
         return self._template
 
     def _create_s_matrix(self, X):

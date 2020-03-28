@@ -5,6 +5,7 @@ from abc import ABC, abstractmethod
 from scipy.signal import correlate
 
 from ..patch_creator import PatchCreator
+from .utils import make_template_mass
 
 
 class TemplateCrossCorellatorBase(ABC):
@@ -12,11 +13,15 @@ class TemplateCrossCorellatorBase(ABC):
         self.template_shape = template_shape
         self._template = None
         self._masked_template = None
+        self._mask = make_template_mass(int(template_shape[0] / 2))
 
     @property
     @abstractmethod
     def template(self):
         pass
+
+    def masked_template(self):
+        return self._mask * self.template
 
     def predict(self, X):
         template = self.template.reshape(1, *self.template.shape)
