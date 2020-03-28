@@ -23,8 +23,8 @@ import numpy as np
 ```
 
 ```python
-from templatematching.data_generation import make_circle, make_cross
-from templatematching.orientation_transformer import OrientationScoreTransformer
+from templatematching.datasets import make_circle, make_cross
+from templatematching.preprocessing import OrientationScoreTransformer
 ```
 
 ```python
