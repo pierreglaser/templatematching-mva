@@ -7,20 +7,20 @@ class PatchCreator:
     from images
     """
 
-    def __init__(self, patch_size, neg_pos_proportion=1, random_state=None):
+    def __init__(self, patch_shape, neg_pos_proportion=1, random_state=None):
         """
         Inputs:
         -------
 
-        patch_size (tuple(int)):
-            Patches size
+        patch_shape (tuple(int)):
+            Patches shape
         neg_pos_proportion (float):
             The ratio negative / positive patches
         random_state (int):
             Random see, intervenes only for negative patch creation
         """
         self.rs = np.random.RandomState(random_state)
-        self.patch_size = patch_size
+        self.patch_shape = patch_shape
         self.neg_pos_prop = neg_pos_proportion
         self._eye_locations = None
 
@@ -71,8 +71,8 @@ class PatchCreator:
     ):
 
         # Define offset
-        Nx = int((self.patch_size[0] - 1) / 2)
-        Ny = int((self.patch_size[1] - 1) / 2)
+        Nx = int((self.patch_shape[0] - 1) / 2)
+        Ny = int((self.patch_shape[1] - 1) / 2)
         # Define mask
         mask = np.ones(image.shape)
 
@@ -109,7 +109,7 @@ class PatchCreator:
         # Pad the patch
         patch_left = np.pad(patch_left, ((pad_1, pad_2), (pad_3, pad_4)))
 
-        assert patch_left.shape == self.patch_size
+        assert patch_left.shape == self.patch_shape
 
         # Perform padding
         pad_1, pad_2 = (
@@ -144,15 +144,15 @@ class PatchCreator:
         # Pad the patch
         patch_right = np.pad(patch_right, ((pad_1, pad_2), (pad_3, pad_4)))
 
-        assert patch_right.shape == self.patch_size
+        assert patch_right.shape == self.patch_shape
 
         return patch_left, patch_right, mask
 
     def _create_negative_patch_from_image(self, image, mask):
         assert mask.shape == image.shape
 
-        Nx = int((self.patch_size[0] - 1) / 2)
-        Ny = int((self.patch_size[1] - 1) / 2)
+        Nx = int((self.patch_shape[0] - 1) / 2)
+        Ny = int((self.patch_shape[1] - 1) / 2)
 
         v = np.argwhere(mask == 1)
         center_id = self.rs.randint(0, len(v))
@@ -175,6 +175,6 @@ class PatchCreator:
         # Pad the patch
         patch = np.pad(patch, ((pad_1, pad_2), (pad_3, pad_4)))
 
-        assert patch.shape == self.patch_size
+        assert patch.shape == self.patch_shape
 
         return patch
