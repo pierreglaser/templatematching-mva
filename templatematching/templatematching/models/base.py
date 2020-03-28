@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 
 from scipy.signal import correlate
 
-from ..patch_transformer import PatchCreator
+from ..patch_creator import PatchCreator
 
 
 class TemplateCrossCorellatorBase(ABC):
