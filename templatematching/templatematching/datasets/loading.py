@@ -2,9 +2,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 from pathlib import Path
 
-DATA_DIR = Path(__file__).parent.parent.parent / "images"
-PROCESS_DATA_DIR = Path(__file__).parent.parent.parent / "img_normalized"
-PATCH_DIR = Path(__file__).parent.parent.parent / "patches"
+DATA_DIR = Path(__file__).parent.parent.parent.parent / "images"
+PROCESS_DATA_DIR = (
+    Path(__file__).parent.parent.parent.parent / "img_normalized"
+)
+PATCH_DIR = Path(__file__).parent.parent.parent.parent / "patches"
 
 
 def read_images(image_nos):
