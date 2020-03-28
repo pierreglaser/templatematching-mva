@@ -25,7 +25,7 @@ import numpy as np
 
 ```python
 image = read_pgm(0)
-left_eye, right_eye = read_eye_annotations(img_no=0)
+eyes = read_eye_annotations(image_nos=3)
 ```
 
 ```python
@@ -135,7 +135,11 @@ ax4.imshow(B2d(x, y))
 ## Discrete splines
 
 ```python
-from templatematching.spline import discrete_spline, discrete_spline_2D
+from templatematching.spline import (
+    discrete_spline,
+    discrete_spline_first_derivative,
+    discrete_spline_second_derivative,
+    discrete_spline_2D)
 ```
 
 ```python
@@ -147,8 +151,8 @@ Nk = Nl = 51
 sk = Nx / Nk
 sl = Ny / Nk
 
-x = np.array(range(-int( 5 * sk /2) + 1, int( 5 * sk /2) + 1 )) / sk
-y = np.array(range(-int( 5 * sk /2) + 1, int( 5 * sk /2) + 1 )) / sl
+x = np.array(range(-int( 5 * sk /2) , int( 5 * sk /2) + 1 )) / sk
+y = np.array(range(-int( 5 * sk /2), int( 5 * sk /2) + 1 )) / sl
 
 B2d = discrete_spline_2D(x, y, 9)
 ax1.imshow(B2d)
@@ -161,5 +165,27 @@ ax3.imshow(B2d)
 
 B2d = discrete_spline_2D(x, y, 3)
 ax4.imshow(B2d)
+
+```
+
+```python
+import itertools
+plt.subplots(nrows=1, ncols=5, sharex=True, sharey=True, figsize=(15, 15))
+j = 0
+for i in range(1, 6):
+    xs = np.linspace(-10, 10, 100)
+    
+    ys = discrete_spline(xs, i)
+    zs = discrete_spline_first_derivative(xs, i)
+    ts = discrete_spline_second_derivative(xs, i)
+
+    j+=1
+    plt.subplot(10, 5, j)
+    plt.plot(xs, ys, c='b')
+    plt.plot(xs, zs, c='r')
+    plt.plot(xs, ts, c='g')
+```
+
+```python
 
 ```
