@@ -29,12 +29,13 @@ import matplotlib.pyplot as plt
 from scipy.integrate import dblquad
 from scipy.signal import fftconvolve
 
-from templatematching.utils import read_pgm
-from templatematching.preprocessing import normalize_img, m_function
+from templatematching.datasets import read_images
+from templatematching.preprocessing.utils import m_function
+from templatematching.preprocessing.image_transformer import _normalize_img_batched
 ```
 
 ```python
-image = read_pgm(17)
+image = read_images([17])[0]
 image_float = image.astype(np.float64)
 ```
 
@@ -54,7 +55,7 @@ window = m_function(y, x, r=r, n_order=n_order) / eta
 ```
 
 ```python
-ee = (np.round(127+ 127*normalize_img(image_float, window)))
+ee = (np.round(127+ 127*_normalize_img_batched(image_float[np.newaxis, :, :], window)))[0]
 
 f, (ax1, ax2) = plt.subplots(ncols=2, figsize=(16, 8))
 ax1.imshow(image, cmap='gray')
@@ -65,7 +66,7 @@ ax2.imshow(ee, cmap='gray')
 #Js = 100
 window_two = np.ones(image_float.shape)
 window_two /= window_two.sum()
-nim = normalize_img(image_float/256, window_two)
+nim = _normalize_img_batched(image_float[np.newaxis, :, :]/256, window_two)[0]
 ```
 
 ```python
@@ -88,8 +89,4 @@ std = np.sqrt(np.abs(im_meansq - im_mean**2))
 
 ```python
 plt.imshow(1*(np.abs((image_float - im_mean))/(std + eps)>=1))
-```
-
-```python
-
 ```
