@@ -151,8 +151,8 @@ Nk = Nl = 51
 sk = Nx / Nk
 sl = Ny / Nk
 
-x = np.array(range(-int( 5 * sk /2) , int( 5 * sk /2) + 1 )) / sk
-y = np.array(range(-int( 5 * sk /2), int( 5 * sk /2) + 1 )) / sl
+x = np.linspace(-int( 5 * sk /2), int( 5 * sk /2), 5 * sk ) / sk
+y = np.linspace(-int( 5 * sl /2), int( 5 * sl /2), 5 * sl ) / sl
 
 B2d = discrete_spline_2D(x, y, 9)
 ax1.imshow(B2d)
@@ -184,6 +184,34 @@ for i in range(1, 6):
     plt.plot(xs, ys, c='b')
     plt.plot(xs, zs, c='r')
     plt.plot(xs, ts, c='g')
+```
+
+```python
+def _make_R_matrix(Nk, Nl, sk, sl, n):
+    x = np.linspace(-int( Nk /2), int( Nk /2), Nk)
+    y = np.linspace(-int( Nl /2), int( Nl /2), Nl)
+    
+    xs = np.array([ [xi - xk for xi in y] for xk in x])
+    ys = np.array([ [yi - yk for yi in y] for yk in y])
+    
+    Bxk = - 1 / sk * discrete_spline_second_derivative(xs, 2 * n +1)
+    Bxl = sl * discrete_spline(xs, 2 * n + 1)
+    Byk = sk * discrete_spline(ys, 2 * n +1)
+    Byl = - 1 / sl * discrete_spline_second_derivative(ys, 2 * n + 1)
+    
+    return np.kron(Bxk, Bxl) + np.kron(Byk, Byl)
+    
+    
+```
+
+```python
+R = _make_R_matrix(Nk, Nl, sk, sl, 3)
+plt.matshow(R)
+R.shape
+```
+
+```python
+51*51
 ```
 
 ```python
