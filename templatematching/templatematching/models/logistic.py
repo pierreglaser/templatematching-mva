@@ -41,7 +41,7 @@ class R2LogReg(R2Ridge):
 
         Nk, Nl = self.splines_per_axis
         S = self._create_s_matrix(X)
-        R = self._create_R_matrix()
+        R = self._create_r_matrix()
 
         # Randomly intialize c
         c = self.rs.rand(Nk * Nl, 1)
