@@ -69,7 +69,17 @@ class R2Ridge(SplineRegressorBase, PatchRegressorBase):
                 rcond=None,
             )[0]
         elif self.solver == "dual":
-            c = S.T @ np.linalg.inv(S @ S.T + self.mu * np.eye(S.shape[0])) @ y
+            if self.lbd == 0:
+                c = S.T @ np.linalg.inv(S @ S.T + self.mu * np.eye(S.shape[0])) @ y
+            else:
+                B = self.mu * np.eye(S.shape[1]) + self.lbd * R
+                B_inv = np.linalg.inv(B)
+                c = (
+                    B_inv
+                    @ S.T
+                    @ np.linalg.inv(S @ B_inv @ S.T + np.eye(S.shape[0]))
+                    @ y
+                )
         else:
             raise ValueError(f"solver must be 'primal' or 'dual', got '{self.solver}'")
         self._S, self._spline_coef = S, c
