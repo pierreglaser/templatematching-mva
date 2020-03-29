@@ -165,6 +165,8 @@ class SE2Ridge(SplineRegressorBase, PatchRegressorBase):
         Dtheta=0,
         verbose=0,
         solver="dual",
+        random_state=None,
+        eye="left"
     ):
         assert template_shape[0] == template_shape[1]
         assert solver in ["primal", "dual"], "solver must be primal or dual"
@@ -172,7 +174,9 @@ class SE2Ridge(SplineRegressorBase, PatchRegressorBase):
         SplineRegressorBase.__init__(
             self, template_shape, splines_per_axis, spline_order=spline_order
         )
-        PatchRegressorBase.__init__(self, patch_shape=template_shape)
+        PatchRegressorBase.__init__(
+            self, patch_shape=template_shape, eye=eye, random_state=random_state
+        )
 
         self.name = "SE2 Ridge"
         self.mu = mu
