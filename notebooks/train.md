@@ -79,7 +79,7 @@ print(f'score (from {num_test_samples} samples): {score:.3f}')
 ```python
 clf = R2Ridge(
     template_shape=(101, 101), splines_per_axis=(51, 51),
-    mu=1e7, spline_order=3, solver="dual"
+    mu=1e7, lbd=1e3, spline_order=3, solver="dual"
 )
 ridge_pipeline = make_pipeline(Normalizer(), clf)
 ridge_pipeline.fit(X=images, y=eye_annotations)
@@ -106,6 +106,7 @@ logistic_regressor = R2LogReg(
     template_shape=(101, 101),
     splines_per_axis=(51, 51),
     mu=1e-4,
+    lbd=1e7,
     spline_order=3,
     max_iter=50,
     random_state=10,
@@ -143,11 +144,20 @@ se2_pipeline = make_pipeline(
     Normalizer(),
     SE2Ridge(template_shape=(101, 101), splines_per_axis=(51, 51, 4),
              wavelet_dim=21, num_orientation_slices=4,
-             mu=1e7, spline_order=3, solver="dual")
+             mu=1e7, lbd=1e2, Dxi=1, Deta=1, Dtheta=1, spline_order=3, solver="dual")
 )
 se2_pipeline.fit(images, eye_annotations)
 ```
 
 ```python
 show_template_and_prediction(se2_pipeline, images, 0)
+```
+
+```python
+51*51 * 12
+
+```
+
+```python
+
 ```
