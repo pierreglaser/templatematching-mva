@@ -30,7 +30,7 @@ from sklearn.model_selection import train_test_split
 
 from templatematching.datasets import read_images, read_eye_annotations
 from templatematching.models.utils import make_template_mass
-from templatematching.models import Averager, R2Ridge
+from templatematching.models import Averager, R2Ridge, R2LogReg
 from templatematching.preprocessing import Normalizer
 ```
 
@@ -132,8 +132,6 @@ print(f'score (from {X_test.shape[0]} samples): {score:.3f}')
 # Logistic model (B, C)
 
 ```python
-from templatematching.models.logistic import R2LogReg
-
 logistic_regressor = R2LogReg(
     template_shape=(101, 101),
     splines_per_axis=(51, 51),
