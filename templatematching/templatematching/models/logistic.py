@@ -37,9 +37,9 @@ class R2LogReg(R2Ridge):
 
     def _fit_patches(self, X, y):
         self._check_params(X)
+        num_samples, _, _, Nk, Nl, _, _ = self._get_dims()
         y = y.reshape(-1, 1)
 
-        Nk, Nl = self.splines_per_axis
         S = self._create_s_matrix(X)
         R = self._create_r_matrix()
 
@@ -64,11 +64,18 @@ class R2LogReg(R2Ridge):
             W = np.diag(w.flatten())
 
             # Close form hessian
-            H = -(S.T @ W @ S + self.lbd * R + self.mu * np.eye(S.shape[1]))
+            H = -(
+                S.T @ W @ S
+                + num_samples * (self.lbd * R + self.mu * np.eye(S.shape[1]))
+            )
             H_inv = np.linalg.inv(H + self.tol * np.eye(H.shape[0]))
 
             # Close form gradient
-            grad = S.T @ (y - p) - self.lbd * R @ c - self.mu * np.eye(S.shape[1]) @ c
+            grad = (
+                S.T @ (y - p)
+                - num_samples * self.lbd * R @ c
+                - num_samples * self.mu * np.eye(S.shape[1]) @ c
+            )
             c -= H_inv @ grad
             c /= np.linalg.norm(c)
 
@@ -124,7 +131,7 @@ class SE2LogReg(SE2Ridge):
         self._check_params(X)
         y = y.reshape(-1, 1)
 
-        _, _, _, _, Nk, Nl, Nm, _, _, _ = self._get_dims()
+        num_samples, _, _, _, Nk, Nl, Nm, _, _, _ = self._get_dims()
         S = self._create_s_matrix(X)
         R = self._create_r_matrix()
 
@@ -149,11 +156,18 @@ class SE2LogReg(SE2Ridge):
             W = np.diag(w.flatten())
 
             # Close form hessian
-            H = -(S.T @ W @ S + self.lbd * R + self.mu * np.eye(S.shape[1]))
+            H = -(
+                S.T @ W @ S
+                + num_samples * (self.lbd * R + self.mu * np.eye(S.shape[1]))
+            )
             H_inv = np.linalg.inv(H + self.tol * np.eye(H.shape[0]))
 
             # Close form gradient
-            grad = S.T @ (y - p) - self.lbd * R @ c - self.mu * np.eye(S.shape[1]) @ c
+            grad = (
+                S.T @ (y - p)
+                - num_samples * self.lbd * R @ c
+                - num_samples * self.mu * np.eye(S.shape[1]) @ c
+            )
             c -= H_inv @ grad
             c /= np.linalg.norm(c)
 

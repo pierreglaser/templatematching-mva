@@ -62,19 +62,26 @@ class R2Ridge(SplineRegressorBase, PatchRegressorBase):
 
     def _fit_patches(self, X, y):
         self._check_params(X)
+        num_samples, _, _, _, _, _, _ = self._get_dims()
         S = self._create_s_matrix(X)
         R = self._create_r_matrix()
         if self.solver == "primal":
             c = np.linalg.lstsq(
-                S.T @ S + self.lbd * R + self.mu * np.eye(S.shape[1]),
+                S.T @ S + num_samples * (self.lbd * R + self.mu * np.eye(S.shape[1])),
                 S.T @ y,
                 rcond=None,
             )[0]
         elif self.solver == "dual":
             if self.lbd == 0:
-                c = S.T @ np.linalg.inv(S @ S.T + self.mu * np.eye(S.shape[0])) @ y
+                c = (
+                    S.T
+                    @ np.linalg.inv(
+                        S @ S.T + num_samples * self.mu * np.eye(S.shape[0])
+                    )
+                    @ y
+                )
             else:
-                B = self.mu * np.eye(S.shape[1]) + self.lbd * R
+                B = num_samples * (self.mu * np.eye(S.shape[1]) + self.lbd * R)
                 B_inv = np.linalg.inv(B)
                 c = (
                     B_inv
@@ -106,10 +113,10 @@ class R2Ridge(SplineRegressorBase, PatchRegressorBase):
         S = convolved_X[:, ::sk, ::sl].reshape(num_samples, Nk * Nl)
         S /= np.linalg.norm(S, axis=0, keepdims=True)
 
-        return num_samples * S
+        return S
 
     def _create_r_matrix(self):
-        num_samples, _, _, Nk, Nl, sk, sl = self._get_dims()
+        _, _, _, Nk, Nl, sk, sl = self._get_dims()
         k = np.linspace(-int(Nk / 2), int(Nk / 2), Nk)
         l = np.linspace(-int(Nl / 2), int(Nl / 2), Nl)
 
@@ -123,7 +130,7 @@ class R2Ridge(SplineRegressorBase, PatchRegressorBase):
 
         R = np.kron(Bxk, Bxl) + np.kron(Byk, Byl)
 
-        return num_samples * R
+        return R
 
     def _make_unit_spline(self, sk, sl):
         # Our spline is always defined on [-2.5, 2.5] (may be a problem if we
@@ -166,7 +173,7 @@ class SE2Ridge(SplineRegressorBase, PatchRegressorBase):
         verbose=0,
         solver="dual",
         random_state=None,
-        eye="left"
+        eye="left",
     ):
         assert template_shape[0] == template_shape[1]
         assert solver in ["primal", "dual"], "solver must be primal or dual"
@@ -218,19 +225,26 @@ class SE2Ridge(SplineRegressorBase, PatchRegressorBase):
     def _fit_patches(self, X, y):
         X = self._ost.fit_transform(X).imag  # can also take the modulus
         self._check_params(X)
+        num_samples, _, _, _, _, _, _, _, _, _ = self._get_dims()
         S = self._create_s_matrix(X)
         R = self._create_r_matrix()
         if self.solver == "primal":
             c = np.linalg.lstsq(
-                S.T @ S + self.lbd * R + self.mu * np.eye(S.shape[1]),
+                S.T @ S + num_samples * (self.lbd * R + self.mu * np.eye(S.shape[1])),
                 S.T @ y,
                 rcond=None,
             )[0]
         elif self.solver == "dual":
             if self.lbd == 0:
-                c = S.T @ np.linalg.inv(S @ S.T + self.mu * np.eye(S.shape[0])) @ y
+                c = (
+                    S.T
+                    @ np.linalg.inv(
+                        S @ S.T + num_samples * self.mu * np.eye(S.shape[0])
+                    )
+                    @ y
+                )
             else:
-                B = self.mu * np.eye(S.shape[1]) + self.lbd * R
+                B = num_samples * (self.mu * np.eye(S.shape[1]) + self.lbd * R)
                 B_inv = np.linalg.inv(B)
                 c = (
                     B_inv
@@ -252,7 +266,7 @@ class SE2Ridge(SplineRegressorBase, PatchRegressorBase):
         convolved_X = fftconvolve(X, B, mode="same")
         S = convolved_X[:, ::sk, ::sl, ::sm].reshape(num_samples, Nk * Nl * Nm)
         S /= np.linalg.norm(S, axis=0, keepdims=True)
-        return num_samples * S
+        return S
 
     def _create_r_matrix(self):
         """
@@ -262,7 +276,7 @@ class SE2Ridge(SplineRegressorBase, PatchRegressorBase):
         -------
         Dxi, Deta, Dtheta (float):
         """
-        num_samples, _, _, _, Nk, Nl, Nm, sk, sl, sm = self._get_dims()
+        _, _, _, _, Nk, Nl, Nm, sk, sl, sm = self._get_dims()
         k = np.linspace(-int(Nk / 2), int(Nk / 2), Nk)
         l = np.linspace(-int(Nl / 2), int(Nl / 2), Nl)
         m = np.linspace(-int(Nm / 2), int(Nm / 2), Nm)
@@ -328,7 +342,7 @@ class SE2Ridge(SplineRegressorBase, PatchRegressorBase):
 
         Rtheta = np.kron(np.kron(Rxtheta, Rytheta), Rthetatheta)
 
-        return num_samples * (self.Dxi * Rxi + self.Deta * Reta + self.Dtheta * Rtheta)
+        return self.Dxi * Rxi + self.Deta * Reta + self.Dtheta * Rtheta
 
     def _util_spline(self, theta, m1, m2):
         _, _, _, _, _, _, _, _, _, sm = self._get_dims()
