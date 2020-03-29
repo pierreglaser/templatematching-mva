@@ -62,19 +62,26 @@ class R2Ridge(SplineRegressorBase, PatchRegressorBase):
 
     def _fit_patches(self, X, y):
         self._check_params(X)
+        num_samples, _, _, _, _, _, _ = self._get_dims()
         S = self._create_s_matrix(X)
         R = self._create_r_matrix()
         if self.solver == "primal":
             c = np.linalg.lstsq(
-                S.T @ S + self.lbd * R + self.mu * np.eye(S.shape[1]),
+                S.T @ S + num_samples * (self.lbd * R + self.mu * np.eye(S.shape[1])),
                 S.T @ y,
                 rcond=None,
             )[0]
         elif self.solver == "dual":
             if self.lbd == 0:
-                c = S.T @ np.linalg.inv(S @ S.T + self.mu * np.eye(S.shape[0])) @ y
+                c = (
+                    S.T
+                    @ np.linalg.inv(
+                        S @ S.T + num_samples * self.mu * np.eye(S.shape[0])
+                    )
+                    @ y
+                )
             else:
-                B = self.mu * np.eye(S.shape[1]) + self.lbd * R
+                B = num_samples * (self.mu * np.eye(S.shape[1]) + self.lbd * R)
                 B_inv = np.linalg.inv(B)
                 c = (
                     B_inv
@@ -166,7 +173,7 @@ class SE2Ridge(SplineRegressorBase, PatchRegressorBase):
         verbose=0,
         solver="dual",
         random_state=None,
-        eye="left"
+        eye="left",
     ):
         assert template_shape[0] == template_shape[1]
         assert solver in ["primal", "dual"], "solver must be primal or dual"
@@ -218,19 +225,26 @@ class SE2Ridge(SplineRegressorBase, PatchRegressorBase):
     def _fit_patches(self, X, y):
         X = self._ost.fit_transform(X).imag  # can also take the modulus
         self._check_params(X)
+        num_samples, _, _, _, _, _, _, _, _, _ = self._get_dims()
         S = self._create_s_matrix(X)
         R = self._create_r_matrix()
         if self.solver == "primal":
             c = np.linalg.lstsq(
-                S.T @ S + self.lbd * R + self.mu * np.eye(S.shape[1]),
+                S.T @ S + num_samples * (self.lbd * R + self.mu * np.eye(S.shape[1])),
                 S.T @ y,
                 rcond=None,
             )[0]
         elif self.solver == "dual":
             if self.lbd == 0:
-                c = S.T @ np.linalg.inv(S @ S.T + self.mu * np.eye(S.shape[0])) @ y
+                c = (
+                    S.T
+                    @ np.linalg.inv(
+                        S @ S.T + num_samples * self.mu * np.eye(S.shape[0])
+                    )
+                    @ y
+                )
             else:
-                B = self.mu * np.eye(S.shape[1]) + self.lbd * R
+                B = num_samples * (self.mu * np.eye(S.shape[1]) + self.lbd * R)
                 B_inv = np.linalg.inv(B)
                 c = (
                     B_inv
@@ -240,6 +254,7 @@ class SE2Ridge(SplineRegressorBase, PatchRegressorBase):
                 )
         else:
             raise ValueError(f"solver must be 'primal' or 'dual', got '{self.solver}'")
+        c /= np.linalg.norm(c)
         self._S, self._spline_coef = S, c
 
     def _create_s_matrix(self, X):
