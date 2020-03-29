@@ -32,7 +32,7 @@ class TemplateCrossCorellatorBase(ABC):
             positions.append([x, y])
         return convs, np.array(positions)
 
-    def score(self, X, y, radius_criteria=50):
+    def score(self, X, y, radius_criteria=10):
         if self.eye == "left":
             true_positions = y[:, 0, :]
         else:
