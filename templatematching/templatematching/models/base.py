@@ -57,6 +57,10 @@ class SplineRegressorBase(TemplateCrossCorellatorBase):
         pass
 
     @abstractmethod
+    def _create_r_matrix(self):
+        pass
+
+    @abstractmethod
     def _check_params(self, X):
         pass
 
