@@ -1,44 +1,11 @@
-\author{Pierre Glaser, Clément Chadebec}
+\author{Pierre Glaser, Clement Chadebec}
 \documentclass{article}
-\usepackage{color}
-\usepackage{xcolor}
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{amsthm}
 \usepackage{empheq}
-\usepackage[most]{tcolorbox}
 \usepackage[a4paper, total={6in, 8in}]{geometry}
-\usepackage{algorithm}
-\usepackage[noend]{algpseudocode}
 
-\makeatletter
-\def\BState{\State\hskip-\ALG@thistlm}
-\makeatother
-
-\definecolor{materialdarkbg}{RGB}{15,17,26}
-\definecolor{materialdarkfg}{RGB}{143, 147, 162}
-\definecolor{myblue}{rgb}{.8, .8, 1}
-\definecolor{materialblue}{HTML}{82aaff}
-\definecolor{materialgray}{HTML}{80869e}
-
-
-\tcbset{colback=materialgray, colframe=materialblue}
-
-\usepackage{import}
-\usepackage{xifthen}
-\usepackage{pdfpages}
-\usepackage{transparent}
-
-\newcommand{\incfig}[1]{%
-    \colorbox{white}{
-        \def\svgwidth{\columnwidth}
-        \import{./figures/}{#1.pdf_tex}
-    }
-}
-
-\newtheorem{definition}{Definition}
-\newtheorem{proposition}{Proposition}
-\newtheorem{theorem}{Theorem}
 
 \title{Rapport de projet - Geodesic Methods and Deformable Models}
 \begin{document}
@@ -49,6 +16,7 @@ $ \quad $
 
 
 \paragraph{Quel est le problème traité} 
+hello ok
 Nous étudierons dans ce rapport l'article \emph{Template Matching via densitives on the
 Roto Translation Group}, par Erik J. Bekkers et. Al.
 
@@ -78,9 +46,9 @@ compte des structures d'orientation locale en tout point de l'image.
         t = \arg \min_{  } \sum\limits_{ i=1 }^{ N } \left ( \langle t, p_i \rangle
         - y_i \right )^2 + R(t)
         \] 
-        les $ p_i $ sont des templates individuels: 'idéaux': ce sont des images de la
-        même taille que $ t $ centrée en le point d'intérêt de l'image $ i $. Si l'on
-        suppose que 
+        les $ p_i $ sont des templates individuels: ``idéaux'': ce sont des patches,
+        extraits des images, de la même taille que $ t $ centrée en le point d'intérêt
+        de l'image $ i $. Si l'on suppose que 
         \begin{itemize}
             \item $ \|p_i\| = 1 $
             \item n'importe quelle coupe de $ f_i $ de la taille de $ p_i $ a une norme
@@ -90,9 +58,27 @@ compte des structures d'orientation locale en tout point de l'image.
         \|p_i\| \|f_i[p_i]\| \leq  1$, le maximum étant atteint quand $ f_i $ et $ p_i $ 
         sont alignés, ceci arrivant par construction en $ {x}^{\star}_i $
         ou $ R $ est une pénalité imposant de la régularité à t.
-        L'intuition derrière ce problème d'optimisation est.
-    \item 
-        le template $ t $ doit ensuite être paramétrisé, pour limiter la dimension de
-        l'espace
+    \item A ce moment la, le template est une variable dans $ \mathbb{R}^N$, N étant le
+        nombre de pixels du patch. On pourrait alors optimiser chaque pixel
+        respectivement, mais il serait alors difficile d'imposer des contraintes de
+        régularité du patch final. Une autre maniere de faire est de parametriser le
+        patch comme une combinaison linéaire de fonctions régulière: c'est l'approche
+        suivie dans cet article, qui utilise come fonction les B-splines. Le tempate
+        s'ecrit alors
+        \[
+            \sum\limits_{ k=1 }^{ N_k } \sum\limits_{ l=1 }^{ N_l } c_k B^n \left (
+            \frac{x}{s_k} - k \right ) B^n \left ( \frac{y}{s_{l}} - l \right )
+        \] 
 \end{itemize}
+somefunction
+
+\paragraph{Pouvez vous situer l'article par rapport aux méthodes étudiées en cours et le
+comparer à des sujets proches évoqués en cours} 
+La différence principale avec les sujets étudiés en cours est que cette méthode est une
+méthode d'apprentissage supervisée et automatique alors que les méthodes étudiées
+pendant le cours sont non-supervisées et demandent généralement une intervention humaine
+au moment de l'initialisation.\newline
+Une caractéristique commune ce ces deux méthodes est la présence d'un terme de
+pénalisation sur la régularité de la solution au problème d'optimisation, les deux
+faisant intervenir le gradient le la paremétrisation.
 \end{document}
