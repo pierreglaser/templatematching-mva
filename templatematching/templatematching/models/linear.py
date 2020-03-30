@@ -110,12 +110,15 @@ class R2Ridge(SplineRegressorBase, PatchRegressorBase):
         B = self._make_unit_spline(sk, sl)
         B = B.reshape(1, *B.shape)
 
-        for i in range(int(num_samples / self.batch_size)):
-            print(i)
-            X_batch = X[i * self.batch_size:(i+1) * self.batch_size, :, :]
+        batch_size = min(self.batch_size, num_samples)
+
+        for i in range(int(num_samples / batch_size)):
+            X_batch = X[i * batch_size : (i + 1) * batch_size, :, :]
             convolved_X = fftconvolve(X_batch, B, mode="same")
-            S[i * self.batch_size:(i+1) * self.batch_size, :] = convolved_X[:, ::sk, ::sl].reshape(self.batch_size, Nk * Nl)
-       
+            S[i * batch_size : (i + 1) * batch_size, :] = convolved_X[
+                :, ::sk, ::sl
+            ].reshape(batch_size, Nk * Nl)
+
         S /= np.linalg.norm(S, axis=0, keepdims=True)
 
         return S
@@ -170,7 +173,7 @@ class SE2Ridge(SplineRegressorBase, PatchRegressorBase):
         wavelet_dim,
         num_orientation_slices=12,
         spline_order=2,
-        batch_size=50,
+        batch_size=10,
         mu=0,
         lbd=0,
         Dxi=0,
@@ -203,7 +206,9 @@ class SE2Ridge(SplineRegressorBase, PatchRegressorBase):
         self._is_fitted = False
         self._template = None
         self._ost = OrientationScoreTransformer(
-            wavelet_dim=wavelet_dim, num_slices=num_orientation_slices
+            wavelet_dim=wavelet_dim,
+            num_slices=num_orientation_slices,
+            batch_size=batch_size,
         )
 
     @TemplateCrossCorellatorBase.template.getter
@@ -220,13 +225,22 @@ class SE2Ridge(SplineRegressorBase, PatchRegressorBase):
         # TODO: put this method in a Mixin Class.
         X = self._ost.transform(X).imag
         template = self.template.reshape(1, *self.template.shape)
-        convs = correlate(X, template, mode="same", method="fft")
-        positions = []
+
+        batch_size = min(self.batch_size, X.shape[0])
+
+        convs = np.zeros(X.shape)
+
+        for i in range(int(X.shape[0] / batch_size)):
+            X_batch = X[i * batch_size : (i + 1) * batch_size, :, :]
+            convs[i * batch_size : (i + 1) * batch_size, :, :] = correlate(
+                X_batch, template, mode="same", method="fft"
+            )
+            positions = []
+
         for i in range(len(X)):
             (y, x, _) = np.unravel_index(np.argmax(convs[i]), convs[i].shape)
             positions.append([x, y])
         return convs, np.array(positions)
-        return TemplateCrossCorellatorBase.predict(self, X)
 
     def _fit_patches(self, X, y):
         X = self._ost.fit_transform(X).imag  # can also take the modulus
@@ -269,12 +283,14 @@ class SE2Ridge(SplineRegressorBase, PatchRegressorBase):
         B = self._make_unit_spline(sk, sl, sm)
         B = B.reshape(1, *B.shape)
 
-        for i in range(int(num_samples / self.batch_size)):
-            print(i)
-            X_batch = X[i * self.batch_size:(i+1) * self.batch_size, :, :]
-            print(X_batch.shape, B.shape)
+        batch_size = min(self.batch_size, X.shape[0])
+
+        for i in range(int(num_samples / batch_size)):
+            X_batch = X[i * batch_size : (i + 1) * batch_size, :, :]
             convolved_X = fftconvolve(X_batch, B, mode="same")
-            S[i * self.batch_size:(i+1) * self.batch_size, :] = convolved_X[:, ::sk, ::sl, ::sm].reshape(self.batch_size, Nk * Nl)
+            S[i * batch_size : (i + 1) * batch_size, :] = convolved_X[
+                :, ::sk, ::sl, ::sm
+            ].reshape(batch_size, Nk * Nl * Nm)
 
         S /= np.linalg.norm(S, axis=0, keepdims=True)
         return S
