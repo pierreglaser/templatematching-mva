@@ -66,9 +66,7 @@ class PatchCreator:
         self.fit(X, y=y)
         return self.transform(X)
 
-    def _create_positive_patch_from_image(
-        self, image, left_eye_pos, right_eye_pos
-    ):
+    def _create_positive_patch_from_image(self, image, left_eye_pos, right_eye_pos):
 
         # Define offset
         Nx = int((self.patch_shape[0] - 1) / 2)
@@ -88,20 +86,20 @@ class PatchCreator:
 
         # Create left patch
         patch_left = image[
-            max(left_eye_pos[1] - Ny, 0): min(
+            max(left_eye_pos[1] - Ny, 0) : min(
                 left_eye_pos[1] + Ny + 1, image.shape[0]
             ),
-            max(left_eye_pos[0] - Nx, 0): min(
+            max(left_eye_pos[0] - Nx, 0) : min(
                 left_eye_pos[0] + Nx + 1, image.shape[1]
             ),
         ]
 
         # Remove location of left patch
         mask[
-            max(left_eye_pos[1] - Ny, 0): min(
+            max(left_eye_pos[1] - Ny, 0) : min(
                 left_eye_pos[1] + Ny + 1, image.shape[0]
             ),
-            max(left_eye_pos[0] - Nx, 0): min(
+            max(left_eye_pos[0] - Nx, 0) : min(
                 left_eye_pos[0] + Nx + 1, image.shape[1]
             ),
         ] = 0
@@ -123,20 +121,20 @@ class PatchCreator:
 
         # Create right patch
         patch_right = image[
-            max(right_eye_pos[1] - Ny, 0): min(
+            max(right_eye_pos[1] - Ny, 0) : min(
                 right_eye_pos[1] + Ny + 1, image.shape[0]
             ),
-            max(right_eye_pos[0] - Nx, 0): min(
+            max(right_eye_pos[0] - Nx, 0) : min(
                 right_eye_pos[0] + Nx + 1, image.shape[1]
             ),
         ]
 
         # Remove location of right patch
         mask[
-            max(right_eye_pos[1] - Ny, 0): min(
+            max(right_eye_pos[1] - Ny, 0) : min(
                 right_eye_pos[1] + Ny + 1, image.shape[0]
             ),
-            max(right_eye_pos[0] - Nx, 0): min(
+            max(right_eye_pos[0] - Nx, 0) : min(
                 right_eye_pos[0] + Nx + 1, image.shape[1]
             ),
         ] = 0
@@ -168,8 +166,8 @@ class PatchCreator:
             -image.shape[1] + max(center[1] + Ny + 1, image.shape[1]),
         )
         patch = image[
-            max(center[0] - Ny, 0): min(center[0] + Ny + 1, image.shape[0]),
-            max(center[1] - Nx, 0): min(center[1] + Nx + 1, image.shape[1]),
+            max(center[0] - Ny, 0) : min(center[0] + Ny + 1, image.shape[0]),
+            max(center[1] - Nx, 0) : min(center[1] + Nx + 1, image.shape[1]),
         ]
 
         # Pad the patch
