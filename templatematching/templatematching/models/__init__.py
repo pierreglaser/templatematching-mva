@@ -1,4 +1,4 @@
-from .averager import Averager
+from .averager import Averager, SE2Averager
 from .linear import R2Ridge, SE2Ridge
 from .logistic import R2LogReg, SE2LogReg
 
