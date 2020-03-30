@@ -6,7 +6,7 @@ from scipy.integrate import dblquad
 from .utils import m_function
 
 
-def _normalize_img_batched(image, window, mask=None, eps=1e-7):
+def _normalize_img_batched(image, window, batch_size=50, mask=None, eps=1e-7):
     if mask is None:
         mask = np.ones((image.shape[-2], image.shape[-1]))
 
@@ -15,30 +15,39 @@ def _normalize_img_batched(image, window, mask=None, eps=1e-7):
 
     mask = mask.astype(int)
     mask_c_window = fftconvolve(mask, window, mode="same")
-    im_squared = image ** 2
+    
 
-    im_mean = fftconvolve(image * mask, window, mode="same") / (
-        mask_c_window + eps
-    )
-    im_mean_sq = fftconvolve(im_squared * mask, window, mode="same") / (
-        mask_c_window + eps
-    )
+    img_norm = np.zeros(image.shape)
 
-    std = np.sqrt(np.abs(im_mean_sq - im_mean ** 2))
+    for i in range(int(image.shape[0] / batch_size)):
 
-    background = (1 - np.abs(image - im_mean) / (std + eps)) >= 0
-    background = background.astype(int)
-    mask_c_background = fftconvolve(mask * background, window, mode="same")
+        im_squared = image[i * batch_size: (i+1) * batch_size, :, :] ** 2
 
-    im_mean = fftconvolve(
-        image * mask * background, window, mode="same"
-    ) / (mask_c_background + eps)
-    im_mean_sq = fftconvolve(
-        im_squared * mask * background, window, mode="same"
-    ) / (mask_c_background + eps)
+        im_mean = fftconvolve(image[i * batch_size: (i+1) * batch_size, :, :] * mask, window, mode="same") / (
+            mask_c_window + eps
+        )
+        im_mean_sq = fftconvolve(im_squared * mask, window, mode="same") / (
+            mask_c_window + eps
+        )
 
-    std = np.sqrt(np.abs(im_mean_sq - im_mean ** 2))
-    return np.tanh(8 * (image - im_mean) / (std + eps))
+        std = np.sqrt(np.abs(im_mean_sq - im_mean ** 2))
+
+        background = (1 - np.abs(image[i * batch_size: (i+1) * batch_size, :, :] - im_mean) / (std + eps)) >= 0
+        background = background.astype(int)
+        mask_c_background = fftconvolve(mask * background, window, mode="same")
+
+        im_mean = fftconvolve(
+            image[i * batch_size: (i+1) * batch_size, :, :] * mask * background, window, mode="same"
+        ) / (mask_c_background + eps)
+        im_mean_sq = fftconvolve(
+            im_squared * mask * background, window, mode="same"
+        ) / (mask_c_background + eps)
+
+        std = np.sqrt(np.abs(im_mean_sq - im_mean ** 2))
+
+        img_norm[i * batch_size: (i+1) * batch_size, :, :] = np.tanh(8 * (image[i * batch_size: (i+1) * batch_size, :, :] - im_mean) / (std + eps))
+    print('normalized :', img_norm.shape)
+    return img_norm
 
 
 class Normalizer:
