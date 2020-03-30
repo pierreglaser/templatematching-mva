@@ -25,6 +25,7 @@ class R2Ridge(SplineRegressorBase, PatchRegressorBase):
         template_shape,
         splines_per_axis,
         spline_order=2,
+        batch_size=50,
         mu=0,
         lbd=0,
         verbose=0,
@@ -45,7 +46,7 @@ class R2Ridge(SplineRegressorBase, PatchRegressorBase):
         self.mu = mu
         self.lbd = lbd
         self.verbose = verbose
-
+        self.batch_size = batch_size
         self.solver = solver
         self._is_fitted = False
         self._cached_template = None
@@ -109,8 +110,12 @@ class R2Ridge(SplineRegressorBase, PatchRegressorBase):
         B = self._make_unit_spline(sk, sl)
         B = B.reshape(1, *B.shape)
 
-        convolved_X = fftconvolve(X, B, mode="same")
-        S = convolved_X[:, ::sk, ::sl].reshape(num_samples, Nk * Nl)
+        for i in range(int(num_samples / self.batch_size)):
+            print(i)
+            X_batch = X[i * self.batch_size:(i+1) * self.batch_size, :, :]
+            convolved_X = fftconvolve(X_batch, B, mode="same")
+            S[i * self.batch_size:(i+1) * self.batch_size, :] = convolved_X[:, ::sk, ::sl].reshape(self.batch_size, Nk * Nl)
+       
         S /= np.linalg.norm(S, axis=0, keepdims=True)
 
         return S
@@ -165,6 +170,7 @@ class SE2Ridge(SplineRegressorBase, PatchRegressorBase):
         wavelet_dim,
         num_orientation_slices=12,
         spline_order=2,
+        batch_size=50,
         mu=0,
         lbd=0,
         Dxi=0,
@@ -192,7 +198,7 @@ class SE2Ridge(SplineRegressorBase, PatchRegressorBase):
         self.Deta = Deta
         self.Dtheta = Dtheta
         self.verbose = verbose
-
+        self.batch_size = batch_size
         self.solver = solver
         self._is_fitted = False
         self._template = None
@@ -263,8 +269,13 @@ class SE2Ridge(SplineRegressorBase, PatchRegressorBase):
         B = self._make_unit_spline(sk, sl, sm)
         B = B.reshape(1, *B.shape)
 
-        convolved_X = fftconvolve(X, B, mode="same")
-        S = convolved_X[:, ::sk, ::sl, ::sm].reshape(num_samples, Nk * Nl * Nm)
+        for i in range(int(num_samples / self.batch_size)):
+            print(i)
+            X_batch = X[i * self.batch_size:(i+1) * self.batch_size, :, :]
+            print(X_batch.shape, B.shape)
+            convolved_X = fftconvolve(X_batch, B, mode="same")
+            S[i * self.batch_size:(i+1) * self.batch_size, :] = convolved_X[:, ::sk, ::sl, ::sm].reshape(self.batch_size, Nk * Nl)
+
         S /= np.linalg.norm(S, axis=0, keepdims=True)
         return S
 
