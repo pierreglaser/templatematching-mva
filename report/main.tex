@@ -60,7 +60,7 @@ Roto Translation Group}, par Erik J. Bekkers et. Al.
 Le problème traité est la \textbf{localisation} d'un objet d'intérêt dans une image par
 \textbf{apprentissage supervisé}. Dans les jeux de
 données utilisés, l'objet est par exemple le disque optique d'un œil, ou bien la
-rétine. Le présupposé est que les problèmes en question bénéficierait d'une prise en
+rétine. Le présupposé est que les problèmes en question bénéficieraient d'une prise en
 compte des structures d'orientation locale en tout point de l'image.
 
 \paragraph{Quelles sont les équations et les méthodes numériques utilisées} 
@@ -75,9 +75,9 @@ compte des structures d'orientation locale en tout point de l'image.
     \] 
     \item Dans le cas standard, $ f $ est définie sur $ \mathbb{R}^2 $. Cependant, $ f $
         peut être transformée (relevée/soulevée?) dans $ \mathbb{R}^3 $, la dimension
-        additionnelle décrivant l'état local l'orientation en tout point d'une image.
+        additionnelle décrivant l'état local et l'orientation en tout point d'une image.
     \item Le template final est la solution d'un probleme d'optimisation de type
-        moindres carrés régularisé, ou régression logistique régularisée.
+        moindres carrés régularisés, ou régression logistique régularisée.
         Typiquement,
         \[
         t = \arg \min_{  } \sum\limits_{ i=1 }^{ N } \left ( \langle t, p_i \rangle
@@ -88,14 +88,14 @@ compte des structures d'orientation locale en tout point de l'image.
         de l'image $ i $. Si l'on suppose que 
         \begin{itemize}
             \item $ \|p_i\| = 1 $
-            \item n'importe quelle coupe de $ f_i $ de la taille de $ p_i $ a une norme
+            \item n'importe quelle coupe de $ f_i $, une image, de la taille de $ p_i $ a une norme
                 de $ 1 $
         \end{itemize}
         on a $ (p_i \star f_i)(x) = \mathcal  \langle T_x(p_i) f_i[p_i] \rangle  \leq
         \|p_i\| \|f_i[p_i]\| \leq  1$, le maximum étant atteint quand $ f_i $ et $ p_i $ 
         sont alignés, ceci arrivant par construction en $ {x}^{\star}_i $
         ou $ R $ est une pénalité imposant de la régularité à t.
-    \item A ce moment la, le template est une variable dans $ \mathbb{R}^N$, N étant le
+    \item A ce moment là, le template est une variable dans $ \mathbb{R}^N$, N étant le
         nombre de pixels du patch. On pourrait alors optimiser chaque pixel
         respectivement, mais il serait alors difficile d'imposer des contraintes de
         régularité du patch final. Une autre manière de faire est de paramétriser le
@@ -119,8 +119,8 @@ La différence principale avec les sujets étudiés en cours est que cette méth
 méthode d'apprentissage supervisée et automatique alors que les méthodes étudiées
 pendant le cours sont non-supervisées et demandent généralement une intervention humaine
 au moment de l'initialisation.\newline
-Une caractéristique commune ce ces deux méthodes est la présence d'un terme de
-pénalisation sur la régularité de la solution au problème d'optimisation, les deux
+Une caractéristique commune de ces deux méthodes est la présence d'un terme de
+pénalisation sur la régularité de la solution du problème d'optimisation, les deux
 faisant intervenir le gradient le la paremétrisation: on rapelle que le problème des
 contours actifs s'écrit:
 \[
@@ -130,9 +130,8 @@ contours actifs s'écrit:
 alors que le problème étudié concerne la résolution de 
 \[
     t = \arg \min_{  } \sum\limits_{ i=1 }^{ N } \left ( \langle t, p_i \rangle
-    - y_i \right )^2 + \int\limits_{  }^{  } \| \nabla_{  } t(x, y) \|^2 dx dy
-
-\] 
+    - y_i \right )^2 + \lambda \int\limits_{  }^{  } \| \nabla_{  } t(x, y) \|^2 dx dy + \mu \| t \|^2
+\]
 \paragraph{Quelle est l'originalité du travail (selon les auteurs).} 
 Ce travail s'inscrit dans la continuité d'une  série d'article des auteurs: la majorité
 des concepts utilisés dans cet articles on été introduits dans des publications
@@ -143,10 +142,10 @@ précédentes:
     \item la cross correlation est une technique bien connue pour détecter des points
         d'intérêts.
 \end{itemize}
-les auteurs proposent alors une méthode de résolution pour une reformulation
+Les auteurs proposent alors une méthode de résolution pour une reformulation de la 
 ``regression logistique'' permettant à cette méthode d'atteindre l'état de l'art en
-termes de performances, ainsi qu'une séries d'experiences très completes
-comparant l'influence des différents types de régularisation, l'importance des
+termes de performances, ainsi qu'une série d'experiences très completes
+comparant l'influence des différents types de régularisation et l'importance des
 orientation scores. Enfin, est donnée en appendice une interprétation mathématique d'une
 version simplifiée du problème régularisé dans $ SE2(\mathbb{R}) $
 \paragraph{Quels sont les résultats nouveaux importants qui en découlent.}
@@ -154,5 +153,97 @@ Le résultat le plus important ici est à nos yeux la preuve expérimentale que 
 méthode atteint l'état de l'art pour les jeux de données considérées.
 \paragraph{Voyez-vous des faiblesses dans l'approche présentée et avez-vous des idées
 pour y faire face?}
-??
+
+\paragraph{Expériences}
+
+Afin de mieux comprendre leur fonctionnement et de pouvoir les comparer dans 
+divers cadres d'études, nous avons recodé les différentes méthodes présentées dans cet article 
+en langage \textit{python}. Le code complet peut être trouvé au lien suivant ???????
+Pour mémoire, 5 types de construction de templates sont envisagés:
+\begin{itemize}
+    \item A: Template obtenu par moyenne de tous les patches positifs (i.e. centrés sur la zone d'intérêt) et normalisation.
+    \item B: Template optimisé sans régularisation ($\mu =0$, $\lambda = 0$)
+    \item C: Template optimisé avec $\mu$ ($\lambda=0$)
+    \item D: Template optimisé avec $\lambda$ ($\mu = 0$)
+    \item E: Template optimisé avec $\mu$ et $\lambda$
+\end{itemize}
+
+Pour chacune de ses constructions, un module de regression linéaire et regression logistique est employé dans 
+les espaces $\mathbb{R}^2$ et $SE(2)$. Afin de réaliser les expérience dont les résultats sont présentés plus 
+ont été réalisée en considérant un ensemble de 500 images dont 80\% (400 images) constitue l'ensemble d'entrainement 
+des modèles et les 20 \% (100 images) restants l'ensemble de test. Sur chacune des images d'entrainement, un patch 
+positif de taille $N_x \times N_y = 101 \times 101$ centré autour des coordonnées de l'oeil gauche et un patch négatif 
+de même de taille tiré aléatoirement en dehors des zones d'intérêts (oeil droit et gauche) sont crées. Un détection est 
+ensuite considérée "bonne" sur le point de détection se situe dans rayon de $10$ pixels autour de la position réelle de l'oeil 
+gauche.
+
+
+
+\paragraph{Template Matching dans $\mathbb{R}^2$}
+Premièrement, une comparaison des résultats obtenus avec les différentes methodes a été réalisée dans $\mathbb{R}^2$.
+Les résultats sont reportés dans \ref{table: R2}. Afin de trouver les valeurs optimales de $\mu$ (resp $\lambda$) dans les expériences C (resp. D), nous avons décidé 
+de procèder de façon empirique en faisant varier les valeurs de ces deux paramètres entre $10^{-4}$ et $1$. Afin de trouver le mailleur couple pour l'expérience E, nous avons 
+choisi de tout d'abord fixer la valeur de $\mu$ à la valeur optimale trouvée lors de l'expérience C, puis de faire varier $\lambda$ de  $10^{-4}$ et $1$.
+
+\begin{table}[h!]
+    \centering
+    \begin{tabular}{|c|c|c|}
+        \hline
+        Methode & Score (\%)\\
+        \hline
+        \hline
+        $A^{\mathbb{R}^2}$& 61.0 \% \\
+        \hline
+        $B_{\text{lin}}^{\mathbb{R}^2}$& 3.0 \%    \\
+        $C_{\text{lin}}^{\mathbb{R}^2}$& 62.0 \%   \\
+        $D_{\text{lin}}^{\mathbb{R}^2}$& 38.0 \%   \\
+        $E_{\text{lin}}^{\mathbb{R}^2}$& 62.0 \%   \\
+        \hline
+        $B_{\text{log}}^{\mathbb{R}^2} $& 0.0 \%   \\ 
+        $C_{\text{log}}^{\mathbb{R}^2} $& 63.0 \%  \\ 
+        $D_{\text{log}}^{\mathbb{R}^2} $& 7.0 \%   \\ 
+        $E_{\text{log}}^{\mathbb{R}^2} $& 63.0 \%  \\ 
+        \hline
+    \end{tabular}
+    \caption{Résultats obtenus template matching dans $\mathbb{R}^2$}
+    \label{table: R2}
+\end{table}
+
+La table \ref{table: R2} montre qu'un template relativement simple ne correspondant finlement qu'à la moyenne de tous les patches positifs démontre tout de même de bons
+résultats comparé à des modèles de régression plus évolués. Effectivement, si non complés à de mecanismes de régularisation, les modèles $B_{\text{log}}^{\mathbb{R}^2} $ et 
+$B_{\text{lin}}^{\mathbb{R}^2} $ ne demontre que de faibles performances. Par ailleurs, un bon choix de paramètres de régularisation peut conduire à améliorer drastiquement les 
+performances des regressions dont le meilleur résulat est observé pour $\mu = 10^{-1}$ et $\lambda = 10^{-2}$ pour la regression linéaire et $\mu = 10^{-1}$ et $\lambda = 10^{-3}$ pour la regression logistique.
+
+
+\paragraph{Template Matching dans $SE(2)$}
+Les mêmes expériences ont ensuite été reproduites en utilisant l'espace $SE(2)$ et donc ajoutant également l'orientation score dans les régressions.
+Cependant, dans cette section les paramètres le paramètres $\mu \in [10^{-4}, 1]$ et $\lambda \in [10^{-4}, 100]$. En ce qui concernent les paramètres inhérents à la matrices de 
+régularisation ont été fixé comme suit $D_{\xi \xi}=1, D_{\eta \eta} = 0$ et $D_{\theta \theta} = 10^{-2}$. Nous n'avons pas fait varié ces paramètres qui ont été choisis en accord avec les auteurs 
+de l'artcile présenté. Les resultats peuvent être observés en \ref{table: SE(2)}.
+
+\begin{table}[h!]
+    \centering
+    \begin{tabular}{|c|c|c|}
+        \hline
+        Methode & Score (\%)\\
+        \hline
+        \hline
+        $A^{SE(2)}$&  64.0 \% \\
+        \hline
+        $B_{\text{lin}}^{SE(2)}$&     3.0  \%   \\
+        $C_{\text{lin}}^{SE(2)}$&     68.0 \%   \\
+        $D_{\text{lin}}^{SE(2)}$&     61.0 \%   \\
+        $E_{\text{lin}}^{SE(2)}$&     68.0 \%   \\
+        \hline
+        $B_{\text{log}}^{SE(2)} $&    \%   \\ 
+        $C_{\text{log}}^{SE(2)} $&    \%   \\ 
+        $D_{\text{log}}^{SE(2)} $&    \%   \\ 
+        $E_{\text{log}}^{SE(2)} $&    \%   \\ 
+        \hline
+    \end{tabular}
+    \caption{Résultats obtenus template matching dans $SE(2)$}
+    \label{table: SE(2)}
+\end{table}
+
 \end{document}
+
