@@ -4,7 +4,10 @@
 \usepackage{amsthm}
 \usepackage{empheq}
 \usepackage[most]{tcolorbox}
-\usepackage[a4paper, total={6in, 8in}]{geometry}
+%\usepackage[a4paper, total={6in, 8in}]{geometry}
+\usepackage[a4paper,bindingoffset=0.2in,%
+            left=1in,right=1in,top=1in,bottom=1in,%
+            footskip=.25in]{geometry}
 \usepackage{algorithm}
 \usepackage[noend]{algpseudocode}
 %\usepackage[francais]{babel}
@@ -43,12 +46,12 @@
 \title{Rapport de projet - Geodesic Methods and Deformable Models}
 \begin{document}
 \maketitle
-$ \quad $
-% \pagebreak
-\part{Questions}
+\pagebreak
+%\vspace*{-10em}
+\part*{Questions}
 
 
-\paragraph{Quel est le problème traité} 
+\paragraph{Quel est le problème traité?} 
 Nous étudierons dans ce rapport l'article \emph{Template Matching via densitives on the
 Roto Translation Group}, par Erik J. Bekkers et. Al. \cite{main}
 
@@ -58,7 +61,7 @@ données utilisés, l'objet est par exemple le disque optique d'un œil, ou bien
 rétine. Un des présupposés majeurs de l'article est que les problèmes en question bénéficieraient d'une prise en
 compte des structures d'orientation locale en tout point de l'image.
 
-\paragraph{Quelles sont les équations et les méthodes numériques utilisées} 
+\paragraph{Quelles sont les équations et les méthodes numériques utilisées?} 
 \begin{itemize}
     \item La localisation de l'objet d'intérêt dans une image se fait par
       \emph{cross-correlation} \cite{cross-correlation}: un
@@ -137,7 +140,7 @@ compte des structures d'orientation locale en tout point de l'image.
 \end{itemize}
 
 \paragraph{Pouvez vous situer l'article par rapport aux méthodes étudiées en cours et le
-comparer à des sujets proches évoqués en cours} 
+comparer à des sujets proches évoqués en cours?} 
 La différence principale avec les sujets étudiés en cours est que cette méthode est une
 méthode d'apprentissage supervisée et automatique alors que les méthodes étudiées
 pendant le cours sont non supervisées et demandent généralement une intervention humaine
@@ -156,7 +159,7 @@ alors que le problème étudié concerne la résolution de
     - y_i \right )^2 + \lambda \int\limits_{  }^{  } \| \nabla_{  } t(x, y) \|^2 dx dy + \mu \| t \|^2
     \label{eq.2} \tag{2}
 \]
-\paragraph{Quelle est l'originalité du travail (selon les auteurs).} 
+\paragraph{Quelle est l'originalité du travail (selon les auteurs)?}
 Ce travail s'inscrit dans la continuité d'une  série d'article des auteurs: la majorité
 des concepts utilisés dans cet articles on été introduits dans des publications
 précédentes:
@@ -168,15 +171,22 @@ précédentes:
 \end{itemize}
 Les auteurs proposent alors une méthode de résolution pour une reformulation de la 
 ``regression logistique'' permettant à cette méthode d'atteindre l'état de l'art en
-termes de performances, ainsi qu'une série d'expériences très completes
+termes de performances, ainsi qu'une série d'expériences très complètes
 comparant l'influence des différents types de régularisation et l'importance des
 orientation scores. Enfin, est donnée en appendice une interprétation mathématique d'une
 version simplifiée du problème régularisé dans $ SE2(\mathbb{R}) $
-\paragraph{Quels sont les résultats nouveaux importants qui en découlent.}
+\paragraph{Quels sont les résultats nouveaux importants qui en découlent?}
 Le résultat le plus important ici est à nos yeux la preuve expérimentale que cette
 méthode atteint l'état de l'art pour les jeux de données considérées.
 \paragraph{Voyez vous des faiblesses dans l'approche présentée et avez-vous des idées
 pour y faire face?}
+Une faiblesse de la méthode proposée selon nous est que cette méthode semble peu robuste
+aux changements d'échelle (détails expérimentaux dans \ref{part:details}), quelque chose qui est très fréquent dans les jeux de données
+d'images. Pour y remédier, on pourrait considérer une base d'ondelettes plus riches,
+pouvant prendre en compte différents types d'échelles, mais pour être admissible, une
+ondelette doit satisfaire un cahier des charges fourni (voir plus tard les détails
+théoriques sur les ondelettes de cake).  Il n'est donc pas simple (mathématiquement) de
+changer d'ondelettes pour rendre la méthode invariante aux changements d'échelle.
 
 \part{Rapport détaillé}\label{part:details}
 \section{Discussions théoriques}
