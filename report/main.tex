@@ -306,15 +306,14 @@ régulières telles que les B-splines étendues à $SE(2)$.
 \]
 
 \paragraph{Regression logistique}
-Dans les deux espaces considérés, $\mathbb{R}^2$ et $SE(2)$, un modèle de regression logistique est également proposé en comparaison 
-au modèle de régression linéaire. Dans les problèmes de détection, le but majeur est de séparer les patches $f_i$ correspondant aux zones d'une image correspondant à une 
+Dans les problèmes de détection, le but majeur est de séparer les patches $f_i$ correspondant à une 
 zone d'intérêt ($y_i =1$) des zones sans objet ($y_1=0$). Cependant, une approche différente de \ref{eq.2} et ne faisant pas intervenir le terme de perte quadratique 
 peut être également employée. Ici, les auteurs ont décidé d'avoir recours à un modèle de régression logistique dans lequel la présence ou non de 
 la zone d'intérêt au sein d'un patch $f_i$ est représentée par une certaine probabilité de présence $p_i$. Cette probabilité est inférée à l'aide de
 la function ``sigmoide'' telle que $p_i = \sigma(\langle t, f_i \rangle)$. Le le but revient à trouver le template qui maximise la vraisemblance $l(t) = 
 \prod \limits_{i=1}^N p(f_i; t)^{y_i}(1 - p(f_i; y))^{1- y_i}$
-des patches $f_i$ étant donnés leurs labels $y_i$. Dans une telle approche la log-vraissemenblance permet de 'linéariser' le problème d'optimisation qui prend la forme
-suivante dans $\mathbb{R}^2$:
+des patches $f_i$ étant donnés leurs labels $y_i$. Dans une telle approche, la log-vraissemenblance permet d'aboutir au problème d'optimisation suivant
+dans $\mathbb{R}^2$:
 \[
     \arg \max \sum \limits_{i=1}^N \langle t, f_i \rangle_{\mathbb{L}_2(\mathbb{R}^2)} - \log \left ( 1 + e^{\langle t, f_i \rangle_{\mathbb{L}_2(\mathbb{R}^2)}}\right) - \lambda \int \limits_{\mathbb{R}^2} \lVert \nabla 
     t \rVert_{\mathbb{L}_2(\mathbb{R}^2)}^2 dx dy - \mu \lVert t \rVert_{\mathbb{L}_2(\mathbb{R}^2)}^2
@@ -324,13 +323,14 @@ ou dans $SE(2)$:
     \arg \max \sum \limits_{i=1}^N \langle t, |U_{f_i}| \rangle_{\mathbb{L}_2(SE(2))} - \log \left ( 1 + e^{\langle t, |U_{f_i}| \rangle_{\mathbb{L}_2(SE(2))}}\right) - \lambda \int \limits_{\mathbb{R}^2} \int \limits_{0}^{2\pi}\lVert \nabla 
     t \rVert_{D}^2 dx dy d\theta- \mu \lVert t \rVert_{\mathbb{L}_2(SE(2))}^2
 \]
+Ce problème d'optimisation n'admet plus de solution \textit{closed-formed} et doit donc être résolu par itération. Une méthode de Newton est ici employée. 
 
 \paragraph{Prepocessing des images}
 Les jeux de données utilisés sont composés d'images démontrant de forte variation de luminosité et de contraste. Ainsi, une 
 phase de \textit{preprocessing} est nécessaire afin de renormaliser les images. La méthode employée dans l'article et que nous 
 avons également recodée pour réaliser les expériences décrites plus bas se fonde sur l'idée de renormalisation locale et tirée de \cite{preprocessing}. Elle consiste
 à premièrement calculer une moyenne et un écart-type local de l'intensité des pixels. Ceci permet de renormaliser localement l'image afin 
-que cette dernière est une moyenne nulle et un écart-type de 1. Ensuite, un masque de fond est extrait en utilisant la distance de Mahalanobis 
+que cette dernière ait une moyenne nulle et un écart-type de 1. Ensuite, un masque de fond est extrait en utilisant la distance de Mahalanobis 
 permettant d'éviter la prise en compte des valeurs abhérantes dans la seconde phase de normalisation. L'image est ensuite renormalisée une seconde 
 fois mais en ignorant les pixels ajoutés au masque.
 
@@ -351,9 +351,9 @@ Pour mémoire, 5 types de construction de templates sont envisagés:
 \end{itemize}
 
 Pour chacune de ses constructions, un module de regression linéaire et regression logistique est employé dans 
-les espaces $\mathbb{R}^2$ et $SE(2)$. Afin de réaliser les expérience dont les résultats sont présentés plus 
-ont été réalisée en considérant un ensemble de 500 images dont 80\% (400 images) constitue l'ensemble d'entrainement 
-des modèles et les 20 \% (100 images) restants l'ensemble de test.
+les espaces $\mathbb{R}^2$ et $SE(2)$. Les expériences dont les résultats sont présentés plus bas
+ont été réalisée en considérant un ensemble de 500 images dont 80\% (400 images) constitue l'ensemble d'entrainement
+et les 20 \% (100 images) restants l'ensemble de test.
 Sur chacune des images d'entrainement, un patch 
 positif de taille $N_x \times N_y = 101 \times 101$ centré autour des coordonnées de l'œil gauche et un patch négatif 
 de même de taille tiré aléatoirement en dehors des zones d'intérêts (œil droit et gauche) sont crées. Une détection est 
@@ -367,7 +367,7 @@ Premièrement, une comparaison des résultats obtenus avec les différentes mét
 Les résultats sont reportés dans \ref{table: R2}. Afin de trouver les valeurs optimales de $\mu$ (resp $\lambda$) dans les expériences C (resp. D), nous avons décidé 
 de procéder de façon empirique en faisant varier les valeurs de ces deux paramètres entre $10^{-4}$ et $1$. Afin de trouver le meilleur couple pour l'expérience E, nous avons 
 choisi de tout d'abord fixer la valeur de $\mu$ et $\lambda$ à leur valeur optimale
-trouvée lors des expériences C et D $ {\mu}^{\star}$ et $ {\lambda}^{\star}$, puis de faire légèrement leurs valeurs autour de ces optimaux.
+trouvée lors des expériences C et D, $ {\mu}^{\star}$ et $ {\lambda}^{\star}$, puis de faire légèrement leurs valeurs autour de ces optimaux.
 Il s'est avéré que comme présenté dans l'article un choix de couple $\mu = 0.5
 {\mu}^{\star}$ et $\lambda = 0.5 {\lambda}^{\star}$ fournissait les meilleurs résultats.
 
@@ -397,11 +397,11 @@ Il s'est avéré que comme présenté dans l'article un choix de couple $\mu = 0
 
 La table \ref{table: R2} montre qu'un template relativement simple ne correspondant finalement qu'à la moyenne de tous les patches positifs démontre tout de même de bons
 résultats comparé à des modèles de régression plus évolués. Effectivement, si non couplés à de mécanismes de régularisation, les modèles $B_{\text{log}}^{\mathbb{R}^2} $ et 
-$B_{\text{lin}}^{\mathbb{R}^2} $ ne démontre que de faibles performances. Par ailleurs, un bon choix de paramètres de régularisation peut conduire à améliorer drastiquement les 
+$B_{\text{lin}}^{\mathbb{R}^2} $ ne démontrent que de faibles performances. Par ailleurs, un bon choix de paramètres de régularisation peut conduire à améliorer drastiquement les 
 performances des regressions dont le meilleur résultat est observé pour $\mu = 10^{-1}$ et $\lambda = 10^{-2}$ pour la regression linéaire et $\mu = 10^{-1}$ et $\lambda = 10^{-3}$ pour la regression logistique.
-C'est deux modèles de regression semblent d'ailleurs démontrer des niveaux de performance similaire.
+C'est deux modèles de regression semblent d'ailleurs démontrer des niveaux de performance similaires.
 Le "meilleur" modèle dans $\mathbb{R}^2$ est néanmoins obtenu dans le cas E avec la regression logistique (63\%). Ces résultats semblent alignés avec ceux présentés par les auteurs bien que dans $\mathbb{R}^2$, 
-il semble que le patch moyenné $A^{\mathbb{R}^2}$ démontre les meilleurs résultats, les
+il semble que pour eux le patch moyenné $A^{\mathbb{R}^2}$ démontre les meilleurs résultats, les
 suivant sont $C_{\text{lin}}^{\mathbb{R}^2}, E_{\text{lin}}^{\mathbb{R}^2},
 C_{\text{lin}}^{\mathbb{R}^2}$ et $E_{\text{log}}^{\mathbb{R}^2}$ qui marchent de manière 
 similaires.
@@ -409,8 +409,8 @@ similaires.
 
 \paragraph{Template Matching dans $SE(2)$}
 Les mêmes expériences ont ensuite été reproduites en utilisant l'espace $SE(2)$ et donc ajoutant également l'orientation score dans les régressions.
-Cependant, dans cette section les paramètres le paramètres $\mu \in [10^{-5}, 10^{-1}]$ et $\lambda \in [10^{-4}, 10^{-1}]$. En ce qui concernent les paramètres inhérents à la matrices de 
-régularisation ont été fixé comme suit $D_{\xi \xi}=1, D_{\eta \eta} = 0$ et $D_{\theta \theta} = 10^{-2}$. Nous n'avons pas fait varié ces paramètres qui ont été choisis en accord avec les auteurs 
+Dans cette section, les paramètres varient tel que $\mu \in [10^{-5}, 10^{-1}]$ et $\lambda \in [10^{-4}, 10^{-1}]$. En ce qui concernent les paramètres inhérents à la matrices de 
+régularisation, ils ont été fixés comme suit $D_{\xi \xi}=1, D_{\eta \eta} = 0$ et $D_{\theta \theta} = 10^{-2}$. Nous n'avons pas fait varier ces paramètres qui ont été choisis en accord avec les auteurs 
 de l'article présenté. Les résultats peuvent être observés en \ref{table: SE(2)}.
 
 \begin{table}[h!]
@@ -445,8 +445,8 @@ un simple régularisation $l-2$ est considérée (cas C), combinée à un choix 
 L'ajout d'un nouveau terme régularisant (cas E) et un bon choix de constante permet d'obtenir le meilleur résultat. Seul le cas D, démontre une 
 performance plus faible que le même cas dans $\mathbb{R}^2$ qui était également l'un des moins performants. Les résultats que nous présentons sont en ligne avec ceux 
 présentés par les auteurs en ce qui concerne les regressions linéaires. Notre meilleur modèle est dérivé de la méthode $C_{\text{lin}}^{SE(2)}$. Pour 
-les regressions logistiques, nos résultats sont un peut décevants en comparaison de ceux présenté par les auteurs. 
-En termes de temps de calcul, notre modèle est capable d'effectuer une prédiction en 0.23 s avec le modèle obtenue par la méthode $C_{\text{lin}}^{SE(2)}$.
+les regressions logistiques, nos résultats sont un peu décevants en comparaison de ceux présentés par les auteurs. 
+En terme de temps de calcul, notre modèle est capable d'effectuer une prédiction en 0.23 s/image avec le modèle obtenue par la méthode $C_{\text{lin}}^{SE(2)}$.
 
 
 \begin{figure*}[h!]
@@ -763,11 +763,13 @@ cas considérés sur la seconde ligne (b) le maximum d'intensité du template à
 Nous avons voulu rendre compte de l'influence des différents paramètres de régularisation sur la précision du modèle.
 Pour ce faire nous avons reporté les valeurs de précision des modèles $C_{\text{lin}}^{SE(2)}$ et $D_{\text{lin}}^{SE(2)}$
 en faisant varier les valeurs de $\mu$ et $\lambda$. Les résultats sont visibles en \ref{fig:param}. Cette courbe permet de bien rendre 
-compte de l'importance de la régularisation dans un tel problème de détection.
+compte de l'importance de la régularisation dans un tel problème de détection. On remarque que le modèle admet un maximum de 
+précision global pour des valeurs de $\mu \in [10^{-4}, 1]$ et $\lambda \in [10^{-4}, 1]$. Ceci laisse à penser que les parmètres optimaux se situent bien 
+dans ces intervalles. Ce maximum est d'ailleurs supérieur à la précision sans régularisation ce qui démontre bien l'intérêt de l'ajout de tels termes de régularisation. 
 
 \paragraph{Influence du critère de précision}
-Afin d'être tout à fait transparents sur la précision des modèles développé nous avons testé le modèle démontrant les meilleurs 
-résultats $C_{\text{lin}}^{SE(2)}$ avec différents valeur de rayon de détection variant de $2$ pixels à $50$ pixels. Les résultats 
+Afin d'être tout à fait transparents sur la précision des modèles développés nous avons testé le modèle démontrant les meilleurs 
+résultats $C_{\text{lin}}^{SE(2)}$ avec différentes valeurs de rayon de détection variant de $2$ pixels à $50$ pixels. Les résultats 
 peuvent être appréciés en \ref{fig:radius}. Pour un rayon de détection de 2 pixels, la précision du modèle tombe à $37 \%$. Ceci n'est pas 
 étonnant dans la mesure où 2 pixels rentre largement dans la gamme de précision de ``labélisation''. Par contre, pour un rayon de détection de 5 pixels, 
 le modèle démontre une précision assez bonne de 81 \%, ce qui est en lien avec la valeur précédemment observée pour 10 pixels. Dés que le rayon dépasse 
@@ -796,7 +798,7 @@ avons observé qu'elle n'est pas très robuste aux changements d'échelle comme 
 figure \ref{fig:zoom}. Dans, cette expérience nous avons utilisé le meilleur modèle obtenu via le méthode 
 $C_{\text{lin}}^{SE(2)}$ (c.f. \ref{part:expe}). Nous lui avons demandé de prédire la localisation de la pupile de l'oeil 
 gauche sur la même image mais avec des niveaux de zooms différents (x1, x1.5, x2 et x3). La méthode démontre 
-une bonne capacité de prédiction pour des facteurs d'échelle assez faible puisse en témoigner l'image zoomée 
+une bonne capacité de prédiction pour des facteurs d'échelle assez faibles puisse en témoigner l'image zoomée 
 x1.5. Cependant, dès lors que le facteur d'échelle dépasse 2, le modèle n'est plus en mesure de prédire correctement 
 la localisation de la pupile.  
 
