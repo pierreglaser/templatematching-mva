@@ -759,7 +759,9 @@ cas considérés sur la seconde ligne (b) le maximum d'intensité du template à
 Nous avons voulu rendre compte de l'influence des différents paramètres de régularisation sur la précision du modèle.
 Pour ce faire nous avons reporté les valeurs de précision des modèles $C_{\text{lin}}^{SE(2)}$ et $D_{\text{lin}}^{SE(2)}$
 en faisant varier les valeurs de $\mu$ et $\lambda$. Les résultats sont visibles en \ref{fig:param}. Cette courbe permet de bien rendre 
-compte de l'importance de la régularisation dans un tel problème de détection.
+compte de l'importance de la régularisation dans un tel problème de détection. On remarque que le modèle admet un maximum de 
+précision global pour des valeurs de $\mu \in [10^{-4}, 1]$ et $\lambda \in [10^{-4}, 1]$. Ceci laisse à penser que les parmètres optimaux se situent bien 
+dans ces intervalles. Ce maximum est d'ailleurs supérieur à la précision sans régularisation ce qui démontre bien l'intérêt de l'ajout de tels termes de régularisation. 
 
 \paragraph{Influence du critère de précision}
 Afin d'être tout à fait transparents sur la précision des modèles développés nous avons testé le modèle démontrant les meilleurs 
