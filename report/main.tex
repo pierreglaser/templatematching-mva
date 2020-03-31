@@ -63,6 +63,7 @@ compte des structures d'orientation locale en tout point de l'image.
 
 \paragraph{Quelles sont les équations et les méthodes numériques utilisées?} 
 \begin{itemize}
+    \setlength{\itemsep}{0pt}
     \item La localisation de l'objet d'intérêt dans une image se fait par
       \emph{cross-correlation} \cite{cross-correlation}: un
         \emph{template} est ``appliqué`` en tout point $ x $ de l'image.  La valeur
@@ -127,7 +128,8 @@ compte des structures d'orientation locale en tout point de l'image.
             t(x, y) = \sum\limits_{ k=1 }^{ N_k } \sum\limits_{ l=1 }^{ N_l } c_{k, l} B^n \left (
             \frac{x}{s_k} - k \right ) B^n \left ( \frac{y}{s_{l}} - l \right )
             \label{eq:spline} \tag{1}
-        \] 
+        \] %
+        %\vspace*{-1em}
         ($ s_k $ et $ s_l $ sont des paramètres d'échelles fixés au préalable: il
         ne sont pas des fonctions des indices $ k $ et $ l $).
         Une expression qui admet alors un gradient, ceci permettant d'obtenir une
@@ -135,7 +137,7 @@ compte des structures d'orientation locale en tout point de l'image.
         \[
             \int\limits_{  }^{  } \| \nabla_{  } t(x, y) \|^2 dx dy
         \] 
-    \item Toutes ces formulations et paramétrisations sont pour l'instant uniquement
+    \item \vspace*{-1.5em} Toutes ces formulations et paramétrisations sont pour l'instant uniquement
       valables pour les images dans leur forme initiale (non soulevées). Un
       investissement supplémentaire est nécessaire pour reformuler le problème
       d'optimisation ainsi que les pénalités de régularisation pour optimiser un
