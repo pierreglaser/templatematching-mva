@@ -81,7 +81,9 @@ compte des structures d'orientation locale en tout point de l'image.
       \] 
        est l'opérateur translation.
     \item Dans le cas standard exposé ci-dessus, $ f $ est définie sur $ \mathbb{R}^2 $. Cependant, $ f $
-        peut être transformée (e.g relevée, soulevée) dans $ \mathbb{R}^3 $, la dimension
+        peut être transformée (e.g relevée, soulevée) depuis $ \mathbb{R}^2  \to
+        \mathbb{R} $  vers $ \mathbb{R}^2 \times \lbrack 0, 2 \pi \rbrack  \to \mathbb{
+        C} $, la dimension
         additionnelle décrivant en chaque point l'état local de l'orientation de l'image
         selon un certain nombre de directions.
     \item Afin d'obtenir des bonnes performances en prédiction, le template $ t $ est
@@ -191,10 +193,14 @@ Une des faiblesses de l'article que nous avons observé est le fait
 
 \part{Rapport détaillé}\label{part:details}
 \section{Discussions théoriques}
+Nous rentrons maintenant plus en détail dans les notions spécifiques à l'article, à
+savoir le soulèvement dans l'espace des scores d'orientations, et la redéfinition du
+template-matching et du problème d'optimisation associé dans cet espace.
 \paragraph{Les scores d'orientation} 
 Un concept majeur du papier concerne la manière de prendre en compte les l'état
 d'orientation de chaque point de l'image afin de mieux détecter le point d'intérêt.
-L'approche consiste a convoluer l'image avec le $ R_{\theta} w $, ou $ R_{\theta} $ est la rotation d'angle $ \theta  $, et $ w $ est une ondelette.
+L'approche consiste a convoluer l'image avec le $ R_{\theta} \phi $, ou $ R_{\theta} $
+est la rotation d'angle $ \theta  $, et $ \phi $ est une ondelette.
 l'image 
 \[
     \begin{aligned}
@@ -205,14 +211,13 @@ l'image
 devient alors 
 \[
 \begin{aligned}
-    U_f: \quad \mathbb{R}^2\times \mathbb{ T } &\longrightarrow \mathbb{R} \\
-    (x, y, \theta) &\longmapsto g(x, y, \theta)
+    U_f: \quad \mathbb{R}^2\times \lbrack  0, 2 \pi \rbrack &\longrightarrow \mathbb{C} \\
+    (x, y, \theta) &\longmapsto U_f(x, y, \theta)
 \end{aligned}
 \] 
 $ \theta $, tout comme $ x $ et $ y $ est discrétisé.
 La construction de ce score d'orientation est inspirée par le fonctionnement du cortex
-visuel des mammifères (voir \emph{Image Analysisand Reconstruction using a Wavelet
-Transform constructed from a Reducible Representation of the Euclidean Motion Group}).
+visuel des mammifères \cite{cake2}.
 On effectue alors un certain nombres de remarques sur cette transformée
 \begin{itemize}
     \item Par definition, $  U_f $ est une transformée en ondelettes:
@@ -236,16 +241,20 @@ On effectue alors un certain nombres de remarques sur cette transformée
         de Hilbert.\newline
         De cette propriété découle l'inversibilité de la transformée en scores
         d'orientations.
-        \item contrairement à la transformée en ondelettes classique, cette transformée
+        \item Contrairement à la transformée en ondelettes classique, cette transformée
             ne fait pas intervenir différentes échelles, ce qui dans les cas étudiés,
-            semble être considéré comme quelque chose de désirable.
-        \item la stabilité de la transformée inverse est complètement déterminée par la
-            fonction $ M_{\phi} $, et donc (évidemment), et c'est sous ce critère que la
+            semble être considéré comme quelque chose de désirable dans les articles la
+            décrivant, mais qui peut s'avérer néfaste dans notre cas (voir \ref{paragraph:robustness-to-scale}) 
+        \item La stabilité de la transformée inverse est complètement déterminée par la
+            fonction $ M_{\phi} $; c'est sous ce critère que la
             l'ondelette de base $ \phi $ est choisie.
 \end{itemize}
 Les ondelettes ``cake'' (gateau en anglais) s'avèrent avoir un $ M_{\phi} $ optimal, et
-être d'excellents détecteurs de lignes. C'est donc cette ondelette qui a été choisie
-comme base pour créer les scores d'orientation dans le papier étudié.
+être d'excellents détecteurs de lignes. Le nom de ces ondelettes provient du fait que
+dans le plan de fourrier, le support de l'ondelette ressemble a une part de gateau.
+C'est cette ondelette qui a été choisie comme base pour créer les scores d'orientation
+dans le papier étudié.
+\vspace{5em}
 \begin{figure}[htpb]
 \centering
 \hspace*{-6em}
@@ -773,7 +782,7 @@ le modèle démontre une précision assez bonne de 81 \%, ce qui est en lien ave
 \end{figure}
 
 \vspace{10em}
-\paragraph{robustesse au changement d'échelles}
+\paragraph{robustesse au changement d'échelles}\label{paragraph:robustness-to-scale}
 Bien que par construction la méthode proposée gère bien les transformations par translation, nous 
 avons observé qu'elle n'est pas très robuste aux changements d'échelle comme peut en témoigner la 
 figure \ref{fig:zoom}. Dans, cette expérience nous avons utilisé le meilleur modèle obtenu via le méthode 
@@ -829,6 +838,10 @@ la localisation de la pupile.
       object recognition in invertible orientation scores: application to optic nerve
     head detection in retinal images.}
     In International Workshop on Energy Minimization Methods in Computer Vision and Pattern Recognition (pp. 464-477). Springer, Cham.
+    \bibitem{cake2}
+    Duits, R., Felsberg, M., Granlund, G., \& ter Haar Romeny, B. (2007).
+    \emph{Image analysis and reconstruction using a wavelet transform constructed from a
+    reducible representation of the Euclidean motion group.} International Journal of Computer Vision, 72(1), 79-102.
     \bibitem{cake}
     Kalitzin, S. N., Romeny, B. M. T. H., \& Viergever, M. A. (1999).
     \emph{Invertible apertured orientation filters in image analysis.}
