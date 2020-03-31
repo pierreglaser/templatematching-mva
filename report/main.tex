@@ -11,6 +11,7 @@
 \usepackage{listings}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
+\usepackage{subcaption}
 
 
 
@@ -299,8 +300,10 @@ gauche. Le nombre de splines considéré est de $N_k = 51$ , $N_l =51$ et $N_m =
 Premièrement, une comparaison des résultats obtenus avec les différentes methodes a été réalisée dans $\mathbb{R}^2$.
 Les résultats sont reportés dans \ref{table: R2}. Afin de trouver les valeurs optimales de $\mu$ (resp $\lambda$) dans les expériences C (resp. D), nous avons décidé 
 de procèder de façon empirique en faisant varier les valeurs de ces deux paramètres entre $10^{-4}$ et $1$. Afin de trouver le meilleur couple pour l'expérience E, nous avons 
-choisi de tout d'abord fixer la valeur de $\mu$ et $\lambda$ à leur valeur optimale trouvée lors des expériences C et D $\mu*$ et $\lambda*$, puis de faire légèrement leurs valeurs autour de ces optimaux.
-Il s'est avéré que comme présenté dans l'article un choix de couple $\mu = 0.5 \mu*$ et $\lambda = 0.5 \lambda*$ fournissait les meilleurs résultats.
+choisi de tout d'abord fixer la valeur de $\mu$ et $\lambda$ à leur valeur optimale
+trouvée lors des expériences C et D $ {\mu}^{\star}$ et $ {\lambda}^{\star}$, puis de faire légèrement leurs valeurs autour de ces optimaux.
+Il s'est avéré que comme présenté dans l'article un choix de couple $\mu = 0.5
+{\mu}^{\star}$ et $\lambda = 0.5 {\lambda}^{\star}$ fournissait les meilleurs résultats.
 
 \begin{table}[h!]
     \centering
@@ -703,19 +706,19 @@ le modèle demontre une précision assez bonne de 81 \%, ce qui est en lien avec
 15 pixels, la précision du modèole stagne. Ceci laisse apercevoir que 10\% des détections sont abhérantes.
 
 \begin{figure}[htpb]
-    \centering
-        \includegraphics[scale=0.7]{plots/parameter_score_C_D_lin_R2.jpg}
-        \caption{Influence des paramètres de régularisation}%
-        
-        \label{fig:param}
-\end{figure}
-\begin{figure}[htpb]
-
-        \centering 
-        \includegraphics[scale=0.7]{plots/radius_scores.jpg}
-        \caption{Précision en fonction du rayon de détection}%
-        
-        \label{fig:radius}
+\centering
+\hspace*{-5em}%
+\begin{subfigure}{.6\textwidth}
+\includegraphics[scale=0.65]{plots/parameter_score_C_D_lin_R2.jpg}%
+  \caption{$ \quad \quad \quad $Influence des paramètres de régularisation}%
+    \label{fig:param}
+\end{subfigure}%
+%\hspace*{5em}
+\begin{subfigure}{.6\textwidth}
+  \includegraphics[scale=0.65]{plots/radius_scores.jpg}
+  \caption{ Précision en fonction du rayon de détection}%
+  \label{fig:radius}
+\end{subfigure}
 \end{figure}
         
 \end{document}
