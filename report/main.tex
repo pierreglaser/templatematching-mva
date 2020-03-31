@@ -272,25 +272,25 @@ spatial, une image simple, et la même image transformée par cette ondelette.
 Comme présenté au dessus, le score d'orientation permet de capturer d'une certaine manière les axes dominants d'un image dans une certaine direction. De ce fait, 
 l'utilisation de ce score semble être d'intérêt pour des problèmes de détection.
 Dans, ce papier les auteurs ont ainsi fait le choix d'étendre le problème d'optimisation comme présenté en \ref{eq.2} à $SE(2)$ via 
-l'utilisation du score d'orientation. 
+l'utilisation du score d'orientation: 
 \begin{itemize}
-  \item La notion de cross-correlation est étendue naturellement a $ SE(2) $
+  \item La notion de cross-correlation s'étend naturellement a $ SE(2) $. On change
+    simplement le produit scalaire réel par un produit scalaire hermitien dans $
+    L_2(SE(2)) $:
+    \[
+        \langle t, |U_{fi}| \rangle_{SE(2)} = 
+        \int \limits_{\mathbb{R}^2} \int \limits_{0}^{2\pi} \overline{t(x, y, \theta)} \lvert U_f (x, y, \theta) \rvert dxdyd\theta
+    \]
+  \item Le problème d'optimisation définissant le template devient alors \[ \sum
+      \limits_{i=1}^N (\langle t, |U_{fi}| \rangle_{{\mathbb{L}_2(SE(2))}} - y_i)^2 +
+      \lambda \int \limits_{\mathbb{R}^2} \int \limits_{0}^{2\pi} \lVert \nabla t(x, y,
+      \theta)\rVert_{D}^2 dxdyd\theta + \mu \lVert t \rVert_{\mathbb{L}_2(SE(2))}^2 \]
 \end{itemize}
-Il s'agit désormais de s'intéresser au problème d'optimisation étendu:
-\[
-  \sum \limits_{i=1}^N (\langle t, |U_{fi}| \rangle_{{\mathbb{L}_2(SE(2))}} - y_i)^2 + \lambda \int \limits_{\mathbb{R}^2} \int \limits_{0}^{2\pi} \lVert 
-  \nabla t(x, y, \theta)\rVert_{D}^2 dxdyd\theta + \mu \lVert t \rVert_{\mathbb{L}_2(SE(2))}^2
-\]
-Les $U_{fi}$ sont les scores d'orientation des patchs $p_i$.
-Le produit scalaire définit sur $SE(2)$ prend la forme suivante:
-\[
-    \langle t, |U_{fi}| \rangle_{SE(2)} = 
-    \int \limits_{\mathbb{R}^2} \int \limits_{0}^{2\pi} \overline{t(x, y, \theta)} \lvert U_f (x, y, \theta) \rvert dxdyd\theta
-\]
-
-Et $\nabla t$ est le gradient invariant à gauche déduit des dérivées partielles invariantes à gauches définies sur $SE(2)$
-comme suit $\{\partial_{\xi} = cos(\theta)\partial_x + sin(\theta) \partial_y,\, \partial{\eta} = -sin(\theta) \partial_x + cos(\theta)
-\partial_y, \partial_{\theta}\}$. Une norme pondérée du gradient peut ensuite être définie comme suit:
+Les $U_{fi}$ sont les scores d'orientation des patchs $p_i$.  $\nabla t$ est le gradient
+invariant à gauche déduit des dérivées partielles invariantes à gauches définies sur
+$SE(2)$ comme suit $\{\partial_{\xi} = cos(\theta)\partial_x + sin(\theta) \partial_y,\,
+\partial{\eta} = -sin(\theta) \partial_x + cos(\theta) \partial_y, \partial_{\theta}\}$.
+Une norme pondérée du gradient peut ensuite être définie comme suit:
 \[
     \lVert \nabla t \rVert_{D}^2 = D_{\xi \xi} \Big|\frac{\partial t}{\partial \xi} \Big|^2
     + D_{\eta \eta} \Big|\frac{\partial t}{\partial \eta}\Big|^2 + D_{\theta \theta} \Big|\frac{\partial t}{\partial \theta}\Big|^2
