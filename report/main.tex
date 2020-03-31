@@ -180,49 +180,6 @@ Le résultat le plus important ici est à nos yeux la preuve expérimentale que 
 méthode atteint l'état de l'art pour les jeux de données considérées.
 \paragraph{Voyez vous des faiblesses dans l'approche présentée et avez-vous des idées
 pour y faire face?}
-Une des faiblesses de l'article que nous avons observé est le fait 
-
-Bien que par construction la méthode proposée gère bien les transformations par translation, nous 
-avons observé qu'elle n'est pas très robuste aux changements d'échelle comme peut en témoigner la 
-figure \ref{fig:zoom}. Dans, cette expérience nous avons utilisé le meilleur modèle obtenu via le méthode 
-$C_{\text{lin}}^{SE(2)}$ (c.f. \ref{part:expe}). Nous lui avons demandé de prédire la localisation de la pupile de l'oeil 
-gauche sur la même image mais avec des niveaux de zooms différents (x1, x1.5, x2 et x3). La méthode démontre 
-une bonne capacité de prédiction pour des facteurs d'échelle assez faible puisse en témoigner l'image zoomée 
-x1.5. Cependant, dès lors que le facteur d'échelle dépasse 2, le modèle n'est plus en mesure de prédire correctement 
-la localisation de la pupile.  
-
-\begin{figure}[htpb]
-    \centering
-    %\hspace*{-5em}%
-    \begin{subfigure}[b]{0.3\textwidth}
-    \includegraphics[scale=0.4]{plots/zoom_1.jpeg}%
-      \caption{Image original}%
-        \label{fig:param}
-    \end{subfigure}%
-    \quad
-    \begin{subfigure}[b]{0.3\textwidth}
-      \includegraphics[scale=0.4]{plots/zoom_1_5.jpeg}
-      \caption{Zoom x1.5}%
-      \label{fig:radius}
-    \end{subfigure}
-    \vskip\baselineskip
-    \begin{subfigure}[b]{0.3\textwidth}
-        \includegraphics[scale=0.4]{plots/zoom_2.jpeg}
-        \caption{Zoom x2}%
-        \label{fig:radius}
-      \end{subfigure}
-      \quad
-      \begin{subfigure}[b]{0.3\textwidth}
-        \includegraphics[scale=0.4]{plots/zoom_3.jpeg}
-        \caption{Zoom x3}%
-        \label{fig:radius}
-      \end{subfigure}
-      \caption{Même image zoomée et résultat de prédiction}
-      \label{fig:zoom}
-    \end{figure}
-
-
-\part{Rapport détaillé}
 Une faiblesse de la méthode proposée selon nous est que cette méthode semble peu robuste
 aux changements d'échelle (détails expérimentaux dans \ref{part:details}), quelque chose qui est très fréquent dans les jeux de données
 d'images. Pour y remédier, on pourrait considérer une base d'ondelettes plus riches,
@@ -230,6 +187,7 @@ pouvant prendre en compte différents types d'échelles, mais pour être admissi
 ondelette doit satisfaire un cahier des charges fourni (voir plus tard les détails
 théoriques sur les ondelettes de cake).  Il n'est donc pas simple (mathématiquement) de
 changer d'ondelettes pour rendre la méthode invariante aux changements d'échelle.
+Une des faiblesses de l'article que nous avons observé est le fait 
 
 \part{Rapport détaillé}\label{part:details}
 \section{Discussions théoriques}
@@ -797,7 +755,6 @@ peuvent être appréciés en \ref{fig:radius}. Pour un rayon de détection de 2 
 étonnant dans la mesure où 2 pixels rentre largement dans la gamme de précision de ``labélisation''. Par contre, pour un rayon de détection de 5 pixels, 
 le modèle démontre une précision assez bonne de 81 \%, ce qui est en lien avec la valeur précédemment observée pour 10 pixels. Dés que le rayon dépasse 
 15 pixels, la précision du modèle stagne. Ceci laisse apercevoir que 10\% des détections sont aberrantes.
-\vspace{10em}
 
 \begin{figure}[t]
 \centering
@@ -814,6 +771,49 @@ le modèle démontre une précision assez bonne de 81 \%, ce qui est en lien ave
   \label{fig:radius}
 \end{subfigure}
 \end{figure}
+
+\vspace{10em}
+\paragraph{robustesse au changement d'échelles}
+Bien que par construction la méthode proposée gère bien les transformations par translation, nous 
+avons observé qu'elle n'est pas très robuste aux changements d'échelle comme peut en témoigner la 
+figure \ref{fig:zoom}. Dans, cette expérience nous avons utilisé le meilleur modèle obtenu via le méthode 
+$C_{\text{lin}}^{SE(2)}$ (c.f. \ref{part:expe}). Nous lui avons demandé de prédire la localisation de la pupile de l'oeil 
+gauche sur la même image mais avec des niveaux de zooms différents (x1, x1.5, x2 et x3). La méthode démontre 
+une bonne capacité de prédiction pour des facteurs d'échelle assez faible puisse en témoigner l'image zoomée 
+x1.5. Cependant, dès lors que le facteur d'échelle dépasse 2, le modèle n'est plus en mesure de prédire correctement 
+la localisation de la pupile.  
+
+\begin{figure}[htpb]
+    \centering
+    %\hspace*{-5em}%
+    \begin{subfigure}[b]{0.3\textwidth}
+    \includegraphics[scale=0.4]{plots/zoom_1.jpeg}%
+      \caption{Image original}%
+        \label{fig:param}
+    \end{subfigure}%
+    \quad
+    \begin{subfigure}[b]{0.3\textwidth}
+      \includegraphics[scale=0.4]{plots/zoom_1_5.jpeg}
+      \caption{Zoom x1.5}%
+      \label{fig:radius}
+    \end{subfigure}
+    \vskip\baselineskip
+    \begin{subfigure}[b]{0.3\textwidth}
+        \includegraphics[scale=0.4]{plots/zoom_2.jpeg}
+        \caption{Zoom x2}%
+        \label{fig:radius}
+      \end{subfigure}
+      \quad
+      \begin{subfigure}[b]{0.3\textwidth}
+        \includegraphics[scale=0.4]{plots/zoom_3.jpeg}
+        \caption{Zoom x3}%
+        \label{fig:radius}
+      \end{subfigure}
+      \caption{Même image zoomée et résultat de prédiction}
+      \label{fig:zoom}
+    \end{figure}
+
+
 
 \begin{thebibliography}{9}
 
