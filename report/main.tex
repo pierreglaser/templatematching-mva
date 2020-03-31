@@ -92,9 +92,11 @@ compte des structures d'orientation locale en tout point de l'image.
         t = \arg \min_{  } \sum\limits_{ i=1 }^{ N } \left ( \langle t, p_i \rangle
         - y_i \right )^2 + R(t) 
         \] 
-        les $ p_i $ sont des templates individuels: ``idéaux'': ce sont des patches,
-        extraits des images, de la même taille que $ t $ centrée en le point d'intérêt
-        de l'image $ i $. Si l'on suppose que 
+        les $ p_i $ sont des templates individuels ``idéaux'': ce sont des patches,
+        extraits des images, de la même taille que $ t $ . Si ils sont centrés en le point d'intérêt
+        de l'image $ i $, ce sont des patches dits ``positifs`''. Les patchs ne correspondant à aucune zone d'intérêt 
+        dans l'image sont dit ``négatifs''. Les $y_i$ correspondent aux labels et on a $y_i =1$ si le patch est 
+        postif (i.e. une zone d'intérêt y est présente), $y_i=0$ sinon. Si l'on suppose que 
         \begin{itemize}
             \item $ \|p_i\| = 1 $
             \item n'importe quelle coupe de $ f_i $, une image, de la taille de $ p_i $ a une norme
