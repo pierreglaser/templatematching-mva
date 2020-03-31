@@ -81,7 +81,7 @@ class SE2Averager(TemplateCrossCorellatorBase, PatchRegressorBase):
         y:
             List: 1 if positive patch, 0 if negative
         """
-        X = self._ost.fit_transform(X).imag  # can also take imag
+        X = np.abs(self._ost.fit_transform(X)) # can also take imag
         X = X[y == 1]  # select only positive patches
         m = np.mean(X, axis=0)
         self._template = (m - np.mean(m)) / np.std(m)

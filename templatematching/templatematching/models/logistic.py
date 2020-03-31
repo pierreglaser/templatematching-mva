@@ -150,7 +150,7 @@ class SE2LogReg(SE2Ridge):
         self.rs = np.random.RandomState(random_state)
 
     def _fit_patches(self, X, y):
-        X = self._ost.fit_transform(X).imag  # can also take the modulus
+        X = abs(self._ost.fit_transform(X))  # can also take the modulus
         self._check_params(X)
         y = y.reshape(-1, 1)
 

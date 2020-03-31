@@ -223,7 +223,7 @@ class SE2Ridge(SplineRegressorBase, PatchRegressorBase):
 
     def predict(self, X):
         # TODO: put this method in a Mixin Class.
-        X = self._ost.transform(X).imag
+        X = abs(self._ost.transform(X)) # can tahe modulus
         template = self.template.reshape(1, *self.template.shape)
         batch_size = min(self.batch_size, X.shape[0])
 
@@ -242,7 +242,7 @@ class SE2Ridge(SplineRegressorBase, PatchRegressorBase):
         return convs, np.array(positions)
 
     def _fit_patches(self, X, y):
-        X = self._ost.fit_transform(X).imag  # can also take the modulus
+        X = abs(self._ost.fit_transform(X))  # can also take the modulus
         self._check_params(X)
         num_samples, _, _, _, _, _, _, _, _, _ = self._get_dims()
         S = self._create_s_matrix(X)
