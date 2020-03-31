@@ -84,8 +84,8 @@ compte des structures d'orientation locale en tout point de l'image.
     \item Dans le cas standard exposé ci-dessus, $ f $ est définie sur $ \mathbb{R}^2 $. Cependant, $ f $
         peut être transformée (e.g relevée, soulevée) depuis $ \mathbb{R}^2  \to
         \mathbb{R} $  vers $ \mathbb{R}^2 \times \lbrack 0, 2 \pi \rbrack  \to \mathbb{
-        C} $, la dimension
-        additionnelle décrivant en chaque point l'état local de l'orientation de l'image
+        C} $, ou autrement dit, $ SE2(\mathbb{R}) $. La dimension
+        additionnelle décrit en chaque point l'état local de l'orientation de l'image
         selon un certain nombre de directions.
     \item Afin d'obtenir des bonnes performances en prédiction, le template $ t $ est
       défini comme solution d'un problème d'optimisation de type
@@ -272,7 +272,11 @@ spatial, une image simple, et la même image transformée par cette ondelette.
 Comme présenté au dessus, le score d'orientation permet de capturer d'une certaine manière les axes dominants d'un image dans une certaine direction. De ce fait, 
 l'utilisation de ce score semble être d'intérêt pour des problèmes de détection.
 Dans, ce papier les auteurs ont ainsi fait le choix d'étendre le problème d'optimisation comme présenté en \ref{eq.2} à $SE(2)$ via 
-l'utilisation du score d'orientation. Il s'agit désormais de s'intéresser au problème d'optimisation étendu:
+l'utilisation du score d'orientation. 
+\begin{itemize}
+  \item La notion de cross-correlation est étendue naturellement a $ SE(2) $
+\end{itemize}
+Il s'agit désormais de s'intéresser au problème d'optimisation étendu:
 \[
   \sum \limits_{i=1}^N (\langle t, |U_{fi}| \rangle_{{\mathbb{L}_2(SE(2))}} - y_i)^2 + \lambda \int \limits_{\mathbb{R}^2} \int \limits_{0}^{2\pi} \lVert 
   \nabla t(x, y, \theta)\rVert_{D}^2 dxdyd\theta + \mu \lVert t \rVert_{\mathbb{L}_2(SE(2))}^2
