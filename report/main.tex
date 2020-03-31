@@ -4,7 +4,10 @@
 \usepackage{amsthm}
 \usepackage{empheq}
 \usepackage[most]{tcolorbox}
-\usepackage[a4paper, total={6in, 8in}]{geometry}
+%\usepackage[a4paper, total={6in, 8in}]{geometry}
+\usepackage[a4paper,bindingoffset=0.2in,%
+            left=1in,right=1in,top=1in,bottom=1in,%
+            footskip=.25in]{geometry}
 \usepackage{algorithm}
 \usepackage[noend]{algpseudocode}
 %\usepackage[francais]{babel}
@@ -43,12 +46,12 @@
 \title{Rapport de projet - Geodesic Methods and Deformable Models}
 \begin{document}
 \maketitle
-$ \quad $
-% \pagebreak
-\part{Questions}
+\pagebreak
+%\vspace*{-10em}
+\part*{Questions}
 
 
-\paragraph{Quel est le problème traité} 
+\paragraph{Quel est le problème traité?} 
 Nous étudierons dans ce rapport l'article \emph{Template Matching via densitives on the
 Roto Translation Group}, par Erik J. Bekkers et. Al. \cite{main}
 
@@ -58,9 +61,10 @@ données utilisés, l'objet est par exemple le disque optique d'un œil, ou bien
 rétine. Un des présupposés majeurs de l'article est que les problèmes en question bénéficieraient d'une prise en
 compte des structures d'orientation locale en tout point de l'image.
 
-\paragraph{Quelles sont les équations et les méthodes numériques utilisées} 
+\paragraph{Quelles sont les équations et les méthodes numériques utilisées?} 
 \begin{itemize}
-    \item La localisation de l'objet d'intérêt dans une image se fait par \emph{cross-correlation}: un
+    \item La localisation de l'objet d'intérêt dans une image se fait par
+      \emph{cross-correlation} \cite{cross-correlation}: un
         \emph{template} est ``appliqué`` en tout point $ x $ de l'image.  La valeur
         maximale du résultat est alors la localisation prédite de l'objet. Formellement,
         si $ f $ est l'image, et $ x $ le template:
@@ -128,11 +132,15 @@ compte des structures d'orientation locale en tout point de l'image.
             \int\limits_{  }^{  } \| \nabla_{  } t(x, y) \|^2 dx dy
         \] 
     \item Toutes ces formulations et paramétrisations sont pour l'instant uniquement
-      valables pour les images dans leur forme initiale (non soulevées)
+      valables pour les images dans leur forme initiale (non soulevées). Un
+      investissement supplémentaire est nécessaire pour reformuler le problème
+      d'optimisation ainsi que les pénalités de régularisation pour optimiser un
+      template "soulevé". Ces équations seront étudiées plus en détail dans la section
+      \ref{part:details}
 \end{itemize}
 
 \paragraph{Pouvez vous situer l'article par rapport aux méthodes étudiées en cours et le
-comparer à des sujets proches évoqués en cours} 
+comparer à des sujets proches évoqués en cours?} 
 La différence principale avec les sujets étudiés en cours est que cette méthode est une
 méthode d'apprentissage supervisée et automatique alors que les méthodes étudiées
 pendant le cours sont non supervisées et demandent généralement une intervention humaine
@@ -151,23 +159,23 @@ alors que le problème étudié concerne la résolution de
     - y_i \right )^2 + \lambda \int\limits_{  }^{  } \| \nabla_{  } t(x, y) \|^2 dx dy + \mu \| t \|^2
     \label{eq.2} \tag{2}
 \]
-\paragraph{Quelle est l'originalité du travail (selon les auteurs).} 
+\paragraph{Quelle est l'originalité du travail (selon les auteurs)?}
 Ce travail s'inscrit dans la continuité d'une  série d'article des auteurs: la majorité
 des concepts utilisés dans cet articles on été introduits dans des publications
 précédentes:
 \begin{itemize}
-    \item l'utilisation des scores d'orientation a été introduit en [32]
-    \item l'utilisation des cake wavelets a été introduit dans la thèse de l'auteur.
-    \item la cross correlation est une technique bien connue pour détecter des points
-        d'intérêts.
+  \item l'utilisation des scores d'orientation a été introduit en \cite{orientation-score}
+  \item les cake wavelets ont été introduites dans \cite{cake}
+  \item la cross-corrélation est une technique bien connue pour détecter des points
+    d'intérêts \cite{cross-correlation}.
 \end{itemize}
 Les auteurs proposent alors une méthode de résolution pour une reformulation de la 
 ``regression logistique'' permettant à cette méthode d'atteindre l'état de l'art en
-termes de performances, ainsi qu'une série d'expériences très completes
+termes de performances, ainsi qu'une série d'expériences très complètes
 comparant l'influence des différents types de régularisation et l'importance des
 orientation scores. Enfin, est donnée en appendice une interprétation mathématique d'une
 version simplifiée du problème régularisé dans $ SE2(\mathbb{R}) $
-\paragraph{Quels sont les résultats nouveaux importants qui en découlent.}
+\paragraph{Quels sont les résultats nouveaux importants qui en découlent?}
 Le résultat le plus important ici est à nos yeux la preuve expérimentale que cette
 méthode atteint l'état de l'art pour les jeux de données considérées.
 \paragraph{Voyez vous des faiblesses dans l'approche présentée et avez-vous des idées
@@ -215,6 +223,15 @@ la localisation de la pupile.
 
 
 \part{Rapport détaillé}
+Une faiblesse de la méthode proposée selon nous est que cette méthode semble peu robuste
+aux changements d'échelle (détails expérimentaux dans \ref{part:details}), quelque chose qui est très fréquent dans les jeux de données
+d'images. Pour y remédier, on pourrait considérer une base d'ondelettes plus riches,
+pouvant prendre en compte différents types d'échelles, mais pour être admissible, une
+ondelette doit satisfaire un cahier des charges fourni (voir plus tard les détails
+théoriques sur les ondelettes de cake).  Il n'est donc pas simple (mathématiquement) de
+changer d'ondelettes pour rendre la méthode invariante aux changements d'échelle.
+
+\part{Rapport détaillé}\label{part:details}
 \section{Discussions théoriques}
 \paragraph{Les scores d'orientation} 
 Un concept majeur du papier concerne la manière de prendre en compte les l'état
@@ -797,35 +814,6 @@ le modèle démontre une précision assez bonne de 81 \%, ce qui est en lien ave
 \end{subfigure}
 \end{figure}
 
-
-\begin{figure}[htpb]
-    \centering
-    %\hspace*{-5em}%
-    \begin{subfigure}[b]{0.3\textwidth}
-    \includegraphics[scale=0.4]{plots/zoom_1.jpeg}%
-      \caption{Image original}%
-        \label{fig:param}
-    \end{subfigure}%
-    \quad
-    \begin{subfigure}[b]{0.3\textwidth}
-      \includegraphics[scale=0.4]{plots/zoom_1_5.jpeg}
-      \caption{Zoom x1.5}%
-      \label{fig:radius}
-    \end{subfigure}
-    \vskip\baselineskip
-    \begin{subfigure}[b]{0.3\textwidth}
-        \includegraphics[scale=0.4]{plots/zoom_2.jpeg}
-        \caption{Zoom x2}%
-        \label{fig:radius}
-      \end{subfigure}
-      \quad
-      \begin{subfigure}[b]{0.3\textwidth}
-        \includegraphics[scale=0.4]{plots/zoom_3.jpeg}
-        \caption{Zoom x3}%
-        \label{fig:radius}
-      \end{subfigure}
-    \end{figure}
-
 \begin{thebibliography}{9}
 
 	\bibitem{main}
@@ -835,10 +823,21 @@ le modèle démontre une précision assez bonne de 81 \%, ce qui est en lien ave
     \bibitem{bspline}
     Thévenaz, P., Blu, T., \& Unser, M. (2000). \emph{Interpolation revisited} [medical
     images application]. IEEE Transactions on medical imaging, 19(7), 739-758.
+    \bibitem{orientation-score}
+    Bekkers, E., Duits, R., \& Loog, M. (2015, January). \emph{Training of templates for
+      object recognition in invertible orientation scores: application to optic nerve
+    head detection in retinal images.}
+    In International Workshop on Energy Minimization Methods in Computer Vision and Pattern Recognition (pp. 464-477). Springer, Cham.
+    \bibitem{cake}
+    Kalitzin, S. N., Romeny, B. M. T. H., \& Viergever, M. A. (1999).
+    \emph{Invertible apertured orientation filters in image analysis.}
+    International Journal of Computer Vision, 31(2-3), 145-158.
+    \bibitem{cross-correlation}
+    Yoo, J. C., \& Han, T. H. (2009).
+    \emph{Fast normalized cross-correlation.} Circuits, systems and signal processing, 28(6), 819.
     \bibitem{preprocessing}
     Foracchia, M., Grisan, E., \& Ruggeri A. (2005). \emph{Luminosity  and  contrast  normalization  inretinal images}.
     MEDIA, vol. 9, no. 3, pp. 179–90.
-
 \end{thebibliography}
 
         
