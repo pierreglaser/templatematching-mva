@@ -1,4 +1,3 @@
-\author{Pierre Glaser, Clement Chadebec}
 \documentclass{article}
 \usepackage{amsmath}
 \usepackage{amssymb}
@@ -23,7 +22,11 @@
 \usepackage{xifthen}
 \usepackage{pdfpages}
 \usepackage{transparent}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{hyperref}
 
+\captionsetup[subfigure]{labelformat=empty}
 
 \newcommand{\incfig}[1]{%
     \colorbox{white}{
@@ -35,7 +38,7 @@
 \newtheorem{definition}{Definition}
 \newtheorem{proposition}{Proposition}
 \newtheorem{theorem}{Theorem}
-
+\author{Pierre Glaser, Clement Chadebec}
 \title{Rapport de projet - Geodesic Methods and Deformable Models}
 \begin{document}
 \maketitle
@@ -72,7 +75,7 @@ compte des structures d'orientation locale en tout point de l'image.
         Typiquement,
         \[
         t = \arg \min_{  } \sum\limits_{ i=1 }^{ N } \left ( \langle t, p_i \rangle
-        - y_i \right )^2 + R(t)
+        - y_i \right )^2 + R(t) 
         \] 
         les $ p_i $ sont des templates individuels: ``idéaux'': ce sont des patches,
         extraits des images, de la même taille que $ t $ centrée en le point d'intérêt
@@ -94,8 +97,9 @@ compte des structures d'orientation locale en tout point de l'image.
         suivie dans cet article, qui utilise come fonction les B-splines. Le template
         s'ecrit alors
         \[
-            t(x, y) = \sum\limits_{ k=1 }^{ N_k } \sum\limits_{ l=1 }^{ N_l } c_k B^n \left (
+            t(x, y) = \sum\limits_{ k=1 }^{ N_k } \sum\limits_{ l=1 }^{ N_l } c_{k, l} B^n \left (
             \frac{x}{s_k} - k \right ) B^n \left ( \frac{y}{s_{l}} - l \right )
+            \label{eq:spline} \tag{1}
         \] 
         Une expression qui admet alors un gradient, ceci permettant d'ajouter au
         probleme d'optimisation un terme de la forme
@@ -122,6 +126,7 @@ alors que le problème étudié concerne la résolution de
 \[
     t = \arg \min_{  } \sum\limits_{ i=1 }^{ N } \left ( \langle t, p_i \rangle
     - y_i \right )^2 + \lambda \int\limits_{  }^{  } \| \nabla_{  } t(x, y) \|^2 dx dy + \mu \| t \|^2
+    \label{eq.2} \tag{2}
 \]
 \paragraph{Quelle est l'originalité du travail (selon les auteurs).} 
 Ce travail s'inscrit dans la continuité d'une  série d'article des auteurs: la majorité
@@ -210,7 +215,60 @@ de gauche à droite: l'ondelette dans le plan de fourrier, l'ondelette dans le d
 spatial, une image simple, et la même image transformée par cette ondelette.
 \end{figure}
 
-\part
+\paragraph{Extension à $SE(2)$}
+Comme présenté au dessus, le score d'orientation permet de capturer d'une certaine manière les axes dominants d'un image dans une certaine direction. De ce fait, 
+l'utilisation de ce score semble être d'intérêt pour des problèmes de détection.
+Dans, ce papier les auteurs ont ainsi fait le choix d'étendre le problème d'optimisation comme présenté en \ref{eq.2} à $SE(2)$ via 
+l'utilisation du score d'orientation. Il s'agit désormais de s'intéresser au problème d'optimisation étendu:
+\[
+  \sum \limits_{i=1}^N (\langle t, |U_{fi}| \rangle_{{\mathbb{L}_2(SE(2))}} - y_i)^2 + \lambda \int \limits_{\mathbb{R}^2} \int \limits_{0}^{2\pi} \lVert 
+  \nabla t(x, y, \theta)\rVert_{D}^2 dxdyd\theta + \mu \lVert t \rVert_{\mathbb{L}_2(SE(2))}^2
+\]
+Les $U_{fi}$ sont les scores d'orientation des patchs 'idéaux' $p_i$. 
+Le produit scalaire définit sur $SE(2)$ prend la forme suivante:
+\[
+    \langle t, |U_{fi}| \rangle_{SE(2)} = 
+    \int \limits_{\mathbb{R}^2} \int \limits_{0}^{2\pi} \overline{t(x, y, \theta)} |U_f|(x, y, \theta)dxdyd\theta
+\]
+
+Et $\nabla t$ est le gradient invariant à gauche déduit des dérivées partielles invariantes à gauches défines sur $SE(2)$
+comme suit $\{(\partial_{\xi} = cos(\theta)\partial_x) + sin(\theta) \partial_y, \partial{\eta} = -sin(\theta) \partial_x + cos(\theta)
+\partial_y, \partial_{\theta}\}$. Le gradient est alors déduit:
+\[
+    \lVert \nabla t \rVert_{D}^2 = D_{\xi \xi} \Big|\frac{\partial t}{\partial \xi} \Big|^2
+    + D_{\eta \eta} \Big|\frac{\partial t}{\partial \eta}\Big|^2 + D_{\theta \theta} \Big|\frac{\partial t}{\partial \theta}\Big|^2
+\]
+
+
+De manière identique à l'approche employée dans $\mathbb{R}^2$, le template final est paramétrisé par une famille de fonctions 
+régulières telles que les B-splines étendues à $SE(2)$
+\[
+    t(x, y, \theta) = \sum \limits_{k=1}^{n_k} \sum \limits_{l=i}^{N_l} \sum \limits_{m=1}^{N_m} c_{k,l,m} B^n \left (\frac{x}{s_k} - k \right )
+    B^n \left (\frac{y}{s_l} - l \right) B^n \left (\frac{\theta \text{mod} 2\pi}{s_m} - m \right )
+\]
+
+\paragraph{Regression logistique}
+Dans les deux espaces considérés, $\mathbb{R}^2$ et $SE(2)$, un modèle de regression logistique est également proposé en comparaison 
+au modèle de régression linéaire. Dans les problèmes de détection, le but majeur est de séparer les patches $f_i$ correspondant aux zones d'une image correspondant à une 
+zone d'intérêt ($y_i =1$) des zones sans objet ($y_1=0$). Cependant, une approche différente de \ref{eq.2} et ne faisant pas intervenir le terme de perte quadratique 
+peut être également employée. Ici, les auteurs ont décidé d'avoir recours à un modèle de regresssion logistique dans lequel la présence ou non de 
+la zone d'intérêt au sein d'un patch $f_i$ est représentée par une certaine probabilité de présence $p_i$. Cette probabilité est inférée à l'aide de
+la function sigmoide telle que $p_i = \sigma(\langle t, f_i \rangle)$. Le le but revient à trouver le template qui maximise la vraissemenblance $l(t) = 
+\prod \limits_{i=1}^N p(f_i; t)^{y_i}(1 - p(f_i; y))^{1- y_i})$ 
+des patches $f_i$ étant donnés leurs labels $y_i$. Dans une telle approche la log-vraissemenblance permet de 'linéariser' le problème d'optimisation qui prend la forme
+suivante dans $\mathbb{R}^2$:
+\[
+    \arg \max \sum \limits_{i=1}^N \langle t, f_i \rangle_{\mathbb{L}_2(\mathbb{R}^2)} - \log \left ( 1 + e^{\langle t, f_i \rangle_{\mathbb{L}_2(\mathbb{R}^2)}}\right) - \lambda \int \limits_{\mathbb{R}^2} \lVert \nabla 
+    t \rVert_{\mathbb{L}_2(\mathbb{R}^2)}^2 dx dy - \mu \lVert t \rVert_{\mathbb{L}_2(\mathbb{R}^2)}^2
+\]
+ou dans $SE(2)$:
+\[
+    \arg \max \sum \limits_{i=1}^N \langle t, |U_{f_i}| \rangle_{\mathbb{L}_2(SE(2))} - \log \left ( 1 + e^{\langle t, |U_{f_i}| \rangle_{\mathbb{L}_2(SE(2))}}\right) - \lambda \int \limits_{\mathbb{R}^2} \int \limits_{0}^{2\pi}\lVert \nabla 
+    t \rVert_{D}^2 dx dy d\theta- \mu \lVert t \rVert_{\mathbb{L}_2(SE(2))}^2
+\]
+
+
+
 \paragraph{Expériences}
 
 Afin de mieux comprendre leur fonctionnement et de pouvoir les comparer dans 
@@ -230,17 +288,18 @@ les espaces $\mathbb{R}^2$ et $SE(2)$. Afin de réaliser les expérience dont le
 ont été réalisée en considérant un ensemble de 500 images dont 80\% (400 images) constitue l'ensemble d'entrainement 
 des modèles et les 20 \% (100 images) restants l'ensemble de test. Sur chacune des images d'entrainement, un patch 
 positif de taille $N_x \times N_y = 101 \times 101$ centré autour des coordonnées de l'oeil gauche et un patch négatif 
-de même de taille tiré aléatoirement en dehors des zones d'intérêts (oeil droit et gauche) sont crées. Un détection est 
+de même de taille tiré aléatoirement en dehors des zones d'intérêts (oeil droit et gauche) sont crées. Une détection est 
 ensuite considérée "bonne" sur le point de détection se situe dans rayon de $10$ pixels autour de la position réelle de l'oeil 
-gauche.
+gauche. Le nombre de splines considéré est de $N_k = 51$ , $N_l =51$ et $N_m = 4$.
 
 
 
 \paragraph{Template Matching dans $\mathbb{R}^2$}
 Premièrement, une comparaison des résultats obtenus avec les différentes methodes a été réalisée dans $\mathbb{R}^2$.
 Les résultats sont reportés dans \ref{table: R2}. Afin de trouver les valeurs optimales de $\mu$ (resp $\lambda$) dans les expériences C (resp. D), nous avons décidé 
-de procèder de façon empirique en faisant varier les valeurs de ces deux paramètres entre $10^{-4}$ et $1$. Afin de trouver le mailleur couple pour l'expérience E, nous avons 
-choisi de tout d'abord fixer la valeur de $\mu$ à la valeur optimale trouvée lors de l'expérience C, puis de faire varier $\lambda$ de  $10^{-4}$ et $1$.
+de procèder de façon empirique en faisant varier les valeurs de ces deux paramètres entre $10^{-4}$ et $1$. Afin de trouver le meilleur couple pour l'expérience E, nous avons 
+choisi de tout d'abord fixer la valeur de $\mu$ et $\lambda$ à leur valeur optimale trouvée lors des expériences C et D $\mu*$ et $\lambda*$, puis de faire légèrement leurs valeurs autour de ces optimaux.
+Il s'est avéré que comme présenté dans l'article un choix de couple $\mu = 0.5 \mu*$ et $\lambda = 0.5 \lambda*$ fournissait les meilleurs résultats.
 
 \begin{table}[h!]
     \centering
@@ -258,11 +317,11 @@ choisi de tout d'abord fixer la valeur de $\mu$ à la valeur optimale trouvée l
         \hline
         $B_{\text{log}}^{\mathbb{R}^2} $& 0.0 \%   \\ 
         $C_{\text{log}}^{\mathbb{R}^2} $& 63.0 \%  \\ 
-        $D_{\text{log}}^{\mathbb{R}^2} $& 7.0 \%   \\ 
+        $D_{\text{log}}^{\mathbb{R}^2} $& 26.0 \%   \\ 
         $E_{\text{log}}^{\mathbb{R}^2} $& 63.0 \%  \\ 
         \hline
     \end{tabular}
-    \caption{Résultats obtenus template matching dans $\mathbb{R}^2$}
+    \caption{Résultats obtenus par template matching dans $\mathbb{R}^2$}
     \label{table: R2}
 \end{table}
 
@@ -270,11 +329,15 @@ La table \ref{table: R2} montre qu'un template relativement simple ne correspond
 résultats comparé à des modèles de régression plus évolués. Effectivement, si non complés à de mecanismes de régularisation, les modèles $B_{\text{log}}^{\mathbb{R}^2} $ et 
 $B_{\text{lin}}^{\mathbb{R}^2} $ ne demontre que de faibles performances. Par ailleurs, un bon choix de paramètres de régularisation peut conduire à améliorer drastiquement les 
 performances des regressions dont le meilleur résulat est observé pour $\mu = 10^{-1}$ et $\lambda = 10^{-2}$ pour la regression linéaire et $\mu = 10^{-1}$ et $\lambda = 10^{-3}$ pour la regression logistique.
+C'est deux modèles de regression semblent d'ailleurs démontrer des niveaux de performance similaire.
+Le "meilleur" modèle dans $\mathbb{R}^2$ est néanmoins obtenu dans le cas E avec la regression logistique (63\%). Ces résultats semblent alignés avec ceux présentés par les auteurs bien que dans $\mathbb{R}^2$, 
+il semble que le patch moyenné $A^{\mathbb{R}^2}$ demontre les meilleurs resultats, les suivant sont $C_{\text{lin}}^{\mathbb{R}^2}, E_{\text{lin}}^{\mathbb{R}^2}, C_{\text{lin}}^{\mathbb{R}^2}$ et $E_{\text{log}}^{\mathbb{R}^2}$ qui performent de manière 
+similaires.
 
 
 \paragraph{Template Matching dans $SE(2)$}
 Les mêmes expériences ont ensuite été reproduites en utilisant l'espace $SE(2)$ et donc ajoutant également l'orientation score dans les régressions.
-Cependant, dans cette section les paramètres le paramètres $\mu \in [10^{-4}, 1]$ et $\lambda \in [10^{-4}, 100]$. En ce qui concernent les paramètres inhérents à la matrices de 
+Cependant, dans cette section les paramètres le paramètres $\mu \in [10^{-5}, 10^{-1}]$ et $\lambda \in [10^{-4}, 10^{-1}]$. En ce qui concernent les paramètres inhérents à la matrices de 
 régularisation ont été fixé comme suit $D_{\xi \xi}=1, D_{\eta \eta} = 0$ et $D_{\theta \theta} = 10^{-2}$. Nous n'avons pas fait varié ces paramètres qui ont été choisis en accord avec les auteurs 
 de l'artcile présenté. Les resultats peuvent être observés en \ref{table: SE(2)}.
 
@@ -285,23 +348,342 @@ de l'artcile présenté. Les resultats peuvent être observés en \ref{table: SE
         Methode & Score (\%)\\
         \hline
         \hline
-        $A^{SE(2)}$&  64.0 \% \\
+        $A^{SE(2)}$&  63.0 \% \\
         \hline
-        $B_{\text{lin}}^{SE(2)}$&     3.0  \%   \\
-        $C_{\text{lin}}^{SE(2)}$&     68.0 \%   \\
-        $D_{\text{lin}}^{SE(2)}$&     61.0 \%   \\
-        $E_{\text{lin}}^{SE(2)}$&     68.0 \%   \\
+        $B_{\text{lin}}^{SE(2)}$&  67.0    \%   \\
+        $C_{\text{lin}}^{SE(2)}$&  88.0    \%   \\
+        $D_{\text{lin}}^{SE(2)}$&  26.0   \%   \\
+        $E_{\text{lin}}^{SE(2)}$&  89.0    \%   \\
         \hline
-        $B_{\text{log}}^{SE(2)} $&    \%   \\ 
-        $C_{\text{log}}^{SE(2)} $&    \%   \\ 
+        $B_{\text{log}}^{SE(2)} $&  7.0  \%   \\ 
+        $C_{\text{log}}^{SE(2)} $&  55.0  \%   \\ 
         $D_{\text{log}}^{SE(2)} $&    \%   \\ 
         $E_{\text{log}}^{SE(2)} $&    \%   \\ 
         \hline
     \end{tabular}
-    \caption{Résultats obtenus template matching dans $SE(2)$}
+    \caption{Résultats obtenus par template matching dans $SE(2)$}
     \label{table: SE(2)}
 \end{table}
 
+Finalement, les résultats présentés en \ref{table: SE(2)} démontrent l'intérêt de considérer des templates dans un espace étendu tel que $SE(2)$.
+Si le template créé par moyenne de tous les patches popsitifs ne performe que légèrement mieux dans $SE(2)$ (63\% v. 61\%), l'efficacité 
+lors de la création de template via des régressions dans $SE(2)$ est remarquable. En effet, une simple régression linéaire sans aucune régularisation permet 
+d'atteindre un niveau de performance bien supérieur passant de 3\% dans $\mathbb{R}^2$ à 67\% dans $SE(2)$. Si maintenant, 
+un simple régularisation $l-2$ est considérée (cas C), combinée à un choix judicieux de $\mu$,  la performance peut atteindre 88\% de précision.
+L'ajout d'un nouveau terme régularisant (cas E) et un bon choix de constante permet d'obtenir le meilleur résultat. Seul le cas D, démontre une 
+performance plus faible que le même cas dans $\mathbb{R}^2$ qui était également l'un des moins peformants. Les résultats que nous présentons sont en ligne avec ceux 
+présentés par les auteurs en ce qui concerne les regressions linéaires. Notre meilleur modèle est dérivé de la méthode $C_{\text{lin}}^{SE(2)}$. En ce qui concerne 
+les regressions logistiques, nos résultats sont un peut décevants en comparaison de ceux présenté par les auteurs. 
 
+
+
+\begin{figure*}[h!]
+    \centering
+
+    \begin{subfigure}[b]{0.3\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{plots/test_image_detection.jpg}
+        \caption{test image}
+    \end{subfigure}
+
+    {\small (a)}
+
+    \vskip\baselineskip
+    \begin{subfigure}[b]{0.1\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{plots/A_R2_template.jpg}
+
+    \end{subfigure}
+    \hspace{-1\baselineskip}
+    \vspace{-0.5\baselineskip}
+    \quad
+    \begin{subfigure}[b]{0.1\textwidth}  
+        \centering 
+        \includegraphics[width=\textwidth]{plots/B_lin_R2_template.jpg}
+
+    \end{subfigure}
+    \hspace{-1\baselineskip}
+    \quad
+    \begin{subfigure}[b]{0.1\textwidth}   
+        \centering 
+        \includegraphics[width=\textwidth]{plots/C_lin_R2_template.jpg}
+
+    \end{subfigure}
+    \hspace{-1\baselineskip}
+    \quad
+    \begin{subfigure}[b]{0.1\textwidth}   
+        \centering 
+        \includegraphics[width=\textwidth]{plots/D_lin_R2_template.jpg}
+
+    \end{subfigure}
+    \hspace{-1\baselineskip}
+    \quad
+    \begin{subfigure}[b]{0.1\textwidth}   
+        \centering 
+        \includegraphics[width=\textwidth]{plots/E_lin_R2_template.jpg}
+
+    \end{subfigure}
+    \hspace{-1\baselineskip}
+    \quad
+    \begin{subfigure}[b]{0.1\textwidth}   
+        \centering 
+        \includegraphics[width=\textwidth]{plots/B_log_R2_template.jpg}
+
+    \end{subfigure}
+    \hspace{-1\baselineskip}
+    \quad
+    \begin{subfigure}[b]{0.1\textwidth}   
+        \centering 
+        \includegraphics[width=\textwidth]{plots/C_log_R2_template.jpg}
+
+    \end{subfigure}
+    \hspace{-1\baselineskip}
+    \quad
+    \begin{subfigure}[b]{0.1\textwidth}   
+        \centering 
+        \includegraphics[width=\textwidth]{plots/D_log_R2_template.jpg}
+
+    \end{subfigure}
+    \hspace{-1\baselineskip}
+    \quad
+    \begin{subfigure}[b]{0.1\textwidth}   
+        \centering 
+        \includegraphics[width=\textwidth]{plots/E_log_R2_template.jpg}
+
+    \end{subfigure}
+    \vskip\baselineskip
+    \begin{subfigure}[b]{0.1\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{plots/A_R2_conv.jpg}
+        \caption{$A^{\mathbb{R}^2}$}%
+        
+        \label{fig:mean and std of net14}
+    \end{subfigure}
+    \hspace{-1\baselineskip}
+    \quad
+    \begin{subfigure}[b]{0.1\textwidth}  
+        \centering 
+        \includegraphics[width=\textwidth]{plots/B_lin_R2_conv.jpg}
+        \caption{$B_{\text{lin}}^{\mathbb{R}^2}$}%
+         
+        \label{fig:mean and std of net24}
+    \end{subfigure}
+    \hspace{-1\baselineskip}
+    \quad
+    \begin{subfigure}[b]{0.1\textwidth}   
+        \centering 
+        \includegraphics[width=\textwidth]{plots/C_lin_R2_conv.jpg}
+        \caption{$C_{\text{lin}}^{\mathbb{R}^2}$}%
+           
+        \label{fig:mean and std of net34}
+    \end{subfigure}
+    \hspace{-1\baselineskip}
+    \quad
+    \begin{subfigure}[b]{0.1\textwidth}   
+        \centering 
+        \includegraphics[width=\textwidth]{plots/D_lin_R2_conv.jpg}
+        \caption{$D_{\text{lin}}^{\mathbb{R}^2}$}%
+        
+        \label{fig:mean and std of net44}
+    \end{subfigure}
+    \hspace{-1\baselineskip}
+    \quad
+    \begin{subfigure}[b]{0.1\textwidth}   
+        \centering 
+        \includegraphics[width=\textwidth]{plots/E_lin_R2_conv.jpg}
+        \caption{$E_{\text{lin}}^{\mathbb{R}^2}$}%
+        
+        \label{fig:mean and std of net44}
+    \end{subfigure}
+    \hspace{-1\baselineskip}
+    \quad
+    \begin{subfigure}[b]{0.1\textwidth}   
+        \centering 
+        \includegraphics[width=\textwidth]{plots/B_log_R2_conv.jpg}
+        \caption{$B_{\text{log}}^{\mathbb{R}^2}$}%
+        
+        \label{fig:mean and std of net44}
+    \end{subfigure}
+    \hspace{-1\baselineskip}
+    \quad
+    \begin{subfigure}[b]{0.1\textwidth}   
+        \centering 
+        \includegraphics[width=\textwidth]{plots/C_log_R2_conv.jpg}
+        \caption{$C_{\text{log}}^{\mathbb{R}^2}$}%
+        
+        \label{fig:mean and std of net44}
+    \end{subfigure}
+    \hspace{-1\baselineskip}
+    \quad
+    \begin{subfigure}[b]{0.1\textwidth}   
+        \centering 
+        \includegraphics[width=\textwidth]{plots/D_log_R2_conv.jpg}
+        \caption{$D_{\text{log}}^{\mathbb{R}^2}$}%
+        
+        \label{fig:mean and std of net44}
+    \end{subfigure}
+    \hspace{-1\baselineskip}
+    \quad
+    \begin{subfigure}[b]{0.1\textwidth}   
+        \centering 
+        \includegraphics[width=\textwidth]{plots/E_log_R2_conv.jpg}
+        \caption{$E_{\text{log}}^{\mathbb{R}^2}$}%
+        
+        \label{fig:mean and std of net44}
+    \end{subfigure}
+    {\small (a)}
+    \vskip\baselineskip
+    \begin{subfigure}[b]{0.1\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{plots/A_SE2_template.jpg}
+
+    \end{subfigure}
+    \hspace{-1\baselineskip}
+    \vspace{-0.5\baselineskip}
+    \quad
+    \begin{subfigure}[b]{0.1\textwidth}  
+        \centering 
+        \includegraphics[width=\textwidth]{plots/B_lin_SE2_template.jpg}
+
+    \end{subfigure}
+    \hspace{-1\baselineskip}
+    \quad
+    \begin{subfigure}[b]{0.1\textwidth}   
+        \centering 
+        \includegraphics[width=\textwidth]{plots/C_lin_SE2_template.jpg}
+
+    \end{subfigure}
+    \hspace{-1\baselineskip}
+    \quad
+    \begin{subfigure}[b]{0.1\textwidth}   
+        \centering 
+        \includegraphics[width=\textwidth]{plots/D_lin_SE2_template.jpg}
+
+    \end{subfigure}
+    \hspace{-1\baselineskip}
+    \quad
+    \begin{subfigure}[b]{0.1\textwidth}   
+        \centering 
+        \includegraphics[width=\textwidth]{plots/E_lin_SE2_template.jpg}
+
+    \end{subfigure}
+    \hspace{-1\baselineskip}
+    \quad
+    \begin{subfigure}[b]{0.1\textwidth}   
+        \centering 
+        \includegraphics[width=\textwidth]{plots/B_log_SE2_template.jpg}
+
+    \end{subfigure}
+    \hspace{-1\baselineskip}
+    \quad
+    \begin{subfigure}[b]{0.1\textwidth}   
+        \centering 
+        \includegraphics[width=\textwidth]{plots/C_log_SE2_template.jpg}
+
+    \end{subfigure}
+    \hspace{-1\baselineskip}
+    \quad
+    \begin{subfigure}[b]{0.1\textwidth}   
+        \centering 
+        \includegraphics[width=\textwidth]{plots/D_log_SE2_template.jpg}
+
+    \end{subfigure}
+    \hspace{-1\baselineskip}
+    \quad
+    \begin{subfigure}[b]{0.1\textwidth}   
+        \centering 
+        \includegraphics[width=\textwidth]{plots/E_log_SE2_template.jpg}
+
+    \end{subfigure}
+    \vskip\baselineskip
+    \begin{subfigure}[b]{0.1\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{plots/A_SE2_conv.jpg}
+        \caption{$A^{SE(2)}$}%
+        
+        \label{fig:mean and std of net14}
+    \end{subfigure}
+    \hspace{-1\baselineskip}
+    \quad
+    \begin{subfigure}[b]{0.1\textwidth}  
+        \centering 
+        \includegraphics[width=\textwidth]{plots/B_lin_SE2_conv.jpg}
+        \caption{$B_{\text{lin}}^{SE(2)}$}%
+         
+        \label{fig:mean and std of net24}
+    \end{subfigure}
+    \hspace{-1\baselineskip}
+    \quad
+    \begin{subfigure}[b]{0.1\textwidth}   
+        \centering 
+        \includegraphics[width=\textwidth]{plots/C_lin_SE2_conv.jpg}
+        \caption{$C_{\text{lin}}^{SE(2)}$}%
+           
+        \label{fig:mean and std of net34}
+    \end{subfigure}
+    \hspace{-1\baselineskip}
+    \quad
+    \begin{subfigure}[b]{0.1\textwidth}   
+        \centering 
+        \includegraphics[width=\textwidth]{plots/D_lin_SE2_conv.jpg}
+        \caption{$D_{\text{lin}}^{SE(2)}$}%
+        
+        \label{fig:mean and std of net44}
+    \end{subfigure}
+    \hspace{-1\baselineskip}
+    \quad
+    \begin{subfigure}[b]{0.1\textwidth}   
+        \centering 
+        \includegraphics[width=\textwidth]{plots/E_lin_SE2_conv.jpg}
+        \caption{$E_{\text{lin}}^{SE(2)}$}%
+        
+        \label{fig:mean and std of net44}
+    \end{subfigure}
+    \hspace{-1\baselineskip}
+    \quad
+    \begin{subfigure}[b]{0.1\textwidth}   
+        \centering 
+        \includegraphics[width=\textwidth]{plots/B_log_SE2_conv.jpg}
+        \caption{$B_{\text{log}}^{SE(2)}$}%
+        
+        \label{fig:mean and std of net44}
+    \end{subfigure}
+    \hspace{-1\baselineskip}
+    \quad
+    \begin{subfigure}[b]{0.1\textwidth}   
+        \centering 
+        \includegraphics[width=\textwidth]{plots/C_log_SE2_conv.jpg}
+        \caption{$C_{\text{log}}^{SE(2)}$}%
+        
+        \label{fig:mean and std of net44}
+    \end{subfigure}
+    \hspace{-1\baselineskip}
+    \quad
+    \begin{subfigure}[b]{0.1\textwidth}   
+        \centering 
+        \includegraphics[width=\textwidth]{plots/D_log_SE2_conv.jpg}
+        \caption{$D_{\text{log}}^{SE(2)}$}%
+        
+        \label{fig:mean and std of net44}
+    \end{subfigure}
+    \hspace{-1\baselineskip}
+    \quad
+    \begin{subfigure}[b]{0.1\textwidth}   
+        \centering 
+        \includegraphics[width=\textwidth]{plots/E_log_R2_conv.jpg}
+        \caption{$D_{\text{log}}^{SE(2)}$}%
+        
+        \label{fig:mean and std of net44}
+    \end{subfigure}
+
+    {\small (b)}
+
+    \caption[ The average and standard deviation of critical parameters ]
+    {\small Exemples de templates et leur réponse} 
+    \label{fig: template}
+\end{figure*}
+
+La figure \ref{fig: template} represente (a) l'image test (b) les différents templates de $\mathbb{R}^2$ que nous avons obtenus sur la première ligne ainsi que leur réponse dans les différents 
+cas considérés sur la seconde ligne (b) le maximum d'intensité du template à travers les orientations $\theta$ ainsi que la réponse du template à l'image test.
 \end{document}
 

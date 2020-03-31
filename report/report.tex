@@ -1,0 +1,307 @@
+\author{Pierre Glaser, Clement Chadebec}
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{empheq}
+\usepackage[most]{tcolorbox}
+\usepackage[a4paper, total={6in, 8in}]{geometry}
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+%\usepackage[francais]{babel}
+\usepackage{listings}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+
+
+
+\makeatletter
+\def\BState{\State\hskip-\ALG@thistlm}
+\makeatother
+
+\usepackage{import}
+\usepackage{xifthen}
+\usepackage{pdfpages}
+\usepackage{transparent}
+
+
+\newcommand{\incfig}[1]{%
+    \colorbox{white}{
+        \def\svgwidth{\columnwidth}
+        \import{./figures/}{#1.pdf_tex}
+    }
+}
+
+\newtheorem{definition}{Definition}
+\newtheorem{proposition}{Proposition}
+\newtheorem{theorem}{Theorem}
+
+\title{Rapport de projet - Geodesic Methods and Deformable Models}
+\begin{document}
+\maketitle
+$ \quad $
+% \pagebreak
+\part{Questions}
+
+
+\paragraph{Quel est le problème traité} 
+Nous étudierons dans ce rapport l'article \emph{Template Matching via densitives on the
+Roto Translation Group}, par Erik J. Bekkers et. Al.
+
+Le problème traité est la \textbf{localisation} d'un objet d'intérêt dans une image par
+\textbf{apprentissage supervisé}. Dans les jeux de
+données utilisés, l'objet est par exemple le disque optique d'un œil, ou bien la
+rétine. Le présupposé est que les problèmes en question bénéficieraient d'une prise en
+compte des structures d'orientation locale en tout point de l'image.
+
+\paragraph{Quelles sont les équations et les méthodes numériques utilisées} 
+\begin{itemize}
+    \item La localisation de l'objet d'intérêt se fait par \emph{cross-correlation}: un
+        \emph{template} est convolué avec l'image d'intérêt. La valeur maximale du
+        résultat est alors la localisation prédite de l'objet. Formellement, si $ f $
+        est l'image, et $ x $
+    le template:
+    \[
+        {x}^{\star} = \arg \max_{  } \left ( f \star t \right )(x)
+    \] 
+    \item Dans le cas standard, $ f $ est définie sur $ \mathbb{R}^2 $. Cependant, $ f $
+        peut être transformée (relevée/soulevée?) dans $ \mathbb{R}^3 $, la dimension
+        additionnelle décrivant l'état local et l'orientation en tout point d'une image.
+    \item Le template final est la solution d'un probleme d'optimisation de type
+        moindres carrés régularisés, ou régression logistique régularisée.
+        Typiquement,
+        \[
+        t = \arg \min_{  } \sum\limits_{ i=1 }^{ N } \left ( \langle t, p_i \rangle
+        - y_i \right )^2 + R(t)
+        \] 
+        les $ p_i $ sont des templates individuels: ``idéaux'': ce sont des patches,
+        extraits des images, de la même taille que $ t $ centrée en le point d'intérêt
+        de l'image $ i $. Si l'on suppose que 
+        \begin{itemize}
+            \item $ \|p_i\| = 1 $
+            \item n'importe quelle coupe de $ f_i $, une image, de la taille de $ p_i $ a une norme
+                de $ 1 $
+        \end{itemize}
+        on a $ (p_i \star f_i)(x) = \mathcal  \langle T_x(p_i) f_i[p_i] \rangle  \leq
+        \|p_i\| \|f_i[p_i]\| \leq  1$, le maximum étant atteint quand $ f_i $ et $ p_i $ 
+        sont alignés, ceci arrivant par construction en $ {x}^{\star}_i $
+        ou $ R $ est une pénalité imposant de la régularité à t.
+    \item A ce moment là, le template est une variable dans $ \mathbb{R}^N$, N étant le
+        nombre de pixels du patch. On pourrait alors optimiser chaque pixel
+        respectivement, mais il serait alors difficile d'imposer des contraintes de
+        régularité du patch final. Une autre manière de faire est de paramétriser le
+        patch comme une combinaison linéaire de fonctions régulière: c'est l'approche
+        suivie dans cet article, qui utilise come fonction les B-splines. Le template
+        s'ecrit alors
+        \[
+            t(x, y) = \sum\limits_{ k=1 }^{ N_k } \sum\limits_{ l=1 }^{ N_l } c_k B^n \left (
+            \frac{x}{s_k} - k \right ) B^n \left ( \frac{y}{s_{l}} - l \right )
+        \] 
+        Une expression qui admet alors un gradient, ceci permettant d'ajouter au
+        probleme d'optimisation un terme de la forme
+        \[
+            \int\limits_{  }^{  } \| \nabla_{  } t(x, y) \|^2 dx dy
+        \] 
+\end{itemize}
+
+\paragraph{Pouvez vous situer l'article par rapport aux méthodes étudiées en cours et le
+comparer à des sujets proches évoqués en cours} 
+La différence principale avec les sujets étudiés en cours est que cette méthode est une
+méthode d'apprentissage supervisée et automatique alors que les méthodes étudiées
+pendant le cours sont non-supervisées et demandent généralement une intervention humaine
+au moment de l'initialisation.\newline
+Une caractéristique commune de ces deux méthodes est la présence d'un terme de
+pénalisation sur la régularité de la solution du problème d'optimisation, les deux
+faisant intervenir le gradient le la paremétrisation: on rapelle que le problème des
+contours actifs s'écrit:
+\[
+    \int\limits_{  \Omega }^{  } \left ( w_1^2 \|C'(s)\|^2 + w_2^2 \|C''(s)\|^2 +
+    P(C(s)) \right )ds
+\] 
+alors que le problème étudié concerne la résolution de 
+\[
+    t = \arg \min_{  } \sum\limits_{ i=1 }^{ N } \left ( \langle t, p_i \rangle
+    - y_i \right )^2 + \lambda \int\limits_{  }^{  } \| \nabla_{  } t(x, y) \|^2 dx dy + \mu \| t \|^2
+\]
+\paragraph{Quelle est l'originalité du travail (selon les auteurs).} 
+Ce travail s'inscrit dans la continuité d'une  série d'article des auteurs: la majorité
+des concepts utilisés dans cet articles on été introduits dans des publications
+précédentes:
+\begin{itemize}
+    \item l'utilisation des scores d'orientation a été introduit en [32]
+    \item l'utilisation des cake wavelets a été introduit dans la thèse de l'auteur.
+    \item la cross correlation est une technique bien connue pour détecter des points
+        d'intérêts.
+\end{itemize}
+Les auteurs proposent alors une méthode de résolution pour une reformulation de la 
+``regression logistique'' permettant à cette méthode d'atteindre l'état de l'art en
+termes de performances, ainsi qu'une série d'experiences très completes
+comparant l'influence des différents types de régularisation et l'importance des
+orientation scores. Enfin, est donnée en appendice une interprétation mathématique d'une
+version simplifiée du problème régularisé dans $ SE2(\mathbb{R}) $
+\paragraph{Quels sont les résultats nouveaux importants qui en découlent.}
+Le résultat le plus important ici est à nos yeux la preuve expérimentale que cette
+méthode atteint l'état de l'art pour les jeux de données considérées.
+\paragraph{Voyez-vous des faiblesses dans l'approche présentée et avez-vous des idées
+pour y faire face?}
+
+\part{Rapport détaillé}
+\paragraph{Les scores d'orientation} 
+Un concept majeur du papier concerne la manière de prendre en compte les l'état
+d'orientation de chaque point de l'image afin de mieux détecter le point d'intérêt.
+L'approche consiste a convoluer l'image avec le $ R_{\theta} w $, ou $ R_{\theta} $ est la rotation d'angle $ \theta  $, et $ w $ est une ondelette.
+l'image 
+\[
+    \begin{aligned}
+        f: \mathbb{R}^2 &\longrightarrow \mathbb{R} \\
+        (x, y) &\longmapsto f(x, y)
+    \end{aligned}
+\] 
+devient alors 
+\[
+\begin{aligned}
+    U_f: \quad \mathbb{R}^2\times \mathbb{ T } &\longrightarrow \mathbb{R} \\
+    (x, y, \theta) &\longmapsto g(x, y, \theta)
+\end{aligned}
+\] 
+$ \theta $, tout comme $ x $ et $ y $ est discrétisé.
+La construction de ce score d'orientation est inspirée par le fonctionnement du cortex
+visuel des mamifères (voir \emph{Image Analysisand Reconstruction using a Wavelet
+Transform constructed from a Reducible Representation of the Euclidean Motion Group}).
+On effectue alors un certain nombres de remarques sur cette transformée
+\begin{itemize}
+    \item Par definition, $  U_f $ est une transformée en ondelettes:
+        \[
+             U_f(g) =  (\mathcal W_{\phi}[f])(g)  = \langle \mathcal  U_g \phi, f
+             \rangle_{\mathbb{R}^2}
+        \] 
+        et $ \mathcal  U_g $ est une representation:
+        \[
+            \mathcal  U_g \phi(x) = (\mathcal  T_b \mathcal  R_{e^{i \theta}} \phi )(x)
+            = \phi \left ( R_{\theta}^{-1}(x - b) \right )
+        \] 
+        \item $ f  \to U_f $ transforme $ L_2(\mathbb{R}) $ en un espace de hilbert $
+        \mathbb C_K^{\mathbb{R}^2 \times \mathbb{ T }} $.\newline
+        Tout comme la transformée de fourier (aux constantes multiplicatives près), la
+        transformation $ U_f $ est une isométrie:
+        \[
+            \|f\|_{L_2(\mathbb{R})} = \|U_f\|_{M_{\phi}}
+        \] 
+        où $ M_{\phi} $ est une fonction caractérisant le produit scalaire de cet espace
+        de Hilbert.\newline
+        De cette propriété découle l'inversibilité de la transformée en scores
+        d'orientations.
+        \item contrairement à la transformée en ondelettes classique, cette transformée
+            ne fait pas intervenir différentes échelles, ce qui dans les cas étudiés,
+            semble être considéré comme quelque chose de désirable.
+        \item la stabilité de la transformée inverse est complètement déterminée par la
+            fonction $ M_{\phi} $, et donc (évidemment), et c'est sous ce critère que la
+            l'ondelette de base $ \phi $ est choisie.
+\end{itemize}
+Les ondelettes ``cake'' (gateau en anglais) s'avèrent avoir un $ M_{\phi} $ optimal, et
+être d'excellents détecteurs de lignes. C'est donc cette ondelette qui a été choisie
+comme base pour créer les scores d'orientation dans le papier étudié.
+\begin{figure}[htpb]
+\centering
+\hspace*{-6em}
+\includegraphics[scale=0.39]{plots/cake_wavelet.png}
+\caption {Simulation personnelles des ondelettes de  cake}
+de gauche à droite: l'ondelette dans le plan de fourrier, l'ondelette dans le domaine
+spatial, une image simple, et la même image transformée par cette ondelette.
+\end{figure}
+
+\part
+\paragraph{Expériences}
+
+Afin de mieux comprendre leur fonctionnement et de pouvoir les comparer dans 
+divers cadres d'études, nous avons recodé les différentes méthodes présentées dans cet article 
+en langage \textit{python}. Le code complet peut être trouvé au lien suivant ???????
+Pour mémoire, 5 types de construction de templates sont envisagés:
+\begin{itemize}
+    \item A: Template obtenu par moyenne de tous les patches positifs (i.e. centrés sur la zone d'intérêt) et normalisation.
+    \item B: Template optimisé sans régularisation ($\mu =0$, $\lambda = 0$)
+    \item C: Template optimisé avec $\mu$ ($\lambda=0$)
+    \item D: Template optimisé avec $\lambda$ ($\mu = 0$)
+    \item E: Template optimisé avec $\mu$ et $\lambda$
+\end{itemize}
+
+Pour chacune de ses constructions, un module de regression linéaire et regression logistique est employé dans 
+les espaces $\mathbb{R}^2$ et $SE(2)$. Afin de réaliser les expérience dont les résultats sont présentés plus 
+ont été réalisée en considérant un ensemble de 500 images dont 80\% (400 images) constitue l'ensemble d'entrainement 
+des modèles et les 20 \% (100 images) restants l'ensemble de test. Sur chacune des images d'entrainement, un patch 
+positif de taille $N_x \times N_y = 101 \times 101$ centré autour des coordonnées de l'oeil gauche et un patch négatif 
+de même de taille tiré aléatoirement en dehors des zones d'intérêts (oeil droit et gauche) sont crées. Un détection est 
+ensuite considérée "bonne" sur le point de détection se situe dans rayon de $10$ pixels autour de la position réelle de l'oeil 
+gauche.
+
+
+
+\paragraph{Template Matching dans $\mathbb{R}^2$}
+Premièrement, une comparaison des résultats obtenus avec les différentes methodes a été réalisée dans $\mathbb{R}^2$.
+Les résultats sont reportés dans \ref{table: R2}. Afin de trouver les valeurs optimales de $\mu$ (resp $\lambda$) dans les expériences C (resp. D), nous avons décidé 
+de procèder de façon empirique en faisant varier les valeurs de ces deux paramètres entre $10^{-4}$ et $1$. Afin de trouver le mailleur couple pour l'expérience E, nous avons 
+choisi de tout d'abord fixer la valeur de $\mu$ à la valeur optimale trouvée lors de l'expérience C, puis de faire varier $\lambda$ de  $10^{-4}$ et $1$.
+
+\begin{table}[h!]
+    \centering
+    \begin{tabular}{|c|c|c|}
+        \hline
+        Methode & Score (\%)\\
+        \hline
+        \hline
+        $A^{\mathbb{R}^2}$& 61.0 \% \\
+        \hline
+        $B_{\text{lin}}^{\mathbb{R}^2}$& 3.0 \%    \\
+        $C_{\text{lin}}^{\mathbb{R}^2}$& 62.0 \%   \\
+        $D_{\text{lin}}^{\mathbb{R}^2}$& 38.0 \%   \\
+        $E_{\text{lin}}^{\mathbb{R}^2}$& 62.0 \%   \\
+        \hline
+        $B_{\text{log}}^{\mathbb{R}^2} $& 0.0 \%   \\ 
+        $C_{\text{log}}^{\mathbb{R}^2} $& 63.0 \%  \\ 
+        $D_{\text{log}}^{\mathbb{R}^2} $& 7.0 \%   \\ 
+        $E_{\text{log}}^{\mathbb{R}^2} $& 63.0 \%  \\ 
+        \hline
+    \end{tabular}
+    \caption{Résultats obtenus template matching dans $\mathbb{R}^2$}
+    \label{table: R2}
+\end{table}
+
+La table \ref{table: R2} montre qu'un template relativement simple ne correspondant finlement qu'à la moyenne de tous les patches positifs démontre tout de même de bons
+résultats comparé à des modèles de régression plus évolués. Effectivement, si non complés à de mecanismes de régularisation, les modèles $B_{\text{log}}^{\mathbb{R}^2} $ et 
+$B_{\text{lin}}^{\mathbb{R}^2} $ ne demontre que de faibles performances. Par ailleurs, un bon choix de paramètres de régularisation peut conduire à améliorer drastiquement les 
+performances des regressions dont le meilleur résulat est observé pour $\mu = 10^{-1}$ et $\lambda = 10^{-2}$ pour la regression linéaire et $\mu = 10^{-1}$ et $\lambda = 10^{-3}$ pour la regression logistique.
+
+
+\paragraph{Template Matching dans $SE(2)$}
+Les mêmes expériences ont ensuite été reproduites en utilisant l'espace $SE(2)$ et donc ajoutant également l'orientation score dans les régressions.
+Cependant, dans cette section les paramètres le paramètres $\mu \in [10^{-4}, 1]$ et $\lambda \in [10^{-4}, 100]$. En ce qui concernent les paramètres inhérents à la matrices de 
+régularisation ont été fixé comme suit $D_{\xi \xi}=1, D_{\eta \eta} = 0$ et $D_{\theta \theta} = 10^{-2}$. Nous n'avons pas fait varié ces paramètres qui ont été choisis en accord avec les auteurs 
+de l'artcile présenté. Les resultats peuvent être observés en \ref{table: SE(2)}.
+
+\begin{table}[h!]
+    \centering
+    \begin{tabular}{|c|c|c|}
+        \hline
+        Methode & Score (\%)\\
+        \hline
+        \hline
+        $A^{SE(2)}$&  64.0 \% \\
+        \hline
+        $B_{\text{lin}}^{SE(2)}$&     3.0  \%   \\
+        $C_{\text{lin}}^{SE(2)}$&     68.0 \%   \\
+        $D_{\text{lin}}^{SE(2)}$&     61.0 \%   \\
+        $E_{\text{lin}}^{SE(2)}$&     68.0 \%   \\
+        \hline
+        $B_{\text{log}}^{SE(2)} $&    \%   \\ 
+        $C_{\text{log}}^{SE(2)} $&    \%   \\ 
+        $D_{\text{log}}^{SE(2)} $&    \%   \\ 
+        $E_{\text{log}}^{SE(2)} $&    \%   \\ 
+        \hline
+    \end{tabular}
+    \caption{Résultats obtenus template matching dans $SE(2)$}
+    \label{table: SE(2)}
+\end{table}
+
+
+\end{document}
+
