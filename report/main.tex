@@ -224,7 +224,7 @@ l'utilisation du score d'orientation. Il s'agit désormais de s'intéresser au p
   \sum \limits_{i=1}^N (\langle t, |U_{fi}| \rangle_{{\mathbb{L}_2(SE(2))}} - y_i)^2 + \lambda \int \limits_{\mathbb{R}^2} \int \limits_{0}^{2\pi} \lVert 
   \nabla t(x, y, \theta)\rVert_{D}^2 dxdyd\theta + \mu \lVert t \rVert_{\mathbb{L}_2(SE(2))}^2
 \]
-Les $U_{fi}$ sont les scores d'orientation des patchs 'idéaux' $p_i$. 
+Les $U_{fi}$ sont les scores d'orientation des patchs ``idéaux'' $p_i$.
 Le produit scalaire définit sur $SE(2)$ prend la forme suivante:
 \[
     \langle t, |U_{fi}| \rangle_{SE(2)} = 
@@ -232,12 +232,13 @@ Le produit scalaire définit sur $SE(2)$ prend la forme suivante:
 \]
 
 Et $\nabla t$ est le gradient invariant à gauche déduit des dérivées partielles invariantes à gauches défines sur $SE(2)$
-comme suit $\{(\partial_{\xi} = cos(\theta)\partial_x) + sin(\theta) \partial_y, \partial{\eta} = -sin(\theta) \partial_x + cos(\theta)
+comme suit $\{\partial_{\xi} = cos(\theta)\partial_x + sin(\theta) \partial_y,\, \partial{\eta} = -sin(\theta) \partial_x + cos(\theta)
 \partial_y, \partial_{\theta}\}$. Le gradient est alors déduit:
 \[
     \lVert \nabla t \rVert_{D}^2 = D_{\xi \xi} \Big|\frac{\partial t}{\partial \xi} \Big|^2
     + D_{\eta \eta} \Big|\frac{\partial t}{\partial \eta}\Big|^2 + D_{\theta \theta} \Big|\frac{\partial t}{\partial \theta}\Big|^2
 \]
+\textcolor{red}{C'est quoi $ D_{ \xi \xi}, D_{\eta \eta}  $ etc.?}
 
 
 De manière identique à l'approche employée dans $\mathbb{R}^2$, le template final est paramétrisé par une famille de fonctions 
@@ -254,7 +255,7 @@ zone d'intérêt ($y_i =1$) des zones sans objet ($y_1=0$). Cependant, une appro
 peut être également employée. Ici, les auteurs ont décidé d'avoir recours à un modèle de regresssion logistique dans lequel la présence ou non de 
 la zone d'intérêt au sein d'un patch $f_i$ est représentée par une certaine probabilité de présence $p_i$. Cette probabilité est inférée à l'aide de
 la function sigmoide telle que $p_i = \sigma(\langle t, f_i \rangle)$. Le le but revient à trouver le template qui maximise la vraissemenblance $l(t) = 
-\prod \limits_{i=1}^N p(f_i; t)^{y_i}(1 - p(f_i; y))^{1- y_i})$ 
+\prod \limits_{i=1}^N p(f_i; t)^{y_i}(1 - p(f_i; y))^{1- y_i}$
 des patches $f_i$ étant donnés leurs labels $y_i$. Dans une telle approche la log-vraissemenblance permet de 'linéariser' le problème d'optimisation qui prend la forme
 suivante dans $\mathbb{R}^2$:
 \[
