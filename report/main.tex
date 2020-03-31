@@ -94,9 +94,11 @@ compte des structures d'orientation locale en tout point de l'image.
         t = \arg \min_{  } \sum\limits_{ i=1 }^{ N } \left ( \langle t, p_i \rangle
         - y_i \right )^2 + R(t) 
         \] 
-        les $ p_i $ sont des templates individuels: ``idéaux'': ce sont des patches,
-        extraits des images, de la même taille que $ t $ centrée en le point d'intérêt
-        de l'image $ i $. Si l'on suppose que 
+        les $ p_i $ sont des templates individuels ``idéaux'': ce sont des patches,
+        extraits des images, de la même taille que $ t $ . Si ils sont centrés en le point d'intérêt
+        de l'image $ i $, ce sont des patches dits ``positifs`''. Les patchs ne correspondant à aucune zone d'intérêt 
+        dans l'image sont dit ``négatifs''. Les $y_i$ correspondent aux labels et on a $y_i =1$ si le patch est 
+        postif (i.e. une zone d'intérêt y est présente), $y_i=0$ sinon. Si l'on suppose que 
         \begin{itemize}
             \item $ \|p_i\| = 1 $
             \item n'importe quelle coupe de $ f_i $, une image, de la taille de $ p_i $ a une norme
@@ -118,15 +120,15 @@ compte des structures d'orientation locale en tout point de l'image.
         inférieure à celle des images entières). On pourrait alors optimiser chaque pixel
         respectivement, mais il serait alors difficile de formuler les contraintes de
         ``smoothness'' du patch final. Une autre manière de faire est de paramétriser le
-        patch comme une combinaison linéaire de fonctions régulière: c'est l'approche
-        suivie dans cet article, qui utilise come fonction les B-splines \cite{bspline}. Le template
+        patch comme une combinaison linéaire de fonctions régulières: c'est l'approche
+        suivie dans cet article, qui utilise comme fonctions les B-splines \cite{bspline}. Le template
         s'écrit alors
         \[
             t(x, y) = \sum\limits_{ k=1 }^{ N_k } \sum\limits_{ l=1 }^{ N_l } c_{k, l} B^n \left (
             \frac{x}{s_k} - k \right ) B^n \left ( \frac{y}{s_{l}} - l \right )
             \label{eq:spline} \tag{1}
         \] 
-        ($ s_k $ et $ s_l $ sont des paramètres d'échelles fixés au préalable: il ne
+        ($ s_k $ et $ s_l $ sont des paramètres d'échelles fixés au préalable: il
         ne sont pas des fonctions des indices $ k $ et $ l $).
         Une expression qui admet alors un gradient, ceci permettant d'obtenir une
         formulation du terme: 
@@ -175,7 +177,7 @@ Les auteurs proposent alors une méthode de résolution pour une reformulation d
 ``regression logistique'' permettant à cette méthode d'atteindre l'état de l'art en
 termes de performances, ainsi qu'une série d'expériences très complètes
 comparant l'influence des différents types de régularisation et l'importance des
-orientation scores. Enfin, est donnée en appendice une interprétation mathématique d'une
+scores d'orientation. Enfin, est donnée en appendice une interprétation mathématique d'une
 version simplifiée du problème régularisé dans $ SE2(\mathbb{R}) $
 \paragraph{Quels sont les résultats nouveaux importants qui en découlent?}
 Le résultat le plus important ici est à nos yeux la preuve expérimentale que cette
@@ -189,7 +191,7 @@ pouvant prendre en compte différents types d'échelles, mais pour être admissi
 ondelette doit satisfaire un cahier des charges fourni (voir plus tard les détails
 théoriques sur les ondelettes de cake).  Il n'est donc pas simple (mathématiquement) de
 changer d'ondelettes pour rendre la méthode invariante aux changements d'échelle.
-Une des faiblesses de l'article que nous avons observé est le fait 
+
 
 \part{Rapport détaillé}\label{part:details}
 \section{Discussions théoriques}
@@ -197,7 +199,7 @@ Nous rentrons maintenant plus en détail dans les notions spécifiques à l'arti
 savoir le soulèvement dans l'espace des scores d'orientations, et la redéfinition du
 template-matching et du problème d'optimisation associé dans cet espace.
 \paragraph{Les scores d'orientation} 
-Un concept majeur du papier concerne la manière de prendre en compte les l'état
+Un concept majeur du papier concerne la manière de prendre en compte l'état
 d'orientation de chaque point de l'image afin de mieux détecter le point d'intérêt.
 L'approche consiste a convoluer l'image avec le $ R_{\theta} \phi $, ou $ R_{\theta} $
 est la rotation d'angle $ \theta  $, et $ \phi $ est une ondelette.
@@ -218,7 +220,7 @@ devient alors
 $ \theta $, tout comme $ x $ et $ y $ est discrétisé.
 La construction de ce score d'orientation est inspirée par le fonctionnement du cortex
 visuel des mammifères \cite{cake2}.
-On effectue alors un certain nombres de remarques sur cette transformée
+On effectue alors un certain nombre de remarques sur cette transformée
 \begin{itemize}
     \item Par definition, $  U_f $ est une transformée en ondelettes:
         \[
@@ -240,14 +242,14 @@ On effectue alors un certain nombres de remarques sur cette transformée
         où $ M_{\phi} $ est une fonction caractérisant le produit scalaire de cet espace
         de Hilbert.\newline
         De cette propriété découle l'inversibilité de la transformée en scores
-        d'orientations.
+        d'orientation.
         \item Contrairement à la transformée en ondelettes classique, cette transformée
             ne fait pas intervenir différentes échelles, ce qui dans les cas étudiés,
             semble être considéré comme quelque chose de désirable dans les articles la
             décrivant, mais qui peut s'avérer néfaste dans notre cas (voir \ref{paragraph:robustness-to-scale}) 
         \item La stabilité de la transformée inverse est complètement déterminée par la
-            fonction $ M_{\phi} $; c'est sous ce critère que la
-            l'ondelette de base $ \phi $ est choisie.
+            fonction $ M_{\phi} $; c'est sous ce critère que l'ondelette de base $ \phi
+            $ est choisie.
 \end{itemize}
 Les ondelettes ``cake'' (gateau en anglais) s'avèrent avoir un $ M_{\phi} $ optimal, et
 être d'excellents détecteurs de lignes. Le nom de ces ondelettes provient du fait que
@@ -273,7 +275,7 @@ l'utilisation du score d'orientation. Il s'agit désormais de s'intéresser au p
   \sum \limits_{i=1}^N (\langle t, |U_{fi}| \rangle_{{\mathbb{L}_2(SE(2))}} - y_i)^2 + \lambda \int \limits_{\mathbb{R}^2} \int \limits_{0}^{2\pi} \lVert 
   \nabla t(x, y, \theta)\rVert_{D}^2 dxdyd\theta + \mu \lVert t \rVert_{\mathbb{L}_2(SE(2))}^2
 \]
-Les $U_{fi}$ sont les scores d'orientation des patchs ``idéaux'' $p_i$.
+Les $U_{fi}$ sont les scores d'orientation des patchs $p_i$.
 Le produit scalaire définit sur $SE(2)$ prend la forme suivante:
 \[
     \langle t, |U_{fi}| \rangle_{SE(2)} = 
@@ -291,7 +293,7 @@ comme suit $\{\partial_{\xi} = cos(\theta)\partial_x + sin(\theta) \partial_y,\,
 
 Les paramètres $D_{\xi \xi}, D_{\eta, \eta}$ et $D_{\theta \theta}$ sont des paremètres de régularisation permettant de 'pénaliser' ou 'favoriser' une certaine direction.
 De manière identique à l'approche employée dans $\mathbb{R}^2$, le template final est paramétré par une famille de fonctions
-régulières telles que les B-splines étendues à $SE(2)$
+régulières telles que les B-splines étendues à $SE(2)$.
 \[
     t(x, y, \theta) = \sum \limits_{k=1}^{n_k} \sum \limits_{l=i}^{N_l} \sum \limits_{m=1}^{N_m} c_{k,l,m} B^n \left (\frac{x}{s_k} - k \right )
     B^n \left (\frac{y}{s_l} - l \right) B^n \left (\frac{\theta \text{mod} 2\pi}{s_m} - m \right )
