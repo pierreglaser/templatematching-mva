@@ -378,7 +378,7 @@ L'ajout d'un nouveau terme régularisant (cas E) et un bon choix de constante pe
 performance plus faible que le même cas dans $\mathbb{R}^2$ qui était également l'un des moins peformants. Les résultats que nous présentons sont en ligne avec ceux 
 présentés par les auteurs en ce qui concerne les regressions linéaires. Notre meilleur modèle est dérivé de la méthode $C_{\text{lin}}^{SE(2)}$. Pour 
 les regressions logistiques, nos résultats sont un peut décevants en comparaison de ceux présenté par les auteurs. 
-
+En termes de temps de calcul, notre modèle est capable d'effectuer une prédiction en 0.23 s avec le modèle obtenue par la méthode $C_{\text{lin}}^{SE(2)}$.
 
 
 \begin{figure*}[h!]
@@ -674,8 +674,8 @@ les regressions logistiques, nos résultats sont un peut décevants en comparais
     \quad
     \begin{subfigure}[b]{0.1\textwidth}   
         \centering 
-        \includegraphics[width=\textwidth]{plots/E_log_R2_conv.jpg}
-        \caption{$D_{\text{log}}^{SE(2)}$}%
+        \includegraphics[width=\textwidth]{plots/E_log_SE2_conv.jpg}
+        \caption{$E_{\text{log}}^{SE(2)}$}%
         
         \label{fig:mean and std of net44}
     \end{subfigure}
