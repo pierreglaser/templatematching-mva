@@ -685,5 +685,37 @@ les regressions logistiques, nos résultats sont un peut décevants en comparais
 
 La figure \ref{fig: template} represente (a) l'image test (b) les différents templates de $\mathbb{R}^2$ que nous avons obtenus sur la première ligne ainsi que leur réponse dans les différents 
 cas considérés sur la seconde ligne (b) le maximum d'intensité du template à travers les orientations $\theta$ ainsi que la réponse du template à l'image test.
+
+\paragraph{Influence de la régularisation}
+
+Nous avons voulu rendre compte de l'influence des différents paramètres de régularisation sur la précision du modèle.
+Pour ce faire nous avons reporté les valeurs de précision des modèles $C_{\text{lin}}^{SE(2)}$ et $D_{\text{lin}}^{SE(2)}$
+en faisent varier les valeurs de $\mu$ et $\lambda$. Les résulats sont visibles en \ref{fig:param}. Cette courbe permet de bien rendre 
+compte de l'importance de la régularisation dans un tel problème de détection.
+
+\paragraph{Influence du critère de précision}
+Afin d'être tout à fait transparents sur la précision des modèles développé nous avons testé le modèle démontrant les meilleurs 
+résultats $C_{\text{lin}}^{SE(2)}$ avec différents valeur de rayon de détection variant de $2$ pixels à $50$ pixels. Les résultats 
+peuvent être appréciés en \ref{fig:radius}. Pour un rayon de détection de 2 pixels, la précision du modèle tombe à $37 \%$. Ceci n'est pas 
+étonnant dans la mesure où 2 pixels rentre largement dans la gamme de précision de labélisation. Par contre, pour un rayon de détection de 5 pixels, 
+le modèle demontre une précision assez bonne de 81 \%, ce qui est en lien avec la valeur précédemment observée pour 10 pixels. Dés que le rayon dépasse 
+15 pixels, la précision du modèole stagne. Ceci laisse apercevoir que 10\% des détections sont abhérantes.
+
+\begin{figure}[htpb]
+    \centering
+        \includegraphics[scale=0.7]{plots/parameter_score_C_D_lin_R2.jpg}
+        \caption{Influence des paramètres de régularisation}%
+        
+        \label{fig:param}
+\end{figure}
+\begin{figure}[htpb]
+
+        \centering 
+        \includegraphics[scale=0.7]{plots/radius_scores.jpg}
+        \caption{Précision en fonction du rayon de détection}%
+        
+        \label{fig:radius}
+\end{figure}
+        
 \end{document}
 
