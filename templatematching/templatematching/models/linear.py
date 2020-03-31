@@ -1,5 +1,8 @@
 import numpy as np
 
+from scipy import sparse
+from scipy.sparse import csr_matrix, kron
+
 from scipy.signal import fftconvolve, correlate
 
 from scipy.integrate import quad
@@ -131,14 +134,14 @@ class R2Ridge(SplineRegressorBase, PatchRegressorBase):
         ks = np.array([[ki - kk for ki in k] for kk in k])
         ls = np.array([[li - lk for li in l] for lk in l])
 
-        Bxk = -1 / sk * discrete_spline_second_derivative(ks, 2 * self.spline_order + 1)
-        Bxl = sl * discrete_spline(ls, 2 * self.spline_order + 1)
-        Byk = sk * discrete_spline(ks, 2 * self.spline_order + 1)
-        Byl = -1 / sl * discrete_spline_second_derivative(ls, 2 * self.spline_order + 1)
+        Bxk = csr_matrix(-1 / sk * discrete_spline_second_derivative(ks, 2 * self.spline_order + 1))
+        Bxl = csr_matrix(sl * discrete_spline(ls, 2 * self.spline_order + 1))
+        Byk = csr_matrix(sk * discrete_spline(ks, 2 * self.spline_order + 1))
+        Byl = csr_matrix(-1 / sl * discrete_spline_second_derivative(ls, 2 * self.spline_order + 1))
 
-        R = np.kron(Bxk, Bxl) + np.kron(Byk, Byl)
+        R = kron(Bxk, Bxl) + kron(Byk, Byl)
 
-        return R
+        return R.toarray()
 
     def _make_unit_spline(self, sk, sl):
         # Our spline is always defined on [-2.5, 2.5] (may be a problem if we
@@ -311,23 +314,23 @@ class SE2Ridge(SplineRegressorBase, PatchRegressorBase):
         ls = np.array([[li - lk for li in l] for lk in l])
         ms = np.array([[mi - mk for mi in m] for mk in m])
 
-        RIx = -1 / sk * discrete_spline_second_derivative(ks, 2 * self.spline_order + 1)
-        RIy = sl * discrete_spline(ls, 2 * self.spline_order + 1)
+        RIx = csr_matrix(-1 / sk * discrete_spline_second_derivative(ks, 2 * self.spline_order + 1))
+        RIy = csr_matrix(sl * discrete_spline(ls, 2 * self.spline_order + 1))
         cos2_spline = lambda theta, m1, m2: np.cos(theta) ** 2 * self._util_spline(
             theta, m1, m2
         )
-        RItheta = np.array(
+        RItheta = csr_matrix(
             [[quad(cos2_spline, 0, np.pi, args=(m1, m2))[0] for m1 in m] for m2 in m]
         )
 
-        RIIx = discrete_spline_second_derivative(ks, 2 * self.spline_order + 1)
-        RIIy = -discrete_spline_second_derivative(ls, 2 * self.spline_order + 1)
+        RIIx = csr_matrix(discrete_spline_second_derivative(ks, 2 * self.spline_order + 1))
+        RIIy = csr_matrix(-discrete_spline_second_derivative(ls, 2 * self.spline_order + 1))
         sincos_spline = (
             lambda theta, m1, m2: np.cos(theta)
             * np.sin(theta)
             * self._util_spline(theta, m1, m2)
         )
-        RIItheta = np.array(
+        RIItheta = csr_matrix(
             [[quad(sincos_spline, 0, np.pi, args=(m1, m2))[0] for m1 in m] for m2 in m]
         )
 
@@ -335,40 +338,42 @@ class SE2Ridge(SplineRegressorBase, PatchRegressorBase):
         RIIIy = -RIIy.copy()
         RIIItheta = RIItheta.copy()
 
-        RIVx = sk * discrete_spline(ks, 2 * self.spline_order + 1)
-        RIVy = (
+        RIVx = csr_matrix(sk * discrete_spline(ks, 2 * self.spline_order + 1))
+        RIVy = csr_matrix((
             -1 / sl * discrete_spline_second_derivative(ls, 2 * self.spline_order + 1)
-        )
+        ))
         sin2_spline = lambda theta, m1, m2: np.sin(theta) ** 2 * self._util_spline(
             theta, m1, m2
         )
-        RIVtheta = np.array(
+        RIVtheta = csr_matrix(
             [[quad(sin2_spline, 0, np.pi, args=(m1, m2))[0] for m1 in m] for m2 in m]
         )
 
-        Rxtheta = sk * discrete_spline(ks, 2 * self.spline_order + 1)
-        Rytheta = sl * discrete_spline(ls, 2 * self.spline_order + 1)
-        Rthetatheta = (
+        Rxtheta = csr_matrix(sk * discrete_spline(ks, 2 * self.spline_order + 1))
+        Rytheta = csr_matrix(sl * discrete_spline(ls, 2 * self.spline_order + 1))
+        Rthetatheta = csr_matrix(
             -1 / sm * discrete_spline_second_derivative(ms, 2 * self.spline_order + 1)
         )
 
         Rxi = (
-            np.kron(np.kron(RIx, RIy), RItheta)
-            + np.kron(np.kron(RIIx, RIIy), RIItheta)
-            + np.kron(np.kron(RIIIx, RIIIy), RIIItheta)
-            + np.kron(np.kron(RIVx, RIVy), RIVtheta)
+            kron(kron(RIx, RIy), RItheta)
+            + kron(kron(RIIx, RIIy), RIItheta)
+            + kron(kron(RIIIx, RIIIy), RIIItheta)
+            + kron(kron(RIVx, RIVy), RIVtheta)
         )
 
         Reta = (
-            np.kron(np.kron(RIIx, RIIy), RIVtheta)
-            - np.kron(np.kron(RIIx, RIIy), RIItheta)
-            - np.kron(np.kron(RIIIx, RIIIy), RIIItheta)
-            + np.kron(np.kron(RIVx, RIVy), RItheta)
+            kron(kron(RIIx, RIIy), RIVtheta)
+            - kron(kron(RIIx, RIIy), RIItheta)
+            - kron(kron(RIIIx, RIIIy), RIIItheta)
+            + kron(kron(RIVx, RIVy), RItheta)
         )
 
-        Rtheta = np.kron(np.kron(Rxtheta, Rytheta), Rthetatheta)
+        Rtheta = kron(kron(Rxtheta, Rytheta), Rthetatheta)
 
-        return self.Dxi * Rxi + self.Deta * Reta + self.Dtheta * Rtheta
+        R = self.Dxi * Rxi + self.Deta * Reta + self.Dtheta * Rtheta
+
+        return R.toarray()
 
     def _util_spline(self, theta, m1, m2):
         _, _, _, _, _, _, _, _, _, sm = self._get_dims()
