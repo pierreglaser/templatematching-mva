@@ -99,7 +99,7 @@ class R2LogReg(R2Ridge):
 
             if count_loss_evol > self.early_stopping:
                 if self.verbose:
-                    print(f"Loss did not improve in {count_loss_evol} iteration(s)")
+                    print(f"Loss did not improve in {self.early_stopping} iteration(s)")
                 break
 
         self._S, self._spline_coef = S, best_c
@@ -210,7 +210,7 @@ class SE2LogReg(SE2Ridge):
 
             if count_loss_evol > self.early_stopping:
                 if self.verbose:
-                    print(f"Loss did not improve in {count_loss_evol} iteration(s)")
+                    print(f"Loss did not improve in {self.early_stopping} iteration(s)")
                 break
 
         self._S, self._spline_coef = S, best_c
