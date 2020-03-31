@@ -295,7 +295,7 @@ ou dans $SE(2)$:
 \paragraph{Prepocessing des images}
 Les jeux de données utilisés sont composés d'images démontrant de forte variation de luminosité et de contraste. Ainsi, une 
 phase de \textit{preprocessing} est nécessaire afin de renormaliser les images. La méthode employée dans l'article et que nous 
-avons également recodée pour réaliser les expériences décrites plus bas se fonde sur l'idée de renormalisation locale. Elle consiste
+avons également recodée pour réaliser les expériences décrites plus bas se fonde sur l'idée de renormalisation locale et tirée de \cite{preprocessing}. Elle consiste
 à premièrement calculer une moyenne et un écart-type local de l'intensité des pixels. Ceci permet de renormaliser localement l'image afin 
 que cette dernière est une moyenne nulle et un écart-type de 1. Ensuite, un masque de fond est extrait en utilisant la distance de Mahalanobis 
 permettant d'éviter la prise en compte des valeurs abhérantes dans la seconde phase de normalisation. L'image est ensuite renormalisée une seconde 
@@ -766,6 +766,9 @@ le modèle démontre une précision assez bonne de 81 \%, ce qui est en lien ave
     \bibitem{bspline}
     Thévenaz, P., Blu, T., \& Unser, M. (2000). \emph{Interpolation revisited} [medical
     images application]. IEEE Transactions on medical imaging, 19(7), 739-758.
+    \bibitem{preprocessing}
+    Foracchia, M., Grisan, E., \& Ruggeri A. (2005). \emph{Luminosity  and  contrast  normalization  inretinal images}.
+    MEDIA, vol. 9, no. 3, pp. 179–90.
 
 \end{thebibliography}
 
