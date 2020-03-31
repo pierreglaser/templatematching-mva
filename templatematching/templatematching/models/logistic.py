@@ -18,6 +18,7 @@ class R2LogReg(R2Ridge):
         batch_size=50,
         tol=1e-8,
         random_state=None,
+        early_stopping=1,
         eye="left",
         verbose=0,
     ):
@@ -35,6 +36,7 @@ class R2LogReg(R2Ridge):
         self.model_name = "Logistic Ridge"
         self.max_iter = max_iter
         self.tol = tol
+        self.early_stopping = early_stopping
         self.rs = np.random.RandomState(random_state)
 
     def _fit_patches(self, X, y):
@@ -51,8 +53,9 @@ class R2LogReg(R2Ridge):
         # Normalize c
         c /= np.linalg.norm(c)
 
-        loss = 1
-
+        loss = 1e7
+        count_loss_evol = 0
+        loss_prev = loss
         # Optimization step
         for iter_no in range(self.max_iter):
 
@@ -85,7 +88,21 @@ class R2LogReg(R2Ridge):
 
             if self.verbose:
                 print(f"iteration no: {iter_no}, change in coefs: {loss}")
-        self._S, self._spline_coef = S, c
+
+            if loss_prev - loss < 0:
+                count_loss_evol += 1
+
+            else:
+                count_loss_evol = 0
+                loss_prev = loss
+                best_c = c.copy()
+
+            if count_loss_evol > self.early_stopping:
+                if self.verbose:
+                    print(f"Loss did not improve in {count_loss_evol} iteration(s)")
+                break
+
+        self._S, self._spline_coef = S, best_c
 
 
 class SE2LogReg(SE2Ridge):
@@ -104,6 +121,7 @@ class SE2LogReg(SE2Ridge):
         Dtheta=0,
         max_iter=10,
         tol=1e-8,
+        early_stopping=10,
         random_state=None,
         eye="left",
         verbose=0,
@@ -128,6 +146,7 @@ class SE2LogReg(SE2Ridge):
         self.model_name = "SE2 Logistic Ridge"
         self.max_iter = max_iter
         self.tol = tol
+        self.early_stopping = early_stopping
         self.rs = np.random.RandomState(random_state)
 
     def _fit_patches(self, X, y):
@@ -145,8 +164,9 @@ class SE2LogReg(SE2Ridge):
         # Normalize c
         c /= np.linalg.norm(c)
 
-        loss = 1
-
+        loss = 1e7
+        count_loss_evol = 0
+        loss_prev = loss
         # Optimization step
         for iter_no in range(self.max_iter):
 
@@ -179,4 +199,18 @@ class SE2LogReg(SE2Ridge):
 
             if self.verbose:
                 print(f"iteration no: {iter_no}, change in coefs: {loss}")
-        self._S, self._spline_coef = S, c
+
+            if loss_prev - loss < 0:
+                count_loss_evol += 1
+
+            else:
+                count_loss_evol = 0
+                loss_prev = loss
+                best_c = c.copy()
+
+            if count_loss_evol > self.early_stopping:
+                if self.verbose:
+                    print(f"Loss did not improve in {count_loss_evol} iteration(s)")
+                break
+
+        self._S, self._spline_coef = S, best_c
