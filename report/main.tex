@@ -50,28 +50,38 @@ $ \quad $
 
 \paragraph{Quel est le problème traité} 
 Nous étudierons dans ce rapport l'article \emph{Template Matching via densitives on the
-Roto Translation Group}, par Erik J. Bekkers et. Al.
+Roto Translation Group}, par Erik J. Bekkers et. Al. \cite{main}
 
 Le problème traité est la \textbf{localisation} d'un objet d'intérêt dans une image par
 \textbf{apprentissage supervisé}. Dans les jeux de
 données utilisés, l'objet est par exemple le disque optique d'un œil, ou bien la
-rétine. Le présupposé est que les problèmes en question bénéficieraient d'une prise en
+rétine. Un des présupposés majeurs de l'article est que les problèmes en question bénéficieraient d'une prise en
 compte des structures d'orientation locale en tout point de l'image.
 
 \paragraph{Quelles sont les équations et les méthodes numériques utilisées} 
 \begin{itemize}
-    \item La localisation de l'objet d'intérêt se fait par \emph{cross-correlation}: un
-        \emph{template} est convolué avec l'image d'intérêt. La valeur maximale du
-        résultat est alors la localisation prédite de l'objet. Formellement, si $ f $
-        est l'image, et $ x $
-    le template:
-    \[
-        {x}^{\star} = \arg \max_{  } \left ( f \star t \right )(x)
-    \] 
-    \item Dans le cas standard, $ f $ est définie sur $ \mathbb{R}^2 $. Cependant, $ f $
-        peut être transformée (relevée/soulevée?) dans $ \mathbb{R}^3 $, la dimension
-        additionnelle décrivant l'état local et l'orientation en tout point d'une image.
-    \item Le template final est la solution d'un problème d'optimisation de type
+    \item La localisation de l'objet d'intérêt dans une image se fait par \emph{cross-correlation}: un
+        \emph{template} est ``appliqué`` en tout point $ x $ de l'image.  La valeur
+        maximale du résultat est alors la localisation prédite de l'objet. Formellement,
+        si $ f $ est l'image, et $ x $ le template:
+      \[
+      {x}^{\star} = \arg \max_{ \tilde{ x } } \langle  f, \mathcal  T_{ \tilde{ x }}
+      t\rangle_{L_2(\mathbb{R}^2)}
+      \] 
+      ou $ \mathcal  T_{ \tilde{ x }}$  est l'opérateur translation, défini comme
+      \[
+      \begin{aligned}
+        T_{ \tilde{ x }}t:  \mathbb{R}^2 &\longrightarrow \mathbb{R}^2 \\
+                                         &\longmapsto \left ( T_{ \tilde{ x }}t \right )(x) = t( x - \tilde{ x })
+      \end{aligned}
+      \] 
+       est l'opérateur translation.
+    \item Dans le cas standard exposé ci-dessus, $ f $ est définie sur $ \mathbb{R}^2 $. Cependant, $ f $
+        peut être transformée (e.g relevée, soulevée) dans $ \mathbb{R}^3 $, la dimension
+        additionnelle décrivant en chaque point l'état local de l'orientation de l'image
+        selon un certain nombre de directions.
+    \item Afin d'obtenir des bonnes performances en prédiction, le template $ t $ est
+      défini comme solution d'un problème d'optimisation de type
         moindres carrés régularisés, ou régression logistique régularisée.
         Typiquement,
         \[
@@ -89,24 +99,36 @@ compte des structures d'orientation locale en tout point de l'image.
         on a $ (p_i \star f_i)(x) = \mathcal  \langle T_x(p_i) f_i[p_i] \rangle  \leq
         \|p_i\| \|f_i[p_i]\| \leq  1$, le maximum étant atteint quand $ f_i $ et $ p_i $ 
         sont alignés, ceci arrivant par construction en $ {x}^{\star}_i $
-        ou $ R $ est une pénalité imposant de la régularité à t.
+        ou 
+    \item $ R(t) $ est une pénalité imposant de la régularité à t. Elle contient deux
+      termes dont le poids peut être modulé:
+      \begin{itemize}
+        \item un terme de robustesse de type $ \mu\|t\|^2 $,
+        \item un terme de ``smoothness'' de type $ \int\limits_{  }^{  } \| \nabla_{
+          } t \|^2 d \mu $
+      \end{itemize}
     \item A ce moment là, le template est une variable dans $ \mathbb{R}^N$, N étant le
-        nombre de pixels du patch. On pourrait alors optimiser chaque pixel
-        respectivement, mais il serait alors difficile d'imposer des contraintes de
-        régularité du patch final. Une autre manière de faire est de paramétriser le
+      nombre de pixels du patch (Typiquement, le patch est de dimension bien
+        inférieure à celle des images entières). On pourrait alors optimiser chaque pixel
+        respectivement, mais il serait alors difficile de formuler les contraintes de
+        ``smoothness'' du patch final. Une autre manière de faire est de paramétriser le
         patch comme une combinaison linéaire de fonctions régulière: c'est l'approche
-        suivie dans cet article, qui utilise come fonction les B-splines. Le template
+        suivie dans cet article, qui utilise come fonction les B-splines \cite{bspline}. Le template
         s'écrit alors
         \[
             t(x, y) = \sum\limits_{ k=1 }^{ N_k } \sum\limits_{ l=1 }^{ N_l } c_{k, l} B^n \left (
             \frac{x}{s_k} - k \right ) B^n \left ( \frac{y}{s_{l}} - l \right )
             \label{eq:spline} \tag{1}
         \] 
-        Une expression qui admet alors un gradient, ceci permettant d'ajouter au
-        problème d'optimisation un terme de la forme
+        ($ s_k $ et $ s_l $ sont des paramètres d'échelles fixés au préalable: il ne
+        ne sont pas des fonctions des indices $ k $ et $ l $).
+        Une expression qui admet alors un gradient, ceci permettant d'obtenir une
+        formulation du terme: 
         \[
             \int\limits_{  }^{  } \| \nabla_{  } t(x, y) \|^2 dx dy
         \] 
+    \item Toutes ces formulations et paramétrisations sont pour l'instant uniquement
+      valables pour les images dans leur forme initiale (non soulevées)
 \end{itemize}
 
 \paragraph{Pouvez vous situer l'article par rapport aux méthodes étudiées en cours et le
@@ -723,6 +745,20 @@ le modèle démontre une précision assez bonne de 81 \%, ce qui est en lien ave
   \label{fig:radius}
 \end{subfigure}
 \end{figure}
+
+
+\begin{thebibliography}{9}
+
+	\bibitem{main}
+    Bekkers, E. J., Loog, M., ter Haar Romeny, B. M., \& Duits, R. (2017).
+    \emph{Template matching via densities on the roto-translation group.}
+    IEEE transactions on pattern analysis and machine intelligence, 40(2), 452-466.
+    \bibitem{bspline}
+    Thévenaz, P., Blu, T., \& Unser, M. (2000). \emph{Interpolation revisited} [medical
+    images application]. IEEE Transactions on medical imaging, 19(7), 739-758.
+
+\end{thebibliography}
+
         
 \end{document}
  
