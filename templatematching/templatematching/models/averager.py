@@ -54,7 +54,7 @@ class SE2Averager(TemplateCrossCorellatorBase, PatchRegressorBase):
 
     def predict(self, X):
         # TODO: put this method in a Mixin Class.
-        X = self._ost.transform(X).imag
+        X = abs(self._ost.transform(X)) # can also take imag
         template = self.template.reshape(1, *self.template.shape)
 
         batch_size = min(self.batch_size, X.shape[0])
