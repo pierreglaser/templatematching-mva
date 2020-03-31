@@ -235,14 +235,14 @@ Le produit scalaire définit sur $SE(2)$ prend la forme suivante:
 
 Et $\nabla t$ est le gradient invariant à gauche déduit des dérivées partielles invariantes à gauches définies sur $SE(2)$
 comme suit $\{\partial_{\xi} = cos(\theta)\partial_x + sin(\theta) \partial_y,\, \partial{\eta} = -sin(\theta) \partial_x + cos(\theta)
-\partial_y, \partial_{\theta}\}$. Le gradient est alors déduit:
+\partial_y, \partial_{\theta}\}$. Une norme pondérée du gradient peut ensuite être définie comme suit:
 \[
     \lVert \nabla t \rVert_{D}^2 = D_{\xi \xi} \Big|\frac{\partial t}{\partial \xi} \Big|^2
     + D_{\eta \eta} \Big|\frac{\partial t}{\partial \eta}\Big|^2 + D_{\theta \theta} \Big|\frac{\partial t}{\partial \theta}\Big|^2
 \]
-\textcolor{red}{C'est quoi $ D_{ \xi \xi}, D_{\eta \eta}  $ etc.?}
 
 
+Les paramètres $D_{\xi \xi}, D_{\eta, \eta}$ et $D_{\theta \theta}$ sont des paremètres de régularisation permettant de 'pénaliser' ou 'favoriser' une certaine direction.
 De manière identique à l'approche employée dans $\mathbb{R}^2$, le template final est paramétré par une famille de fonctions
 régulières telles que les B-splines étendues à $SE(2)$
 \[
@@ -270,6 +270,15 @@ ou dans $SE(2)$:
     t \rVert_{D}^2 dx dy d\theta- \mu \lVert t \rVert_{\mathbb{L}_2(SE(2))}^2
 \]
 
+\paragraph{Prepocessing des images}
+Les jeux de données utilisés sont composés d'images démontrant de forte variation de luminosité et de contraste. Ainsi, une 
+phase de \textit{preprocessing} est nécessaire afin de renormaliser les images. La méthode employée dans l'article et que nous 
+avons également recodée pour réaliser les expériences décrites plus bas se fonde sur l'idée de renormalisation locale. Elle consiste
+à premièrement calculer une moyenne et un écart-type local de l'intensité des pixels. Ceci permet de renormaliser localement l'image afin 
+que cette dernière est une moyenne nulle et un écart-type de 1. Ensuite, un masque de fond est extrait en utilisant la distance de Mahalanobis 
+permettant d'éviter la prise en compte des valeurs abhérantes dans la seconde phase de normalisation. L'image est ensuite renormalisée une seconde 
+fois mais en ignorant les pixels ajoutés au masque.
+
 
 
 \section{Expériences}
@@ -289,7 +298,8 @@ Pour mémoire, 5 types de construction de templates sont envisagés:
 Pour chacune de ses constructions, un module de regression linéaire et regression logistique est employé dans 
 les espaces $\mathbb{R}^2$ et $SE(2)$. Afin de réaliser les expérience dont les résultats sont présentés plus 
 ont été réalisée en considérant un ensemble de 500 images dont 80\% (400 images) constitue l'ensemble d'entrainement 
-des modèles et les 20 \% (100 images) restants l'ensemble de test. Sur chacune des images d'entrainement, un patch 
+des modèles et les 20 \% (100 images) restants l'ensemble de test.
+Sur chacune des images d'entrainement, un patch 
 positif de taille $N_x \times N_y = 101 \times 101$ centré autour des coordonnées de l'œil gauche et un patch négatif 
 de même de taille tiré aléatoirement en dehors des zones d'intérêts (œil droit et gauche) sont crées. Une détection est 
 ensuite considérée "bonne" sur le point de détection se situe dans rayon de $10$ pixels autour de la position réelle de l'œil 
@@ -723,6 +733,6 @@ le modèle démontre une précision assez bonne de 81 \%, ce qui est en lien ave
   \label{fig:radius}
 \end{subfigure}
 \end{figure}
-        
+
 \end{document}
  
