@@ -152,6 +152,7 @@ méthode atteint l'état de l'art pour les jeux de données considérées.
 pour y faire face?}
 
 \part{Rapport détaillé}
+\section{Discussions théoriques}
 \paragraph{Les scores d'orientation} 
 Un concept majeur du papier concerne la manière de prendre en compte les l'état
 d'orientation de chaque point de l'image afin de mieux détecter le point d'intérêt.
@@ -229,7 +230,7 @@ Les $U_{fi}$ sont les scores d'orientation des patchs ``idéaux'' $p_i$.
 Le produit scalaire définit sur $SE(2)$ prend la forme suivante:
 \[
     \langle t, |U_{fi}| \rangle_{SE(2)} = 
-    \int \limits_{\mathbb{R}^2} \int \limits_{0}^{2\pi} \overline{t(x, y, \theta)} |U_f|(x, y, \theta)dxdyd\theta
+    \int \limits_{\mathbb{R}^2} \int \limits_{0}^{2\pi} \overline{t(x, y, \theta)} \lvert U_f (x, y, \theta) \rvert dxdyd\theta
 \]
 
 Et $\nabla t$ est le gradient invariant à gauche déduit des dérivées partielles invariantes à gauches définies sur $SE(2)$
@@ -271,7 +272,7 @@ ou dans $SE(2)$:
 
 
 
-\paragraph{Expériences}
+\section{Expériences}
 
 Afin de mieux comprendre leur fonctionnement et de pouvoir les comparer dans 
 divers cadres d'études, nous avons re-codé les différentes méthodes présentées dans cet article 

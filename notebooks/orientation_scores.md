@@ -30,27 +30,33 @@ from templatematching.preprocessing import OrientationScoreTransformer
 ```python
 # these parameters take ~1 minute to fit to have a nice visualisation, 
 # scale down the size of the image/the patch to increase speed.
-images = np.stack([make_circle(101), make_cross(101)])
-transformer = OrientationScoreTransformer(wavelet_dim=21, num_slices=50)
+images = np.stack([make_circle(1001), make_cross(1001)])
+transformer = OrientationScoreTransformer(wavelet_dim=501, num_slices=12)
 transformer.fit(images)
 oriented_circle, oriented_cross  = transformer.transform(images)
 ```
 
 ```python
-f, axs = plt.subplots(ncols=5, figsize=(20, 5))
+f, axs = plt.subplots(ncols=4, figsize=(20, 5))
 for ax in axs:
     ax.get_xaxis().set_visible(False)
     ax.get_yaxis().set_visible(False)
     
 axs[0].matshow(transformer._cake_slices[0])
-axs[1].matshow(transformer._wavelets[0].imag)
 
 # zoom a little bit on the wavelet
-zoomed_slice = slice(int(3*transformer.wavelet_dim/8),int(5*transformer.wavelet_dim/8))
+# zoomed_slice = slice(int(3*transformer.wavelet_dim/8),int(5*transformer.wavelet_dim/8))
+zoomed_slice = slice(int(3.75*transformer.wavelet_dim/8),int(4.25*transformer.wavelet_dim/8))
 
-axs[2].matshow(transformer._wavelets[0].imag[zoomed_slice, zoomed_slice])
-axs[3].matshow(images[0])
-axs[4].matshow(oriented_circle.imag[:, :, 0])
+axs[1].matshow(transformer._wavelets[0].imag[zoomed_slice, zoomed_slice])
+axs[2].matshow(images[0])
+axs[3].matshow(oriented_circle.imag[:, :, 0])
+f.savefig('../report/plots/cake_wavelet.png')
+```
+
+```python
+f, ax = plt.subplots(figsize=(10, 7))
+ax.matshow(transformer._wavelets[0].imag[zoomed_slice, zoomed_slice], cmap='gray')
 ```
 
 ```python
