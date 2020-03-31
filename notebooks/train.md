@@ -61,6 +61,7 @@ def show_template_and_prediction(clf, test_images, image_no):
 
     ax3.matshow(template, cmap="gray")
     ax4.matshow(masked_template, cmap="gray")
+    return test_images[image_no], (x, y), conv, template, masked_template
 ```
 
 ```python
@@ -228,7 +229,7 @@ se2_pipeline = make_pipeline(
               max_iter=50,
               tol=1e-6,
               early_stopping=10,
-              mu=0,
+              mu=1e0,
               lbd=0,
               Dxi=1,
               Deta=0,
@@ -241,7 +242,7 @@ se2_pipeline.fit(X_train, y_train)
 ```
 
 ```python
-show_template_and_prediction(se2_pipeline, X_test, 0)
+test_image, (x, y), conv, template, masked_template = show_template_and_prediction(se2_pipeline, X_test, 0)
 ```
 
 ```python
@@ -249,6 +250,15 @@ score = se2_pipeline.score(
     X_test, y_test
 )
 print(f'score (from {X_test.shape[0]} samples): {score:.3f}')
+```
+
+```python
+test_image, (x, y), conv, template, masked_template = show_template_and_prediction(se2_pipeline, X_test, 0)
+```
+
+```python
+plt.imsave('../report/plots/C_log_SE2_template.jpg', masked_template, cmap='gray')
+plt.imsave('../report/plots/C_log_SE2_conv.jpg', conv, cmap='gray')
 ```
 
 ```python
