@@ -8,7 +8,8 @@
 \usepackage[a4paper, total={6in, 8in}]{geometry}
 \usepackage{algorithm}
 \usepackage[noend]{algpseudocode}
-\usepackage[francais]{babel}
+%\usepackage[francais]{babel}
+\usepackage{listings}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 
@@ -22,6 +23,7 @@
 \usepackage{xifthen}
 \usepackage{pdfpages}
 \usepackage{transparent}
+
 
 \newcommand{\incfig}[1]{%
     \colorbox{white}{
@@ -39,7 +41,7 @@
 \maketitle
 $ \quad $
 % \pagebreak
-% \part{Questions}
+\part{Questions}
 
 
 \paragraph{Quel est le problème traité} 
@@ -143,8 +145,6 @@ méthode atteint l'état de l'art pour les jeux de données considérées.
 \paragraph{Voyez-vous des faiblesses dans l'approche présentée et avez-vous des idées
 pour y faire face?}
 
-
-
 \part{Rapport détaillé}
 \paragraph{Les scores d'orientation} 
 Un concept majeur du papier concerne la manière de prendre en compte les l'état
@@ -210,7 +210,7 @@ de gauche à droite: l'ondelette dans le plan de fourrier, l'ondelette dans le d
 spatial, une image simple, et la même image transformée par cette ondelette.
 \end{figure}
 
-
+\part
 \paragraph{Expériences}
 
 Afin de mieux comprendre leur fonctionnement et de pouvoir les comparer dans 
