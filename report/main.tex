@@ -289,7 +289,7 @@ l'utilisation du score d'orientation:
       \theta)\rVert_{D}^2 dxdyd\theta + \mu \lVert t \rVert_{\mathbb{L}_2(SE(2))}^2 \]
 \end{itemize}
 Les $U_{fi}$ sont les scores d'orientation des patchs $p_i$.  $\nabla t$ est le gradient
-invariant à gauche déduit des dérivées partielles invariantes à gauches définies sur
+invariant à gauche déduit des dérivées partielles invariantes à gauche définies sur
 $SE(2)$ comme suit $\{\partial_{\xi} = cos(\theta)\partial_x + sin(\theta) \partial_y,\,
 \partial{\eta} = -sin(\theta) \partial_x + cos(\theta) \partial_y, \partial_{\theta}\}$.
 Une norme pondérée du gradient peut ensuite être définie comme suit:
@@ -327,7 +327,7 @@ ou dans $SE(2)$:
 \]
 Ce problème d'optimisation n'admet plus de solution \textit{closed-formed} et doit donc être résolu par itération. Une méthode de Newton est ici employée. 
 
-\paragraph{Prepocessing des images}
+\paragraph{Preprocessing des images}
 Les jeux de données utilisés sont composés d'images démontrant de forte variation de luminosité et de contraste. Ainsi, une 
 phase de \textit{preprocessing} est nécessaire afin de renormaliser les images. La méthode employée dans l'article et que nous 
 avons également recodée pour réaliser les expériences décrites plus bas se fonde sur l'idée de renormalisation locale et tirée de \cite{preprocessing}. Elle consiste
