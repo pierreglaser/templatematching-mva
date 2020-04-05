@@ -35,6 +35,7 @@ class R2Ridge(SplineRegressorBase, PatchRegressorBase):
         solver="dual",
         random_state=None,
         eye="left",
+        n_jobs=1,
     ):
         assert template_shape[0] == template_shape[1]
         assert solver in ["primal", "dual"], "solver must be primal or dual"
@@ -42,7 +43,11 @@ class R2Ridge(SplineRegressorBase, PatchRegressorBase):
             self, template_shape, splines_per_axis, spline_order=spline_order
         )
         PatchRegressorBase.__init__(
-            self, patch_shape=template_shape, eye=eye, random_state=random_state,
+            self,
+            patch_shape=template_shape,
+            eye=eye,
+            random_state=random_state,
+            n_jobs=n_jobs
         )
 
         self.model_name = "Linear Ridge"
@@ -53,6 +58,7 @@ class R2Ridge(SplineRegressorBase, PatchRegressorBase):
         self.solver = solver
         self._is_fitted = False
         self._cached_template = None
+        self.n_jobs = n_jobs
 
     @TemplateCrossCorellatorBase.template.getter
     def template(self):
@@ -194,7 +200,10 @@ class SE2Ridge(SplineRegressorBase, PatchRegressorBase):
             self, template_shape, splines_per_axis, spline_order=spline_order
         )
         PatchRegressorBase.__init__(
-            self, patch_shape=template_shape, eye=eye, random_state=random_state
+            self,
+            patch_shape=template_shape,
+            eye=eye,
+            random_state=random_state,
         )
 
         self.name = "SE2 Ridge"

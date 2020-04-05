@@ -1,5 +1,7 @@
 import numpy as np
 
+from joblib import Parallel, delayed
+
 
 class PatchCreator:
     """
@@ -7,7 +9,9 @@ class PatchCreator:
     from images
     """
 
-    def __init__(self, patch_shape, neg_pos_proportion=1, random_state=None):
+    def __init__(
+        self, patch_shape, neg_pos_proportion=1, random_state=None, n_jobs=1
+    ):
         """
         Inputs:
         -------
@@ -23,6 +27,7 @@ class PatchCreator:
         self.patch_shape = patch_shape
         self.neg_pos_prop = neg_pos_proportion
         self._eye_locations = None
+        self.n_jobs = n_jobs
 
     def fit(self, X, y=None):
         """
@@ -37,30 +42,30 @@ class PatchCreator:
         self._eye_locations = y
 
     def transform(self, X):
-
-        pos_patches_left = []
-        pos_patches_right = []
-        neg_patches = []
-
-        for i in range(X.shape[0]):
-            left_eye_pos, right_eye_pos = self._eye_locations[i]
-            # by convention, left eye is first item of the tuple
-            left, right, mask = self._create_positive_patch_from_image(
-                X[i], left_eye_pos, right_eye_pos
-            )
-
-            pos_patches_left.append(left)
-            pos_patches_right.append(right)
-
-            for _ in range(self.neg_pos_prop):
-                patch = self._create_negative_patch_from_image(X[i], mask)
-                neg_patches.append(patch)
+        patches = Parallel(prefer="threads", n_jobs=self.n_jobs)(
+            delayed(self._create_patch_one_image)(X[i], self._eye_locations[i])
+            for i in range(X.shape[0])
+        )
+        left_eye_patches, right_eye_patches, negative_patches = zip(*patches)
 
         return (
-            np.stack(pos_patches_left, axis=0),
-            np.stack(pos_patches_right, axis=0),
-            np.stack(neg_patches, axis=0),
+            np.stack(left_eye_patches, axis=0),
+            np.stack(right_eye_patches, axis=0),
+            np.concatenate(negative_patches)
         )
+
+    def _create_patch_one_image(self, image, eye_annotation):
+        left_eye_pos, right_eye_pos = eye_annotation
+        neg_patches = []
+        # by convention, left eye is first item of the tuple
+        left, right, mask = self._create_positive_patch_from_image(
+            image, left_eye_pos, right_eye_pos
+        )
+
+        for _ in range(self.neg_pos_prop):
+            patch = self._create_negative_patch_from_image(image, mask)
+            neg_patches.append(patch)
+        return left, right, np.stack(neg_patches, axis=0)
 
     def fit_transform(self, X, y=None):
         self.fit(X, y=y)
