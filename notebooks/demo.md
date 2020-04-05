@@ -8,14 +8,15 @@ jupyter:
       format_version: '1.2'
       jupytext_version: 1.4.1
   kernelspec:
-    display_name: 'Python 3.6.9 64-bit (''mva'': conda)'
+    display_name: Python 3
     language: python
-    name: python36964bitmvaconda71edd13a25bc4435a7006a82eb13bc64
+    name: python3
 ---
 
 ```python
 import matplotlib.pyplot as plt
 import numpy as np
+
 %matplotlib inline
 %load_ext autoreload
 %autoreload 2
@@ -24,14 +25,18 @@ import numpy as np
 ### Normalization 
 
 ```python
-from templatematching.datasets import read_images
-from templatematching.preprocessing import Normalizer
+from templatematching.datasets import load_facesdb
+from templatematching.preprocessing import Normalizer, PatchCreator
 ```
 
 ```python
-images = read_images(1)
-normalizer = Normalizer()
-normalized_images = normalizer.fit_transform(images)
+# we first load the images into memory
+images, eye_annotations = load_facesdb()
+```
+
+```python
+normalizer = Normalizer(n_jobs=-1)
+normalized_images = normalizer.fit_transform(images[:500])
 
 f, (ax1, ax2) = plt.subplots(ncols=2, figsize=(12, 6))
 ax1.imshow(images[0], cmap='gray')
@@ -43,12 +48,7 @@ ax2.set_title('normalized image')
 ### Patch creation
 
 ```python
-num_images = 1
-images, eye_annotations = read_images(num_images), read_eye_annotations(num_images)
-
-normalized_images = normalizer.fit_transform(images)
-trans = PatchCreator(patch_shape=(101, 101), neg_pos_proportion=2, random_state=1)
-image_transformer = Normalizer()
+trans = PatchCreator(patch_shape=(101, 101), neg_pos_proportion=2, random_state=1, n_jobs=-1)
 left_eye_patches, right_eye_patches, negative_patches = trans.fit_transform(
     normalized_images, eye_annotations
 )
@@ -70,10 +70,9 @@ from templatematching.preprocessing import OrientationScoreTransformer
 ```python
 # these parameters take ~1 minute to fit to have a nice visualisation, 
 # scale down the size of the image/the patch to increase speed.
-images = np.stack([make_circle(201), make_cross(201)])
+geom_images = np.stack([make_circle(201), make_cross(201)])
 transformer = OrientationScoreTransformer(wavelet_dim=501, num_slices=12)
-transformer.fit(images)
-oriented_circle, oriented_cross  = transformer.transform(images)
+oriented_circle, oriented_cross  = transformer.fit_transform(geom_images)
 
 f, axs = plt.subplots(ncols=4, figsize=(20, 5))
 for ax in axs:
@@ -87,7 +86,7 @@ axs[0].matshow(transformer._cake_slices[0])
 zoomed_slice = slice(int(3.75*transformer.wavelet_dim/8),int(4.25*transformer.wavelet_dim/8))
 
 axs[1].matshow(transformer._wavelets[0].imag[zoomed_slice, zoomed_slice])
-axs[2].matshow(images[0])
+axs[2].matshow(geom_images[0])
 axs[3].matshow(oriented_circle.imag[:, :, 0])
 ```
 
@@ -96,7 +95,7 @@ axs[3].matshow(oriented_circle.imag[:, :, 0])
 ```python
 from sklearn.pipeline import make_pipeline
 from sklearn.model_selection import train_test_split
-from templatematching.models import SE2Ridge
+from templatematching.models import SE2Ridge, R2Ridge
 ```
 
 ```python
@@ -121,14 +120,35 @@ def show_template_and_prediction(clf, test_images, image_no):
 ```
 
 ```python
-num_images = 500
 random_state = 10
-images, eye_annotations = read_images(num_images), read_eye_annotations(num_images)
+num_images = 500
+X_train, X_test, y_train, y_test = train_test_split(
+    images[:num_images],
+    eye_annotations[:num_images],
+    train_size=0.8,
+    shuffle=True,
+    random_state=random_state,
+)
 
-X_train, X_test, y_train, y_test = train_test_split(images, eye_annotations, train_size=0.8, shuffle=True, random_state=random_state)
+print(f"Number of training samples: {np.round(X_train.shape[0], 2)}")
+print(f"Number of test samples: {np.round(X_test.shape[0], 2)}")
+```
 
-print(f'Number of training samples: {np.round(X_train.shape[0], 2)}')
-print(f'Number of test samples: {np.round(X_test.shape[0], 2)}')
+```python
+ridge_model = R2Ridge(
+    template_shape=(101, 101), splines_per_axis=(51, 51), spline_order=3,
+    batch_size=500, mu=0.5 * 1e-3, lbd=0.5 * 1e-4, solver="dual",
+    random_state=random_state, n_jobs=4
+)
+```
+
+```python
+ridge_model._create_s_matrix(images[:100])
+```
+
+```python
+r2_ridge_pipeline = make_pipeline(Normalizer(), ridge_model)
+r2_ridge_pipeline.fit(X_train, y_train)
 ```
 
 ```python
