@@ -31,15 +31,16 @@ images, eye_annotations = read_images(100), read_eye_annotations(100)
 ```python
 trans = PatchCreator(patch_shape=(101, 101), neg_pos_proportion=2, random_state=1)
 image_transformer = Normalizer()
+normalized_images = image_transformer.fit_transform(images)
 left_eye_patches, right_eye_patches, negative_patches = trans.fit_transform(
-    images, eye_annotations
+    normalized_images, eye_annotations
 )
 ```
 
 ```python
 f, (ax1, ax2, ax3, ax4) = plt.subplots(ncols=4)
-ax1.imshow(left_eye_patches[0])
-ax2.imshow(right_eye_patches[0])
-ax3.imshow(negative_patches[0])
-ax4.imshow(negative_patches[1])
+ax1.imshow(left_eye_patches[0], cmap='gray')
+ax2.imshow(right_eye_patches[0], cmap='gray')
+ax3.imshow(negative_patches[0], cmap='gray')
+ax4.imshow(negative_patches[1], cmap='gray')
 ```
