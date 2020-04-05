@@ -5,6 +5,7 @@ from math import factorial
 from numpy import pi
 from numpy.fft import ifft2
 from scipy.signal import fftconvolve
+from joblib import Parallel, delayed
 
 from ..spline import make_k_th_order_spline
 
@@ -52,6 +53,7 @@ class OrientationScoreTransformer:
         bandwidth=5,
         convolution_mode="same",
         batch_size=50,
+        n_jobs=1
     ):
         self.wavelet_dim = wavelet_dim
         self.num_slices = num_slices
@@ -61,6 +63,7 @@ class OrientationScoreTransformer:
         self.batch_size = batch_size
         self.convolution_mode = convolution_mode
         self.s_theta = 2 * np.pi / self.num_slices
+        self.n_jobs = n_jobs
 
     def fit(self, X, y=None):
         self._wavelets = []
@@ -77,19 +80,14 @@ class OrientationScoreTransformer:
             self._cake_slices.append(cake_slice)
 
     def transform(self, X):
-        transformed_X = []
-
         batch_size = min(self.batch_size, X.shape[0])
-        for w in self._wavelets:
-            w = w.reshape(1, *w.shape)  # convolve over a full batch of images
-            convolved_img = np.zeros(X.shape).astype(np.complex64)
-            for i in range(int(X.shape[0] / batch_size)):
-                X_batch = X[i * batch_size : (i + 1) * batch_size, :, :]
-                convolved_img[
-                    i * batch_size : (i + 1) * batch_size, :, :
-                ] = fftconvolve(X_batch, w, mode=self.convolution_mode)
-            transformed_X.append(convolved_img)
-
+        transformed_X = Parallel(prefer="threads", n_jobs=self.n_jobs)(
+            delayed(fftconvolve)(
+                X[i * batch_size: (i + 1) * batch_size, :, :],
+                w.reshape(1, *w.shape),
+                mode=self.convolution_mode)
+            for i in range(int(X.shape[0] / batch_size))
+            for w in self._wavelets)
         return np.stack(transformed_X, axis=-1)
 
     def fit_transform(self, X, y=None):
