@@ -20,7 +20,7 @@ def _normalize_images_batched(
     mask = mask.astype(int)
     mask_c_window = fftconvolve(mask, window, mode="same")
 
-    images_normalized = Parallel(backend="threading", n_jobs=n_jobs)(
+    images_normalized = Parallel(prefer="threads", n_jobs=n_jobs)(
         delayed(_normalize_batch)(
             image[i * batch_size: (i + 1) * batch_size, :, :],  # noqa
             window,
