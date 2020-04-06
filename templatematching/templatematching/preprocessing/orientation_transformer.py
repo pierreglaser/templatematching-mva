@@ -1,21 +1,21 @@
 import numpy as np
 
-from math import factorial
+from math import factorial, ceil
 
+from joblib import Parallel, delayed
 from numpy import pi
 from numpy.fft import ifft2
 from scipy.signal import fftconvolve
-from joblib import Parallel, delayed
-
-from ..spline import make_k_th_order_spline
 from scipy.fft import fftn, ifftn
 from scipy.signal.signaltools import _centered
+
+from ..spline import make_k_th_order_spline
+from ..utils import tqdm
 
 
 def _broadcasted_convolution(in1, in2, orig_shape):
     fwr = in1[:, :, :, np.newaxis] * np.swapaxes(in2[:, :, :, np.newaxis], 0, 3)
     fwr = fwr.reshape(len(in1), *fwr.shape[1:3], len(in2))
-
     e = ifftn(fwr, s=fwr.shape[1:3], axes=[1, 2])
     return _centered(e, (len(in1), *orig_shape, len(in2)))
 
@@ -96,7 +96,7 @@ class OrientationScoreTransformer:
         for w in self._wavelets:
             w = w.reshape(1, *w.shape)  # convolve over a full batch of images
             convolved_img = np.zeros(X.shape).astype(np.complex64)
-            for i in range(int(X.shape[0] / batch_size)):
+            for i in range(ceil(X.shape[0] / batch_size)):
                 X_batch = X[i * self.batch_size: (i + 1) * self.batch_size, :, :]
                 convolved_img[
                     i * self.batch_size: (i + 1) * self.batch_size, :, :
@@ -112,12 +112,12 @@ class OrientationScoreTransformer:
         fftws = fftn(wavelets, s=ss, axes=[1, 2])
         fftimgs = fftn(X, s=ss, axes=[1, 2])
 
-        from math import ceil
-        batched_convs = Parallel(prefer="processes", n_jobs=self.n_jobs)(
+        batched_convs = Parallel(prefer="threads", n_jobs=self.n_jobs)(
             delayed(_broadcasted_convolution)(
                 fftimgs[i * self.batch_size: (i + 1) * self.batch_size, :, :],
                 fftws, orig_shape=X.shape[1:])
-            for i in range(ceil(X.shape[0] / self.batch_size)))
+            for i in tqdm(range(ceil(X.shape[0] / self.batch_size)),
+                          desc="orientation scores"))
         return np.concatenate(batched_convs)
 
     def fit_transform(self, X, y=None):

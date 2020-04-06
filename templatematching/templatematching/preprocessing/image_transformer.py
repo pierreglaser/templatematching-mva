@@ -1,11 +1,14 @@
 import numpy as np
 import functools
 
+from math import ceil
+
 from scipy.signal import fftconvolve
 from scipy.integrate import dblquad
 from joblib import Parallel, delayed
 
 from .utils import m_function
+from ..utils import tqdm
 
 
 def _normalize_images_batched(
@@ -28,7 +31,8 @@ def _normalize_images_batched(
             eps,
             mask_c_window,
         )
-        for i in range(int(image.shape[0] / batch_size))
+        for i in tqdm(range(ceil(image.shape[0] / batch_size)),
+                      desc="normalization")
     )
     return np.concatenate(images_normalized)
 
