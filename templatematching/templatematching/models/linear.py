@@ -194,6 +194,7 @@ class SE2Ridge(SplineRegressorBase, PatchRegressorBase):
         solver="dual",
         random_state=None,
         eye="left",
+        n_jobs=1
     ):
         assert template_shape[0] == template_shape[1]
         assert solver in ["primal", "dual"], "solver must be primal or dual"
@@ -222,8 +223,9 @@ class SE2Ridge(SplineRegressorBase, PatchRegressorBase):
         self._ost = OrientationScoreTransformer(
             wavelet_dim=wavelet_dim,
             num_slices=num_orientation_slices,
-            batch_size=batch_size,
+            batch_size=batch_size, n_jobs=n_jobs
         )
+        self.n_jobs = n_jobs
 
     @TemplateCrossCorellatorBase.template.getter
     def template(self):
