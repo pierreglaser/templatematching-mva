@@ -5,3 +5,16 @@ Repository containing our project's code for the geodesic methods class of the 2
 
 "[Template Matching via Densities on the Roto-Translation Group](https://arxiv.org/pdf/1603.03304.pdf)", by Erik J.
 Bekkers, Marco Loog, Bart M. ter Haar Romeny, and Remco Duits
+
+
+To use this repository clone it and run
+`cd templatematching` to go in the module
+ 
+`pip install -e .` to install template matching module
+
+
+### template matching
+The module you will install
+
+### notebooks
+This folder contains the 
