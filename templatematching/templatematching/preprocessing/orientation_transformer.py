@@ -8,6 +8,24 @@ from scipy.signal import fftconvolve
 from joblib import Parallel, delayed
 
 from ..spline import make_k_th_order_spline
+from scipy.fft import fftn, ifftn
+from scipy.signal.signaltools import _centered
+
+
+def _broadcasted_convolution(in1, in2):
+    # batch = images[:10].astype(np.float64)
+    # batch_wav =  transformer._wavelets[:5]
+    ss = (in1.shape[1] + in2.shape[1], in1.shape[2] + in2.shape[2])
+
+    f1 = fftn(in1, s=ss, axes=[1, 2])
+    f2 = fftn(in2, s=ss, axes=[1, 2])
+
+    fwr = f1[:, :, :, np.newaxis] * np.swapaxes(f2[:, :, :, np.newaxis],
+                                                0, 3)
+    fwr = fwr.reshape(len(in1), *fwr.shape[1:3], len(in2))
+
+    e = ifftn(fwr, s=fwr.shape[1:3], axes=[1, 2])
+    return _centered(e, (len(in1), *in1.shape[1:], len(in2)))
 
 
 def _make_gaussian_patch(N, sigma):
@@ -80,6 +98,16 @@ class OrientationScoreTransformer:
             self._cake_slices.append(cake_slice)
 
     def transform(self, X):
+        fftws = fftn(np.array(self._wavelets), s=X.shape[1:],
+                     axes=[1, 2])
+        fftimgs = fftn(X, s=X.shape[1:], axes=[1, 2])
+        batched_convs = Parallel(prefer="threads", n_jobs=self.n_jobs)(
+            delayed(_broadcasted_convolution)(
+                fftimgs[i * self.batch_size: (i + 1) * self.batch_size, :, :],
+                fftws) for i in range(int(X.shape[0] / self.batch_size)))
+        return batched_convs
+
+    def _legacy_transform(self, X):
         batch_size = min(self.batch_size, X.shape[0])
         transformed_X = Parallel(prefer="threads", n_jobs=self.n_jobs)(
             delayed(fftconvolve)(
