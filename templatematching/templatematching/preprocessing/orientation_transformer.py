@@ -12,20 +12,12 @@ from scipy.fft import fftn, ifftn
 from scipy.signal.signaltools import _centered
 
 
-def _broadcasted_convolution(in1, in2):
-    # batch = images[:10].astype(np.float64)
-    # batch_wav =  transformer._wavelets[:5]
-    ss = (in1.shape[1] + in2.shape[1], in1.shape[2] + in2.shape[2])
-
-    f1 = fftn(in1, s=ss, axes=[1, 2])
-    f2 = fftn(in2, s=ss, axes=[1, 2])
-
-    fwr = f1[:, :, :, np.newaxis] * np.swapaxes(f2[:, :, :, np.newaxis],
-                                                0, 3)
+def _broadcasted_convolution(in1, in2, orig_shape):
+    fwr = in1[:, :, :, np.newaxis] * np.swapaxes(in2[:, :, :, np.newaxis], 0, 3)
     fwr = fwr.reshape(len(in1), *fwr.shape[1:3], len(in2))
 
     e = ifftn(fwr, s=fwr.shape[1:3], axes=[1, 2])
-    return _centered(e, (len(in1), *in1.shape[1:], len(in2)))
+    return _centered(e, (len(in1), *orig_shape, len(in2)))
 
 
 def _make_gaussian_patch(N, sigma):
@@ -97,31 +89,36 @@ class OrientationScoreTransformer:
             self._wavelets.append(w)
             self._cake_slices.append(cake_slice)
 
+    def _legacy_transform(self, X):
+        transformed_X = []
+
+        batch_size = min(self.batch_size, X.shape[0])
+        for w in self._wavelets:
+            w = w.reshape(1, *w.shape)  # convolve over a full batch of images
+            convolved_img = np.zeros(X.shape).astype(np.complex64)
+            for i in range(int(X.shape[0] / batch_size)):
+                X_batch = X[i * self.batch_size: (i + 1) * self.batch_size, :, :]
+                convolved_img[
+                    i * self.batch_size: (i + 1) * self.batch_size, :, :
+                ] = fftconvolve(X_batch, w, mode=self.convolution_mode)
+            transformed_X.append(convolved_img)
+
+        return np.stack(transformed_X, axis=-1)
+
     def transform(self, X):
-        fftws = fftn(np.array(self._wavelets), s=X.shape[1:],
-                     axes=[1, 2])
-        fftimgs = fftn(X, s=X.shape[1:], axes=[1, 2])
-        batched_convs = Parallel(prefer="threads", n_jobs=self.n_jobs)(
+        wavelets = np.array(self._wavelets)
+        ss = (X.shape[1] + wavelets.shape[1] - 1,
+              X.shape[2] + wavelets.shape[2] - 1)
+        fftws = fftn(wavelets, s=ss, axes=[1, 2])
+        fftimgs = fftn(X, s=ss, axes=[1, 2])
+
+        from math import ceil
+        batched_convs = Parallel(prefer="processes", n_jobs=self.n_jobs)(
             delayed(_broadcasted_convolution)(
                 fftimgs[i * self.batch_size: (i + 1) * self.batch_size, :, :],
-                fftws) for i in range(int(X.shape[0] / self.batch_size)+1))
+                fftws, orig_shape=X.shape[1:])
+            for i in range(ceil(X.shape[0] / self.batch_size)))
         return np.concatenate(batched_convs)
-
-    def _legacy_transform(self, X):
-        batch_size = min(self.batch_size, X.shape[0])
-        transformed_X = Parallel(prefer="threads", n_jobs=self.n_jobs)(
-            delayed(fftconvolve)(
-                X[i * batch_size: (i + 1) * batch_size, :, :],
-                w.reshape(1, *w.shape),
-                mode="same")
-            for w in self._wavelets
-            for i in range(int(X.shape[0] / batch_size) + 1))
-        reformed_chunks = []
-        d = int(X.shape[0] / batch_size) + 1
-        for j in range(len(self._wavelets)):
-            _chunk = np.concatenate(transformed_X[j*d:(j+1)*d])
-            reformed_chunks.append(_chunk)
-        return np.stack(reformed_chunks, axis=-1)
 
     def fit_transform(self, X, y=None):
         self.fit(X, y=y)
