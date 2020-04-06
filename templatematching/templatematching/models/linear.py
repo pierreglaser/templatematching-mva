@@ -247,7 +247,7 @@ class SE2Ridge(SplineRegressorBase, PatchRegressorBase):
 
         convs = np.zeros(X.shape)
 
-        for i in range(int(X.shape[0] / batch_size)):
+        for i in range(ceil(X.shape[0] / batch_size)):
             X_batch = X[i * batch_size : (i + 1) * batch_size, :, :]
             convs[i * batch_size : (i + 1) * batch_size, :, :] = correlate(
                 X_batch, template, mode="same", method="fft"
