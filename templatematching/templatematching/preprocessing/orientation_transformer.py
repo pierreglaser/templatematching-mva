@@ -3,12 +3,11 @@ import numpy as np
 from math import factorial
 
 from numpy import pi
-from numpy.fft import ifft2
+from numpy.fft import ifft2, fftn, ifftn
 from scipy.signal import fftconvolve
 from joblib import Parallel, delayed
 
 from ..spline import make_k_th_order_spline
-from scipy.fft import fftn, ifftn
 from scipy.signal.signaltools import _centered
 
 
