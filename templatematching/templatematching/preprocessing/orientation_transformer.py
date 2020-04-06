@@ -104,8 +104,8 @@ class OrientationScoreTransformer:
         batched_convs = Parallel(prefer="threads", n_jobs=self.n_jobs)(
             delayed(_broadcasted_convolution)(
                 fftimgs[i * self.batch_size: (i + 1) * self.batch_size, :, :],
-                fftws) for i in range(int(X.shape[0] / self.batch_size)))
-        return batched_convs
+                fftws) for i in range(int(X.shape[0] / self.batch_size)+1))
+        return np.concatenate(batched_convs)
 
     def _legacy_transform(self, X):
         batch_size = min(self.batch_size, X.shape[0])
@@ -113,10 +113,15 @@ class OrientationScoreTransformer:
             delayed(fftconvolve)(
                 X[i * batch_size: (i + 1) * batch_size, :, :],
                 w.reshape(1, *w.shape),
-                mode=self.convolution_mode)
-            for i in range(int(X.shape[0] / batch_size))
-            for w in self._wavelets)
-        return np.stack(transformed_X, axis=-1)
+                mode="same")
+            for w in self._wavelets
+            for i in range(int(X.shape[0] / batch_size) + 1))
+        reformed_chunks = []
+        d = int(X.shape[0] / batch_size) + 1
+        for j in range(len(self._wavelets)):
+            _chunk = np.concatenate(transformed_X[j*d:(j+1)*d])
+            reformed_chunks.append(_chunk)
+        return np.stack(reformed_chunks, axis=-1)
 
     def fit_transform(self, X, y=None):
         self.fit(X, y=y)
