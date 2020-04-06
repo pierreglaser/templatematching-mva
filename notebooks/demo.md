@@ -137,37 +137,31 @@ print(f"Number of test samples: {np.round(X_test.shape[0], 2)}")
 ```python
 ridge_model = R2Ridge(
     template_shape=(101, 101), splines_per_axis=(51, 51), spline_order=3,
-    batch_size=500, mu=0.5 * 1e-3, lbd=0.5 * 1e-4, solver="dual",
+    batch_size=1, mu=0.5 * 1e-3, lbd=0.5 * 1e-4, solver="dual",
     random_state=random_state, n_jobs=4
 )
+normalizer = Normalizer(n_jobs=4, batch_size=3)
 ```
 
 ```python
-ridge_model._create_s_matrix(images[:100])
+r2_ridge_pipeline = make_pipeline(normalizer, ridge_model)
+r2_ridge_pipeline = r2_ridge_pipeline.fit(X_train, y_train)
 ```
 
 ```python
-r2_ridge_pipeline = make_pipeline(Normalizer(), ridge_model)
-r2_ridge_pipeline.fit(X_train, y_train)
-```
-
-```python
-se2_pipeline = make_pipeline(
-    Normalizer(),
-    SE2Ridge(template_shape=(101, 101),
-             splines_per_axis=(51, 51, 4),
-             wavelet_dim=21,
-             num_orientation_slices=4,
-             mu=0.5 * 1e-3,
-             lbd=0.5 * 1e-4,
-             Dxi=1,
-             Deta=0,
-             Dtheta=1e-2,
-             spline_order=3,
-             solver="dual",
-             random_state=random_state)
+normalizer = Normalizer(batch_size=3, n_jobs=4)
+se2_ridge_model = SE2Ridge(
+    template_shape=(101, 101), splines_per_axis=(51, 51, 4),  # dimesions
+    wavelet_dim=21, num_orientation_slices=4, # orientation scores
+    mu=0.5 * 1e-3, lbd=0.5 * 1e-4, Dxi=1, Deta=0, Dtheta=1e-2,  # regularization
+    solver="primal", n_jobs=4, batch_size=3, # performance
+    spline_order=3, random_state=random_state # misc
 )
-se2_pipeline.fit(X_train, y_train)
+```
+
+```python
+se2_pipeline = make_pipeline(normalizer, se2_ridge_model)
+se2_pipeline = se2_pipeline.fit(X_train[:100], y_train[:100])
 ```
 
 ```python
@@ -179,4 +173,12 @@ score = se2_pipeline.score(
     X_test, y_test
 )
 print(f'score (from {X_test.shape[0]} samples): {score:.3f}')
+```
+
+```python
+
+```
+
+```python
+
 ```
