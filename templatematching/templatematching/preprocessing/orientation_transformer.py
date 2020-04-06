@@ -4,9 +4,8 @@ from math import factorial, ceil
 
 from joblib import Parallel, delayed
 from numpy import pi
-from numpy.fft import ifft2
+from numpy.fft import ifft2, fftn, ifftn
 from scipy.signal import fftconvolve
-from scipy.fft import fftn, ifftn
 from scipy.signal.signaltools import _centered
 
 from ..spline import make_k_th_order_spline
