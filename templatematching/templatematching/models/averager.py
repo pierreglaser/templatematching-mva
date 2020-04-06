@@ -1,5 +1,7 @@
 import numpy as np
 
+from math import ceil
+
 from scipy.signal import correlate
 
 from .base import PatchRegressorBase, TemplateCrossCorellatorBase
@@ -60,7 +62,7 @@ class SE2Averager(TemplateCrossCorellatorBase, PatchRegressorBase):
         batch_size = min(self.batch_size, X.shape[0])
         convs = np.zeros(X.shape)
 
-        for i in range(int(X.shape[0] / batch_size)):
+        for i in range(ceil(X.shape[0] / batch_size)):
             X_batch = X[i * batch_size : (i + 1) * batch_size, :, :]
             convs[i * batch_size : (i + 1) * batch_size, :, :] = correlate(
                 X_batch, template, mode="same", method="fft"
