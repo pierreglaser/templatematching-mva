@@ -1,5 +1,7 @@
 import numpy as np
 
+from math import ceil
+
 from scipy import sparse
 from scipy.sparse import csr_matrix, kron
 
@@ -121,12 +123,12 @@ class R2Ridge(SplineRegressorBase, PatchRegressorBase):
 
         batch_size = min(self.batch_size, num_samples)
 
-        for i in range(int(num_samples / batch_size)):
+        for i in range(ceil(num_samples / batch_size)):
             X_batch = X[i * batch_size : (i + 1) * batch_size, :, :]
             convolved_X = fftconvolve(X_batch, B, mode="same")
             S[i * batch_size : (i + 1) * batch_size, :] = convolved_X[
                 :, ::sk, ::sl
-            ].reshape(batch_size, Nk * Nl)
+            ].reshape(len(X_batch), Nk * Nl)
 
         S /= np.linalg.norm(S, axis=0, keepdims=True)
 
@@ -296,12 +298,12 @@ class SE2Ridge(SplineRegressorBase, PatchRegressorBase):
 
         batch_size = min(self.batch_size, X.shape[0])
 
-        for i in range(int(num_samples / batch_size)):
+        for i in range(ceil(num_samples / batch_size)):
             X_batch = X[i * batch_size : (i + 1) * batch_size, :, :]
             convolved_X = fftconvolve(X_batch, B, mode="same")
             S[i * batch_size : (i + 1) * batch_size, :] = convolved_X[
                 :, ::sk, ::sl, ::sm
-            ].reshape(batch_size, Nk * Nl * Nm)
+            ].reshape(len(X_batch), Nk * Nl * Nm)
 
         S /= np.linalg.norm(S, axis=0, keepdims=True)
         return S
