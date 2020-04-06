@@ -4,6 +4,8 @@ from math import ceil
 
 from scipy import sparse
 from scipy.sparse import csr_matrix, kron
+from scipy.sparse.linalg import lsqr as sparse_lsqr
+from scipy.sparse.linalg import inv as sparse_inv
 
 from scipy.signal import fftconvolve, correlate
 
@@ -94,7 +96,7 @@ class R2Ridge(SplineRegressorBase, PatchRegressorBase):
                 )
             else:
                 B = num_samples * (self.mu * np.eye(S.shape[1]) + self.lbd * R)
-                B_inv = np.linalg.inv(B)
+                B_inv = sparse_inv(B)
                 c = (
                     B_inv
                     @ S.T
@@ -263,28 +265,30 @@ class SE2Ridge(SplineRegressorBase, PatchRegressorBase):
         num_samples, _, _, _, _, _, _, _, _, _ = self._get_dims()
         S = self._create_s_matrix(X)
         R = self._create_r_matrix()
+        R = sparse.csc_matrix(R)
         if self.solver == "primal":
-            c = np.linalg.lstsq(
-                S.T @ S + num_samples * (self.lbd * R + self.mu * np.eye(S.shape[1])),
-                S.T @ y,
-                rcond=None,
+            c = sparse_lsqr(
+                S.T @ S + num_samples * (self.lbd * R +
+                                         self.mu * sparse.eye(S.shape[1])),
+                S.T @ y
             )[0]
         elif self.solver == "dual":
             if self.lbd == 0:
                 c = (
                     S.T
-                    @ np.linalg.inv(
-                        S @ S.T + num_samples * self.mu * np.eye(S.shape[0])
+                    @ sparse_inv(
+                        S @ S.T + num_samples * self.mu * sparse.eye(S.shape[0])
                     )
                     @ y
                 )
             else:
-                B = num_samples * (self.mu * np.eye(S.shape[1]) + self.lbd * R)
-                B_inv = np.linalg.inv(B)
+                B = num_samples * (self.mu *
+                                   sparse.eye(S.shape[1]) + self.lbd * R)
+                B_inv = sparse_inv(B)
                 c = (
                     B_inv
                     @ S.T
-                    @ np.linalg.inv(S @ B_inv @ S.T + np.eye(S.shape[0]))
+                    @ sparse_inv(S @ B_inv @ S.T + sparse.eye(S.shape[0]))
                     @ y
                 )
         else:
@@ -386,7 +390,7 @@ class SE2Ridge(SplineRegressorBase, PatchRegressorBase):
 
         R = self.Dxi * Rxi + self.Deta * Reta + self.Dtheta * Rtheta
 
-        return R.toarray()
+        return R
 
     def _util_spline(self, theta, m1, m2):
         _, _, _, _, _, _, _, _, _, sm = self._get_dims()
