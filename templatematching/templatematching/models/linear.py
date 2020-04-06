@@ -79,6 +79,7 @@ class R2Ridge(SplineRegressorBase, PatchRegressorBase):
         num_samples, _, _, _, _, _, _ = self._get_dims()
         S = self._create_s_matrix(X)
         R = self._create_r_matrix()
+        print("Solving the ridge problem...", end='')
         if self.solver == "primal":
             c = np.linalg.lstsq(
                 S.T @ S + num_samples * (self.lbd * R + self.mu * np.eye(S.shape[1])),
@@ -95,7 +96,9 @@ class R2Ridge(SplineRegressorBase, PatchRegressorBase):
                     @ y
                 )
             else:
-                B = num_samples * (self.mu * np.eye(S.shape[1]) + self.lbd * R)
+                B = num_samples * (
+                    self.mu * sparse.eye(S.shape[1], format="csc") +
+                    self.lbd * R)
                 B_inv = sparse_inv(B)
                 c = (
                     B_inv
@@ -105,7 +108,8 @@ class R2Ridge(SplineRegressorBase, PatchRegressorBase):
                 )
         else:
             raise ValueError(f"solver must be 'primal' or 'dual', got '{self.solver}'")
-        self._S, self._spline_coef = S, c
+        print(" OK.")
+        self._R, self._S, self._spline_coef = R, S, c
 
     def _reconstruct_template(self):
         _, Nx, Ny, Nk, Nl, sk, sl = self._get_dims()
@@ -151,7 +155,7 @@ class R2Ridge(SplineRegressorBase, PatchRegressorBase):
 
         R = kron(Bxk, Bxl) + kron(Byk, Byl)
 
-        return R.toarray()
+        return sparse.csc.csc_matrix(R)
 
     def _make_unit_spline(self, sk, sl):
         # Our spline is always defined on [-2.5, 2.5] (may be a problem if we
@@ -265,34 +269,37 @@ class SE2Ridge(SplineRegressorBase, PatchRegressorBase):
         num_samples, _, _, _, _, _, _, _, _, _ = self._get_dims()
         S = self._create_s_matrix(X)
         R = self._create_r_matrix()
-        R = sparse.csc_matrix(R)
+        print("Solving the ridge problem...", end='')
         if self.solver == "primal":
-            c = sparse_lsqr(
+            c = np.linalg.lstsq(
                 S.T @ S + num_samples * (self.lbd * R +
-                                         self.mu * sparse.eye(S.shape[1])),
-                S.T @ y
+                                         self.mu * np.eye(S.shape[1])),
+                S.T @ y,
+                rcond=None,
             )[0]
         elif self.solver == "dual":
             if self.lbd == 0:
                 c = (
                     S.T
-                    @ sparse_inv(
-                        S @ S.T + num_samples * self.mu * sparse.eye(S.shape[0])
+                    @ np.linalg.inv(
+                        S @ S.T + num_samples * self.mu * np.eye(S.shape[0])
                     )
                     @ y
                 )
             else:
-                B = num_samples * (self.mu *
-                                   sparse.eye(S.shape[1]) + self.lbd * R)
+                B = num_samples * (
+                    self.mu * sparse.eye(S.shape[1], format="csc") +
+                    self.lbd * R)
                 B_inv = sparse_inv(B)
                 c = (
                     B_inv
                     @ S.T
-                    @ sparse_inv(S @ B_inv @ S.T + sparse.eye(S.shape[0]))
+                    @ np.linalg.inv(S @ B_inv @ S.T + np.eye(S.shape[0]))
                     @ y
                 )
         else:
             raise ValueError(f"solver must be 'primal' or 'dual', got '{self.solver}'")
+        print("OK.")
         c /= np.linalg.norm(c)
         self._S, self._spline_coef = S, c
 
@@ -390,7 +397,7 @@ class SE2Ridge(SplineRegressorBase, PatchRegressorBase):
 
         R = self.Dxi * Rxi + self.Deta * Reta + self.Dtheta * Rtheta
 
-        return R
+        return sparse.csc.csc_matrix(R)
 
     def _util_spline(self, theta, m1, m2):
         _, _, _, _, _, _, _, _, _, sm = self._get_dims()
