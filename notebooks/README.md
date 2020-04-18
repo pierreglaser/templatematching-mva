@@ -15,4 +15,7 @@ In `preprocessing.md`, we test the preprocessing method based on [Foracchia, M.,
 ![Normalization](https://github.com/pierreglaser/templatematching-mva/blob/master/report/plots/normalized_img.jpeg)
 
 
+### Orientation Scores
+In `orientation_scores.md`, the cake wavelet module and orientation score computation is derived.
+![Orientation score](https://github.com/pierreglaser/templatematching-mva/blob/master/report/plots/cake_wavelet.png)
 
