@@ -16,10 +16,10 @@ To use this repository clone it and run
 The module you will install containing all relevant functions
 
 ### notebooks
-This folder contains the experiments we conducted
+This folder contains all the experiments we conducted.
 To have an overview of the process pipeline go to `demo.md`.
 
-In `train.md`, you will find all the training pipeline. All of the models are trained and scored here.
+The training pipeline can be seen in `train.md`. All of the models are trained and scored here.
 
 ### Report
 The report with theoretical background and results.
