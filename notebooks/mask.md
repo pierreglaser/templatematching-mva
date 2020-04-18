@@ -28,7 +28,7 @@ import matplotlib.pyplot as plt
 
 from scipy.integrate import dblquad
 
-from templatematching.preprocessing import m_function
+from templatematching.preprocessing.utils import m_function
 ```
 
 ```python
