@@ -2,11 +2,13 @@
 Here can be seen any of the submodules used to perform template matching
 
 ### Mask
-In `mask.md`, the paramerters in the mask function are assesed
+In `mask.md`, the paramerters in the mask function are assesed.
+
 ![Mask](https://github.com/pierreglaser/templatematching-mva/blob/master/report/plots/mask.jpg)
 
 ### Patches
 In `pupils_patches.md`, we show how to create positive and negative patches from an image.
+
 ![patches](https://github.com/pierreglaser/templatematching-mva/blob/master/report/plots/patches.png)
 
 ### Preprocessing
@@ -17,5 +19,6 @@ In `preprocessing.md`, we test the preprocessing method based on [Foracchia, M.,
 
 ### Orientation Scores
 In `orientation_scores.md`, the cake wavelet module and orientation score computation is derived.
+
 ![Orientation score](https://github.com/pierreglaser/templatematching-mva/blob/master/report/plots/cake_wavelet.png)
 
